@@ -12,7 +12,7 @@
 ]>
 
 
-<rfc ipr="trust200902" docName="draft-opsawg-evans-discardmodel-00" category="info" tocInclude="true" sortRefs="true" symRefs="true">
+<rfc ipr="trust200902" docName="draft-opsawg-evans-discardmodel-01" category="info" tocInclude="true" sortRefs="true" symRefs="true">
   <front>
     <title abbrev="Info. Model for Pkt Discard Reporting">An Information Model for Packet Discard Reporting</title>
 
@@ -68,7 +68,7 @@
       </address>
     </author>
 
-    <date year="2023" month="October" day="05"/>
+    <date year="2023" month="December" day="01"/>
 
     
     <workgroup>Independent Stream</workgroup>
@@ -77,7 +77,7 @@
     <abstract>
 
 
-<t>Router reported packet loss is the primary signal of when a network is not doing its job.  Some packet loss is normal or intended in TCP/IP networks, however.  To minimise network packet loss through automated network operations we need clear and accurate signals of all packets which are dropped and why.  This document defines an information model for packet loss reporting, which classifies these signals to enable automated network mitigation of unintended packet loss.</t>
+<t>Router reported packet loss is the primary signal of when a network is not doing its job.  Some packet loss is normal or intended in TCP/IP networks, however.  To minimise network packet loss through automated network operations requires clear and accurate signals of all packets which are dropped and the reasons why.  This document defines an information model for packet loss reporting, which classifies these signals to enable automated network mitigation of unintended packet loss.</t>
 
 
 
@@ -92,47 +92,48 @@
 
 <section anchor="introduction"><name>Introduction</name>
 
-<t>The job of a network is to transport packets.  Understanding both where and why packet loss occurs is essential for effective network operation.   Router-reported packet loss is the most direct signal for network operations to identify customer impact from unintended packet loss. Accurate accounting of packet loss is not enough, however, as some level of packet loss is normal in TCP/IP networks.  In automating network operations, there are only a relatively small number of automated actions that can be taken to mitigate customer impacting packet loss. Precise classification of packet loss signals is important to ensure the right action is taken as taking the wrong action can make problems worse.</t>
+<t>The primary function of a network is to transport packets. Understanding both where and why packet loss occurs is essential for effective network operation.  Router-reported packet loss is the most direct signal for network operations to identify customer impact resulting from unintended packet loss. Accurate accounting of packet loss is not enough, however, as some level of packet loss is normal in TCP/IP networks.  In automating network operations, there are only a relatively small number of automated actions that can be taken to mitigate customer-impacting packet loss.  Hence, precise classification of packet loss signals is crucial both to ensure that customer impacting packet loss is detected and that the right action is taken to mitigate the impact, as taking the wrong action can make problems worse.</t>
 
-<t>The existing metrics for packet loss as defined in <xref target="RFC1213"/> - namely ifInDiscards, ifOutDiscards, ifInErrors, ifOutErrors - do not provide sufficient precision to be able to automatically identify the cause of the loss and mitigate the impact.  From a network operators' perspective, ifindiscards can represent both intended packet loss (i.e., packets discarded due to policy) and unintended packet loss (e.g., packets dropped in error). Further, these definitions are ambiguous, in that vendors can and have implemented them differently.  In some implementations, ifinerrors accounts only for errored packets which are dropped, whilst in others it accounts for all errored packets whether they are dropped or not.  Many implementations support more discard metrics than these; where they do, they are inconsistently implemented due to an absence of a clearly defined classification scheme and semantics for packet loss reporting.</t>
+<t>The existing metrics for packet loss, as defined in <xref target="RFC1213"/> - namely ifInDiscards, ifOutDiscards, ifInErrors, ifOutErrors - do not provide sufficient precision to automatically identify the cause of the loss and mitigate the impact.  From a network operator's perspective, ifInDiscards can represent both intended packet loss (i.e., packets discarded due to policy) and unintended packet loss (e.g., packets dropped in error). Furthermore, these definitions are ambiguous, as vendors can and have implemented them differently.  In some implementations, ifInErrors accounts only for errored packets that are dropped, while in others, it accounts for all errored packets, whether they are dropped or not.  Many implementations support more discard metrics than these; where they do, they have been inconsistently implemented due to the lack of a clearly defined classification scheme and semantics for packet loss reporting.</t>
 
-<t>Hence, this document defines an information model for packet loss reporting, which aims to address these issues by presenting a packet loss classification scheme that can enable automated mitigation of unintended packet loss.  This information model is independent of any specific implementations or protocols used to transport the data <xref target="RFC3444"/>.  There are multiple ways that this information model could be implemented, including SNMP <xref target="RFC1157"/>, IPFIX <xref target="RFC5153"/>, and NETCONF <xref target="RFC6241"/> / YANG <xref target="RFC7950"/>, but this document does not define specific data models.</t>
+<t>Hence, this document defines an information model for packet loss reporting, aiming to address these issues by presenting a packet loss classification scheme that can enable automated mitigation of unintended packet loss.  This information model is independent of any specific implementations or protocols used to transport the data <xref target="RFC3444"/>.  There are multiple ways that this information model could be implemented, including SNMP <xref target="RFC1157"/>, NETCONF <xref target="RFC6241"/> / YANG <xref target="RFC7950"/>, and IPFIX <xref target="RFC5153"/>, but they are outside of the scope of this document.</t>
 
-<t>Section 2 describes the problem.  Section 3 defines the information model and semantics with examples.  Section 4 gives examples of discard signal-to-cause-to-auto-mitigation action mapping.  Appendix B details our experience from implementing this model.</t>
+<t>Section 2 describes the problem. Section 3 defines the information model and semantics with examples.  Section 4 provides examples of discard signal-to-cause-to-auto-mitigation action mapping.  Appendix B details the authors' experience from implementing this model.</t>
 
-<t>The terms 'packet drop' and 'discard' are considered equivalent and are used interchangeably.</t>
+<t>The terms 'packet drop' and 'discard' are considered equivalent and are used interchangeably in this document.</t>
 
 </section>
 <section anchor="problem"><name>Problem statement</name>
 
-<t>Working backwards from the goal of auto-mitigation of unintended packet loss, there are only a relatively small number of potential auto-mitigation actions, e.g.:</t>
+<t>Working backwards from the goal of auto-mitigation of unintended packet loss, there are only a relatively small number of potential actions than can be taken to auto-mitigate 
+customer impacting packet loss:</t>
 
 <t><list style="numbers">
-  <t>Take a device, link or set of devices and/or links out of service</t>
-  <t>Return a device, link or set of devices and/or links back into service</t>
-  <t>Move traffic to another device</t>
-  <t>Roll-back a recent change to a device that might have caused the problem</t>
-  <t>Escalate to a human (e.g., network operators) as a last resort</t>
+  <t>Take a device, link, or set of devices and/or links out of service.</t>
+  <t>Return a device, link, or set of devices and/or links back into service.</t>
+  <t>Move traffic to other links or devices.</t>
+  <t>Roll back a recent change to a device that might have caused the problem.</t>
+  <t>Escalate to a human (e.g., network operator) as a last resort.</t>
 </list></t>
 
-<t>Precise signal of impact is important as taking the wrong action can be worse than taking no action.  For example, taking a congested device out of service can make congestion worse by moving the traffic to other already congested links and/or devices.</t>
+<t>A precise signal of impact is crucial, as taking the wrong action can be worse than taking no action. For example, taking a congested device out of service can make congestion worse by moving the traffic to other links or devices, which are already congested.</t>
 
-<t>To be able to detect whether router reported packet loss is a problem and determine what actions should be taken to mitigate the impact and remediate the cause, depends on four primary features of the packet loss signal:</t>
+<t>To detect whether router-reported packet loss is a problem and to determine what actions should be taken to mitigate the impact and remediate the cause, depends on four primary features of the packet loss signal:</t>
 
 <t><list style="numbers">
-  <t>the cause of the loss</t>
-  <t>the rate and/or degree of the loss</t>
-  <t>the duration of the loss</t>
-  <t>the location of the loss</t>
+  <t>The cause of the loss.</t>
+  <t>The rate and/or degree of the loss.</t>
+  <t>The duration of the loss.</t>
+  <t>The location of the loss.</t>
 </list></t>
 
-<t>Features 2, 3 and 4 are already addressed with passive monitoring statistics, e.g., obtained with SNMP <xref target="RFC1157"/> / MIB-II <xref target="RFC1213"/> or NETCONF <xref target="RFC6241"/> / YANG <xref target="RFC7950"/>.  Feature 1, however, is dependent on the classification scheme used for packet loss reporting.  In the next section we define a new classification scheme to address this problem.</t>
+<t>Features 2, 3, and 4 are already addressed with passive monitoring statistics, for example, obtained with SNMP <xref target="RFC1157"/> / MIB-II <xref target="RFC1213"/> or NETCONF <xref target="RFC6241"/> / YANG <xref target="RFC7950"/>. Feature 1, however, is dependent on the classification scheme used for packet loss reporting. In the next section, we define a new classification scheme to address this problem.</t>
 
 </section>
 <section anchor="model"><name>Information model</name>
 
-<t>The classification scheme is defined as a tree which follows the structure &lt;component&gt;&lt;direction&gt;&lt;type&gt;&lt;layer&gt;&lt;sub-type&gt;&lt;sub-sub-type&gt;&lt;metric&gt;, where:<br />
-a. component can be interface|device<br />
+<t>The classification scheme is defined as a tree which follows the structure component/direction/type/layer/sub-type/sub-sub-type/.../metric, where:<br />
+a. component can be interface|device|control_plane|flow<br />
 b. direction can be ingress|egress<br />
 c. type can be traffic|discards, where traffic accounts for packets successfully received or transmitted, and discards account for packet drops<br />
 d. layer can be l2|l3</t>
@@ -236,7 +237,7 @@ d. layer can be l2|l3</t>
 |   |       |       |   `-- bytes
 |   |       |       |-- null_route/
 |   |       |       |   `-- packets
-|   |       |       `-- urpf/
+|   |       |       `-- rpf/
 |   |       |           `-- packets
 |   |       `-- no_buffer/
 |   |           |-- class_0/
@@ -324,16 +325,14 @@ d. layer can be l2|l3</t>
 |                   |-- packets
 |                   `-- bytes
 `-- control_plane/
-    |-- traffic/
-    |   |-- packets
-    |   `-- bytes
-    `-- discards/
-        |-- packets
-        |-- bytes
-        `-- policy/
-            |-- acl/
-            |   `-- packets
-            `-- policer/
+    `-- ingress/
+        |-- traffic/
+        |   |-- packets
+        |   `-- bytes
+        `-- discards/
+            |-- packets
+            |-- bytes
+            `-- policy/
                 `-- packets
             
 ]]></artwork></figure>
@@ -343,48 +342,48 @@ d. layer can be l2|l3</t>
 <section anchor="class_descriptions"><name>Discard Class Descriptions</name>
 
 <t>discards/policy/<br />
-     These are intended discards, i.e., packets dropped due to a configured policy. There are multiple sub-classes.</t>
+    These are intended discards, meaning packets dropped due to a configured policy. There are multiple sub-classes.</t>
 
 <t>discards/error/l2/rx/<br />
-     Frames dropped due to errors in the received L2 frame.  There are multiple sub-classes e.g., due to failing CRC, invalid header, invalid MAC address, invalid VLAN.</t>
+    Frames dropped due to errors in the received L2 frame. There are multiple sub-classes, such as those resulting from failing CRC, invalid header, invalid MAC address, or invalid VLAN.</t>
 
 <t>discards/error/l3/rx/<br />
-    These are drops due to errors in the received packet, i.e., which indicate an upstream problem, rather than a problem with the device that is dropping the errored packets. There are multiple sub-classes, e.g., header checksum errors, MTU exceeded, incorrect version, incorrect header length, invalid options.</t>
+    These drops occur due to errors in the received packet, indicating an upstream problem rather than an issue with the device dropping the errored packets. There are multiple sub-classes, including header checksum errors, MTU exceeded, and invalid packet, i.e. due to incorrect version, incorrect header length, or invalid options.</t>
 
 <t>discards/error/l3/rx/ttl_expired<br />
-     There can also be multiple causes for TTL-exceed drops: i) trace-route; ii) TTL set too low by the end-system; iii) routing loops</t>
+    There can be multiple causes for TTL-exceed drops: i) trace-route; ii) TTL set too low by the end-system; iii) routing loops.</t>
 
 <t>discards/error/l3/no_route/<br />
-     Discards due to a packet not matching any route.</t>
+    Discards occur due to a packet not matching any route.</t>
 
 <t>discards/error/local/<br />
-    A device may drop packets within its switching pipeline due to internal errors, e.g., parity errors. Any errored discards not explicitly assigned to the above classes are accounted here.</t>
+    A device may drop packets within its switching pipeline due to internal errors, such as parity errors. Any errored discards not explicitly assigned to the above classes are also accounted for here.</t>
 
 <t>discards/no_buffer/<br />
-     Discards due to no available buffer to enqueue the packet. These can be tail-drop discards or due to an active queue management algorithm, e.g., RED <xref target="RED93"/>, CODEL <xref target="RFC8289"/>.</t>
+    Discards occur due to no available buffer to enqueue the packet. These can be tail-drop discards or due to an active queue management algorithm, such as RED <xref target="RED93"/> or CODEL <xref target="RFC8289"/>.</t>
 
 </section>
 <section anchor="semantics"><name>Semantics</name>
-<t>1-10 below apply to the packets forwarded by the device, i.e., rather than packets destined to/from the device:</t>
+<t>Rules 1-10 relate to packets forwarded by the device; rule 11 relates to packets destined to/from the device:</t>
 
 <t><list style="numbers">
-  <t>All packet receipt, transmission and drops <bcp14>MUST</bcp14> be reported</t>
-  <t>All packet receipt, transmission and drops <bcp14>SHOULD</bcp14> be attributed to the physical or logical interface where they occur.</t>
-  <t>If a frame is discarded at L2, it <bcp14>MUST NOT</bcp14> be accounted for at L3</t>
-  <t>An individual packet <bcp14>MUST NOT</bcp14> account against both the L2 traffic and L2 discard classes on a single direction, i.e., ingress or egress</t>
-  <t>An individual packet <bcp14>MUST NOT</bcp14> account against both the L3 traffic and L3 discard classes on a single direction, i.e., ingress or egress</t>
-  <t>The aggregate L2 and L3 traffic and discard classes <bcp14>MUST</bcp14> account for all underlying packets received, transmitted and dropped across all other classes</t>
-  <t>The aggregate QOS traffic and discard (no buffer) classes <bcp14>MUST</bcp14> account for all underlying packets received, transmitted and dropped across all other classes</t>
-  <t>In addition to the L2 and L3 aggregate classes, an individual dropped packet <bcp14>MUST</bcp14> only account against a single error, policy or no buffer discard sub class</t>
-  <t>Where there may be multiple drop reasons for a packet, the ordering of discard class reporting <bcp14>MUST</bcp14> be defined</t>
-  <t>If Diffserv <xref target="RFC2475"/> quality of service (QOS) is not used, no_buffer discards <bcp14>SHOULD</bcp14> be reported as class0</t>
-  <t>Traffic from the device control plane <bcp14>SHOULD</bcp14> be accounted for the same as other egress traffic</t>
+  <t>All instances of frame or packet receipt, transmission, and drops <bcp14>MUST</bcp14> be reported.</t>
+  <t>All instances of frame or packet receipt, transmission, and drops <bcp14>SHOULD</bcp14> be attributed to the physical or logical interface of the device where they occur.</t>
+  <t>An individual frame <bcp14>MUST</bcp14> only be accounted for by either the L2 traffic class or the L2 discard classes within a single direction, i.e., ingress or egress.</t>
+  <t>An individual packet <bcp14>MUST</bcp14> only be accounted for by either the L3 traffic class or the L3 discard classes within a single direction, i.e., ingress or egress.</t>
+  <t>A frame accounted for at L2 <bcp14>MUST NOT</bcp14> be accounted for at L3 and vice versa</t>
+  <t>The aggregate L2 and L3 traffic and discard classes <bcp14>MUST</bcp14> account for all underlying packets received, transmitted, and dropped across all other classes.</t>
+  <t>The aggregate qos traffic and discard (no buffer) classes <bcp14>MUST</bcp14> account for all underlying packets received, transmitted, and dropped across all other classes.</t>
+  <t>In addition to the L2 and L3 aggregate classes, an individual dropped packet <bcp14>MUST</bcp14> only account against a single error, policy, or no_buffer discard subclass.</t>
+  <t>When there are multiple drop reasons for a packet, the ordering of discard class reporting <bcp14>MUST</bcp14> be defined.</t>
+  <t>If Diffserv <xref target="RFC2475"/> quality of service (QOS) is not used, no_buffer discards <bcp14>SHOULD</bcp14> be reported as class0.</t>
+  <t>Traffic to the device control plane has its own class, however, traffic from the device control plane <bcp14>SHOULD</bcp14> be accounted for in the same way as other egress traffic.</t>
 </list></t>
 
 </section>
 <section anchor="examples"><name>Examples</name>
 
-<t>Assuming all the requirements are met, a good unicast IPv4 packet received would increment:<br />
+<t>Assuming all the requirements are met, a good unicast IPv4 packet received would increment:
 - interface/ingress/traffic/l3/v4/unicast/packets<br />
 - interface/ingress/traffic/l3/v4/unicast/bytes<br />
 - interface/ingress/traffic/qos/class_0/packets<br />
@@ -452,7 +451,15 @@ appear in all capitals, as shown here.</t>
 
 </section>
 <section anchor="contributors"><name>Contributors</name>
-<t>The authors would like to thank Nadav Chachmon for his valuable contribution to this work.</t>
+
+<figure><artwork><![CDATA[
+Nadav Chachmon
+Cisco Systems, Inc.
+170 West Tasman Dr.
+San Jose, CA 95134
+United States of America
+Email: nchachmo@cisco.com
+]]></artwork></figure>
 
 </section>
 <section anchor="acknowledgements"><name>Acknowledgments</name>
@@ -684,18 +691,19 @@ Unintended                 error/rx/l2   error/rx/l3   no_buffer     error/tx/l3
 
 </section>
 <section anchor="experience"><name>Implementation Experience</name>
-<t>This appendix captures experience gained from implementing this information model, as guidance for future implementers.</t>
+<t>This appendix captures the authors' experience gained from implementing and applying this information model across multiple vendors' platforms, as guidance for future implementers.</t>
 
 <t><list style="numbers">
-  <t>The number and granularity of classes described in section 3 is a compromise between: providing sufficient detail to be able to take the appropriate automated actions whilst: a) not providing too much detail which may require deeper understanding rather than helping to surface the problem quickly; b) constraining the quantity of data produced where these metrics are produced per interface to limit data volume and device CPU impacts.  While further granularity is possible, we found the scheme described to be generally sufficient.</t>
-  <t>There are multiple ways that we could have defined the discard classification tree, e.g., we could have used a multi-rooted tree, rooted in each protocol.  We opted instead to define a tree where protocol discards and causal discards are accounted orthogonally, as this reduces the number of classes and we found it sufficient to determine mitigation actions.</t>
-  <t>NoBuffer discards can be realised differently with different memory architectures.  Whether a NoBuffer discard is attributed to ingress or egress can differ accordingly.  For successful auto-mitigation: where the discards are due to egress interface congestion, they should be reported on egress; where the discards are due to device-level congestion (exceeding the device forwarding rate), they should be reported on ingress.</t>
-  <t>Most platforms account for the number of packets where the TTL has expired, and the CPU has returned an ICMP Time Exceeded message. In practise, however, there is often a policer applied to limit the number of packets to the CPU.  Implicitly, this limits the rate of TTL discards processed by the CPU and hence it limits the number of discards reported.  One method to account for all packets discards due to TTL exceeded, even those that are dropped by a policer when being forwarded to the CPU, is to use accounting of all ingress packets received with TTL=1.</t>
-  <t>Where a no route discard is implemented with a default null route, separate accounting is needed for any explicit null routes configured, in order to differentiate between interface/ingress/discards/policy/null_route/packets and interface/ingress/discards/errors/no_route/packets.</t>
-  <t>It is useful to account separately for transit packets dropped by transit ACLs or policers, and packets dropped by ACLs or policers which limit the number of packets to the device control packets.</t>
-  <t>It is not possible to identify a configuration error - i.e., when intended discards are unintended - with device packet loss metrics alone.  For example, to determine if ACL drops are intended or due to a misconfigured ACL some other method is needed, e.g., with configuration validation before deployment or in detecting a significant change in ACL drops after a change compared to before.</t>
-  <t>Where traffic byte counters need to be 64-bit, packet and discard counters which increase at a lower rate may be encoded in fewer bits, e.g., 48-bit.</t>
-  <t>Where the reporting device is the source or destination of a tunnel, the ingress protocol for a packet may be different to the egress protocol, e.g., if IPv4 is tunnelled over IPv6.  In this case, some implementations may attribute egress discards to the ingress protocol.</t>
+  <t>The number and granularity of classes described in Section 3 represent a compromise.  It aims to offer sufficient detail to enable appropriate automated actions while avoiding excessive detail which may hinder quick problem identification.  Additionally, it helps constrain the quantity of data produced per interface to manage data volume and device CPU impacts.  Although further granularity is possible, the scheme described has generally proven to be sufficient.</t>
+  <t>There are multiple possible ways to define the discard classification tree.  For example,  we could have used a multi-rooted tree, rooted in each protocol.  Instead we opted to define a tree where protocol discards and causal discards are accounted for orthogonally.  This decision reduces the number of combinations of classes and has proven sufficient for determining mitigation actions.</t>
+  <t>NoBuffer discards can be realized differently with different memory architectures. Hence, whether a NoBuffer discard is attributed to ingress or egress can differ accordingly.  For successful auto-mitigation, discards due to egress interface congestion should be reported on egress, while discards due to device-level congestion (exceeding the device forwarding rate) should be reported on ingress.</t>
+  <t>Platforms often account for the number of packets dropped where the TTL has expired, and the CPU has returned an ICMP Time Exceeded message.  There is typically a policer applied to limit the number of packets sent to the CPU, however, which implicitly limits the rate of TTL discards that are processed.  One method to account for all packet discards due to TTL exceeded, even those that are dropped by a policer when being forwarded to the CPU, is to use accounting of all ingress packets received with TTL=1.</t>
+  <t>Where no route discards are implemented with a default null route, separate discard accounting is required for any explicit null routes configured, in order to differentiate between interface/ingress/discards/policy/null_route/packets and interface/ingress/discards/errors/no_route/packets.</t>
+  <t>It is useful to account separately for transit packets dropped by transit ACLs or policers, and packets dropped by ACLs or policers which limit the number of packets to the device control plane.</t>
+  <t>It is not possible to identify a configuration error - e.g., when intended discards are unintended - with device packet loss metrics alone.  For example, to determine if ACL drops are intended or due to a misconfigured ACL some other method is needed, i.e., with configuration validation before deployment or by detecting a significant change in ACL drops after a change compared to before.</t>
+  <t>Where traffic byte counters need to be 64-bit, packet and discard counters that increase at a lower rate may be encoded in fewer bits, e.g., 48-bit.</t>
+  <t>In cases where the reporting device is the source or destination of a tunnel, the ingress protocol for a packet may differ from the egress protocol; if IPv4 is tunneled over IPv6 for example.  Some implementations may attribute egress discards to the ingress protocol.</t>
+  <t>While the classification tree is seven layers deep, a minimal implementation may only implement the top six layers.</t>
 </list></t>
 
 </section>
@@ -704,166 +712,169 @@ Unintended                 error/rx/l2   error/rx/l3   no_buffer     error/tx/l3
   </back>
 
 <!-- ##markdown-source:
-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
-l4Zl1djMX8cabx/+H3YJJ3TGZAAA
+H4sIAEfPaWUAA80923bcNpLv/Aps8uA46W7r5sRWJplpy/JGGesykjzenDmz
+DpqN7mbEJmheJHUs77fst+yXbV0AEGSTVCvO5IzOSdLEpVBVqCoUgEJlOBwG
+RVTEal+ME3GUzHS2lEWkE3GspyoW8C3OZHilCvEyykOZTcW5SnVWRMk8kJNJ
+pq73qdvI73DV1nqqw0QuYaBpJmfFUKe5vJkP1bVM8uGUWy8RxHBrO5jKAhru
+bO3sDrd3sCCEgrnOVvsigsGCIEqzfVFkZV7sbG0939oJbnR2Nc90mSI6U5Uq
++FdSiIsiU3IZXKkVNJhiXaGyRBXDl4hEEOSFTKbvZKwTGG+l8iCN9sU/Ch0O
+RA54Z2qWw6/VEn/8MwhkWSx0th+IYSDgL0ryffHjSBwiEVTCFP6oF4lXqLM5
+sHcpf9UJfecAVxX7YlucZVESRqmMxVksQzUQb3WWL6KU8FYFtQ6jAsh+rZOp
+6R4Cl/bF4cHOWOy8GpuiMimQO2/+St9qKaN4X/yC3JXLX/8iafBRqEfllaC/
+gP/l0XE6EmereAWcu9IeLaexusqBSVmjtouove0tcamybCXG10qceCRcKFmA
+pFFJpuYgZPvi7dgj6fmz7a3nDXoufHp0uoorWpbrNMBc/CBlbSrUbJapVVVM
+eP9YJlGqMnGiChScvD4t27u7ICiJvmZNeCtXPhVlkqyuZYOOgxode1vPeun4
+ZQHY/OUXRmKU4ER7RIxH4q9yqvOFR8b4Ospk4pcTHQegN1pcrPJCLUFQj5Jw
+VCflmy3xVuWFuJT5Evq/zEY+KVDyo877KHm6vbvXR4m8Ioz+EiIiNCdBwibk
+Wu1TQ3H+6mBne/v5PiitNS9+3fbO9q73tf30m+prd29vr/p6uv3Ua/n1zt52
+9fXN86db9uvw5XPbjv6MfTsHIdZLcSizeCVeqkKFNLtzsCw3cpWT5TrQyRzY
+heXjax1NZRIqD5JT//ofzdrFSLyK9Wq6YfO/j8SPMtST3KgPsWnvm6cVSc92
+nj03X8FwOBRyArMqQzBa57oEKwYzhqZVTUXKBjrWeS6iXBQLJdIsWkrQwTya
+J2Bd9EzcLFQipEhY4rFdogsx1WCaRVTk4hc9GQlxoZeqCY8mFGBkgHmBdnUK
+P8TlwdmTozMLD4RvoW/UNYizEJdaLKMkWka5cuP5MIsFGOr5AvmjQRwAnm2l
+QR9I6XKg7n0ZZSoXYaxkJmDyhAzDEqqVoSpHsmQcG9g5kBiFADVTsMToNAW4
+2AvZAYtAjkBvFivEbwFUwXJULnGJmKpZlMA4oAyRt/4t3XLmo57Z5WxgRgtj
+mefRLFLE97zCrdBCJXISqxYyl1ERzXkYIAHMgOWrN9QooFlfRtMp2JoAFq5M
+T0uWWfP34fPIK/0YfOf9BcGlJwazMgntcDUZACxBqJIcqbJ8HIk3gExGSyNK
+x0QXCxQf4CvyE3hYY4nGWSFBUXkODI0ksw0ML6rYtVqfXZgDluFhnwwvNRiu
+KchAWFg5RrgtsgJURLjcR7OVCMEnACEGYV0CzAJmLC9jnDExy0D9O5gtxla2
+QMjQ1GEHYNaaKhQwqyi8Tt4HQubgK4DaxPAZt3Yi/VnXGWDDUWLFAwdcJ22A
+nEDGwz86AcMlgaCYTCh8gE0H8U/K5QToxal1kiZDw5mFLEQIoj1RopBXYAIK
+bcVPOV4NmVeIQo0p4geVoFeSwhygMlthD53s+qRayQeSw6wMUQ5IdEgT8hIo
+YGzqE9QYFHtPyTg79YU+pMPRfFEYwkhE1sjBVgyUJgUaIHAsvcnAsNu+yI4l
+dAayNOjnEswCeF1qxCqjbqOckFqqIovCvGkCCDTbDLKDHz6YRezjRzGk1Rom
+JpodJcYDhg7R7LQs/M+j5DDLYExTxR/Qe6pJwgCva5BnkZcz4HWERopnALEH
+gq3EhDD7q0rykdBQljBPMDH4QfxEHrZwCCb3FeqDbAidzh7lAn7lKSvvoEYL
+8Q50FpQKsaLpbdMn8UU0UqOBs8zGv4dG01IhCamOo3D1mLBrV0nxhRrNfRDG
+pAPLFfLrMay3ZYbasdSZGhjrSxMTseyjzsjlJJqXuuRpu4ZRkNNIBY68kNfE
+DxACIEfRWrEEZMFyZVAQr1hDSbtdM6uY1TRam5GzipLxwwpHkNFDb2Wi5QPW
+BqBGIw0Ir6jgIAhU7QYY7KWwOSK6qq10aBg1zuqxTFZNZEGSUrLwyCo7GU7A
+AbeE2fetMfMEfaoH/IO4NFEK18cQoIF+EHNqnDPzSmIHyPJCQ0s3NLTq0rAf
+eQjs5kUlB38SpHhd3aoVF/TTmKPid1m/JTgoaB5An6ZTEGi7gEd5XgK4yUoY
+McdWsgalnQ5na9fW/Y3We+OXrNNAhdWWFjkLU4wKiiiszTVSnGnYwmqwxWAN
+pvVFHmcItteSDRd62B8/0th2mVnicgkgBXnFxvy2IgbCGk9xZfEEYYBCEpfk
+OFycHJ8Z+whu/cePA3FyeHlwevKKC9GDB6P5RPw0PvlPLkI3HtuhSBydvTr6
+Ly5Gzx+LJ2VRST44EDlaSWPsYP+Rmg9POkBoLoyjvwOSkodZNFHWRSbrPxK2
+wa4TJTKTa+TW5fQmAtunbiWSjpNnoexZ8527WsTKKh0vksNCD8lU4w+Uk6En
+ImaZWso0RbEXYpzi3Ee34gUujbDvYgx5e5E/gnHAYEeoG+zjuOng5Q/YQQSY
+BQ7cLljyHhnRQ/vxiEh7ZFB8RNwlRQcvEMQHHXHc8ILskRcOtSRWKMVZCMZj
+rkDeV2jLmrwPzpjJsCEFRSB1RbfVsL7usRq39S2sReR1An43tOYQTUjwXPNW
+psmwTp16mPeU6sK4r573lKx5T/7oSgT97gzserdHsPsGb0PC5F1HaL/iKLka
+oJ7mitSZy2mpfgKlWJ2jeGNdrjKsHAU7I3GuijJLHgoIGYlzpStYu3haB0Yd
+rAJ6GEgVrUJ26MxCGgV7MKwGNhEUZF+Ik8izTtwwTdlQLMlHowWDxHta07Tg
+6UgcgozF5Ipg30WJpxJmpW86Io9xyZawnOTkxYPxAokaO2e02toaT7/yO+91
+/2A+yeczax+3TLRpAp4FLuGsvQNbLVEn8HQAVzumuT5HlWMZVscIPAwsJksw
+Cgade9k+8LayMobN63RVDY5qrI2P7PyBrH87Je0csEvN3TNY/4AP5JkYgc8X
+1qT3edcEJAN1nka2gmZ7IHiVQj8IVt4yq/afSoLosiUkiVjbNhhFaXNhSfax
+hvdnLNtTNc9Uo9kuN5uWmbMLVeUeV8Y6bKkMXlkEdwZil9efvRr7jY8ArCXD
+n6IDcI17VPA2dYYziyYOtw4hTN/Mlx89AZud2J7NRRHWv+OjF8Ojo9pOAvpv
+tlaCrDLqYtvbktImyjkMCU9Rq9NCStrtc6H7i50TdQubcF7iQDqNo61o+3DT
+5Q/5nhVg5MwAnmY0F1dcFuhX66Jw2Yl/VG3GyFrgwafRnhnYLX3Da2VegGUg
+NoV6meoE+PKEjxYA1pNilaonsVyp7EleTob0iT/cx2g0esLu8oBd5H0hAjmq
+gFmrQmviTIbqjlX5DtS2yHT8Lo1lou5mgBD0nIyEG7zqOUdW3Sn6DzQKRwLH
+dusPG427qdtHGl/dGJPa3sFuO/IyBHOSz0rcKKLtBpmlvQL5g6Da5LGhtFuw
+Fo4vE+gjIEbTkSAmWZTinbt4Nwj+x/0Fo+BuOKyY8CS4g4nlIiLLFJhCg7pX
+aCrinUaZKZ9lsL3O16p+hqrJqmjWIKDddkDXey3lps7wrrO+ZSSvFhyREBas
+DvCbDNFNkFdLTnr3QGKDgUTvQFhz/fU69Psg2/p2qLa2k0tiAy7ZNt3IW9J6
+uGT/7huom0tY+l7nddAWJBmrd1stlT1j9hNmQYMtWiv/2Q2ZrA/ZR2Y3iVhi
+jUIF08LyNdQnq6Gh3RQ5QLvtgHwNdeUdhDTrW0byatdkr9ZgkyG6CfJqW2TP
+b9I1Kc023QM1NVRsCNnWt0O1tZ1c8iepd4he5C1pPVyyf/cN1MMlKKUTtKYA
+ix4hNtCy2/556xD0mg3Iwnc0fA8kM9oG0KIE9uDR9N1Shr8rvGtwTD4Z4M8e
+QGraDVHcA7HLJpi6rnnZVHFpYhYqvMrLZd/s+LKwCcxlUb5Tt6FSUzX9fSBa
+fnLbT4eJbYoiBixT8D17kBQbAMT6RL+jbWf3XPdBwTrcjMW/zYJh98XNp1uN
+VGZRseqSBLHWugUiltN1xnr/nzukeRMMsV6GXey5h7s1xFQHZffpjD9Q/2qR
+wAajSxg2RZesbjrrnoQuAEYWJyVe29S7W/zW3DFX2cOCfvItaN8d8zFdc8dE
+o2PXkBZANSR+KW//ZCHU9k8+NXZhc2Wm3LO5flV9tBqg3XZA1jurlbfQ1Vbf
+MpJXW/M71hpsMkQ3QV5tw+9oNmmbo7Y23QP53pl4AGRb3w7V1nZyyf2+b4he
+5C1pPVyyf/cN1M2l2v5JiDqBNYWtVfaM2U+YBW0V1i9fU1i/so/MbhLX908+
+LF9DfbIaGtpNkQO02w7I11BX3kFIs75lJK92TfZqDTYZopsgr7ZF9vwmlv6+
+gUTvQE0NFWIzyLa+Haqt7eSSQ/C+IXqRt6T1cMn9vmcgC6pdvvz9k9+zU4gN
+tOK2e95+7hf0NpG23drA+kS0Etpw0DYdr+aArVX2Degj5DtgbVj/9ulp8Xv8
+v1Yz6kPvGtknb31UC9o3oz5Ga2a02bFryDqhBMo/O38S2AbuLNmH6nyhLgrb
+KfMHrqx1F8rN8joMC8fKWhtxbZD8A/QAbx7ldEohTDImFqjbYlDFAIyr+AIM
+NeFLJhPgm9mbtVws5QqP6L2oKXtTi/cv9nXGAU6WeElxESlfAX74nGdw6hV+
+xFDUjr8gcHwzhJvHBZcUTYN3aO5qvrq7WCqZVFflVXSXCSOiu9ZZNC8p+InA
+jtpCVPCChtDFq+oKEd7NgXnKbi02r8jeNMdh68aRC6q6IHm9w/bpvjEHeMGy
+oMvmhc5VM9Z0JqMYPw7ODwZ2Oy8WSk7pis58H48P7DXZgGOsufzvr8cnLTTt
+ejQxh/l2hqJw7yGLmY1DT+kWDS+1E1GmOT2ScVfEmTQhZhQlx/FQfHdJsUN8
+9U2MtBfajTC1+9lWxQgxO9yRjEF9II4v3wh7nsI3VJYxjooRzI8hGAPTMgoU
+vlZZTneUVZEZIlbJvFjUeKxZvPlNRDurvROTiuuZu5Vz5NGtNV++XV6+HjLq
+PDf7InqM9ilUQ9oifysiKIBWFLZRaC3wVnDCAZygKMOc3nNgM2iHXZBRsQZQ
+I9GFqjuMMVi6iM2aYLgwNgwzXcoiXLAQrDiAoIMRdEpj4I6tAKCBQfKq6HuQ
+EJA4fEuQw28GnUapivGi2E0Uvr+SsZtnq0B8DmOKR2KcrJxUuatJir6+TcEa
+RBh+iNfB88TEt2E81ARjWoyMmcv7XNsLTXPNjZPnq1W1gPYyDmNDrkGdKbCP
+O3Bc8/tSlcqLaRgZrXRRQ1E8JDY5KnQ1GxzrBUgzlKVM5JyjpGQ818CQxbLi
+0PnhS7z4x9ctHCBwcPry8DXHAuBbkY8f0bJfuAC1D5+7YDXPfgfnJUakbQ+3
+tzgWisNxzRwCh244TteII0/2tyKDXmJ723TJ/T5TjHThaXjiQrW4Hwd1jGMM
+fsfnBCFHgJBtFdX9MhmoFFTa3ErnrMF0LU3G7fjNxSVy04a3UETIp4O9+OH0
+zeuXCFgWRRZNyqISpnSxyjHAGuHFek4/3b22DR4xquAFzZLQUCTKOCE7Cyt1
+iQ8XCDeigwLRJqohl8BvFdnQXlyA7L0+yTNd2XO5DSS0cm7UTooc9C1WVWAB
+W8iBdZcQBB8iUSxMHT3Dsc3x2+3Ab/d3we8p4GdYVsdCFsgCQvPk9HIdS6zf
+pRmmicHFQAZfc+SPnAN0imQCENjEI8KLgHCI0yh+NARGC5b4MiZe+a6LXV4H
+LUEV9hlSmFEoPgDggC/ns3zTxO29zlux+gIsENudx38shs8oBsi6pFY9KhZW
+qLvVXdZkyw6xJmMWczmXqMeViJDhHxi/b8Ch7cZKV3G05YTGGwXPR+Itvm0r
+1n0OMrz27RcxyHkPSIQGS5eZhz612a8CoJzpMUFGo2B7Cxgyg2ViNsO4P7a/
++HIPjPJ7oBdXMS8m8Iu/nV48tk+HMNhqsE6Mb4lcBJ80YeZbMCRGxlUxg57l
+MTskQTsksYA+uPzqm4T7ehFhVqYaFroBwbOINb0ynmSOGnkjcek1YmKilQz0
+EayhQXBow54/fG4joKsFKAjG4E9S5D0KG/un9NIP1z1etpc4QVLMtZ7acxRx
+dHa9VzPs6NDeULQieHrcez/wY4/sNtHuDMFJut57Ys9lrG6IB/Sh7d49PfBE
+0+66NxvD72FHCMYVkR4HvvYjsrxtDPqS5KSu1ljSMbjzf5DCrzfkSkenPrb4
+XeretDdWgKkHvPl1b1oSK1+VF8aak/dPvWrB976p7+/TRmOzR+VK9gvA/f2c
+GIAcnIFdjtDrvOCXAwf0bOC4in4/5ncCGD/Jv1oiKDv/nLb2PVDwQu3NEKyn
++QItjbENBbvGCvYy+7WYwK+6zw7W/trbftXx8VV3K788uHPZKNi69/3dCWLw
+WqmFUP+4E2/cw4M/w5ebLBtQzb1bz7q6MWgvpehn++FinO8arTpg/lvMwppR
+MIfLdFDToOONPZUw6xSXfv9C5ryfhI/TL7ZhHXmMP3+q9aXnFu5YA4Pr0Yd4
+6CyYBxTojQCWLfy9a/1JX9X7gKGeDa0vcNfHg7XThjtc80OVFQ3Yf/rOMaGG
+wUmtlXvMUO/9QAwOdALew5yeFlWwm7OQP+byn/4FGJx7xx/dGLTLAT5cGdLD
+FfNexWEw+tIeVo6+FL1/qNPYsFna/vG7zII9ynFQ/vBZaMNgFs3ZMe/G4KGz
+8BAMjsyRHZ82WNvXxGCLUGjOgv/myD4uugcDPPJqzPhL1mlztvowHpBF8ixZ
+xYPN/7rWhfaPpkVqmCIPg053pGUsLz+KV/qpFunTMdhsFl7QZi+U4JbhLo1k
+8o+dBf8ZHi4wSzyx/EMxsPvARu9/A/+gdg2GhyKP7KQ+sj7mI5dVDLT5Eexd
+43JJuSDs00H36ImPQsOSDpUPzFtWaW+4clPT6SkH1QUGiC0+cbJd3MNYA8xm
+YLFHpo33r0fjk/H6+JFMZOvY6+MSgIeNeUkv+3Ss5ysYq6i+akMyj68Ubhnx
+COIzPOn4bMD/xdM1/H1++Lc3R+eHL/H3xQ/j16/dj8C04BOD6lfV8+D0+Pjw
+5CV3xtO6WlHw2fH4p8/4EOqz07PLo9OT8evP1t4QEytAZ+zTqjRTfDgS2Mfc
+dLf54uDs//53e098+PAfJt3Ux4/m49n2N3vwgemPeDQ6e+JPPLINYEeDCYbw
+jDKO0TpEhYw5XwRvcMyVwZf/QM78c1/8aRKm23vfmwIkuFZoeVYrJJ6tl6x1
+Zia2FLUM47hZK29wuo7v+Kfat+W7Vwh/B3gkhKfhuM59+Dz0Pps5htB2nMip
+vBYHCxkuliaZVVdasq50ZDYR2UAcjL2cY7C3wsm+KOjKQc/EeKky2I9T5SEn
+IEtCHtjPQDYOrxJ9E6vpnM+UPnwuXQkfM60pH78wxMt2zrDAQog5AulUbaIS
+NaNjU3Ozq9SUlg/6+vFcnEfXlMTjXCcSM8aBtgIxiyzC2/UXWRkZ4TuWWah/
+RYJ/NQmeEEwQvCW9n1a3KvPqHOTPon9DT7hPIznPYLdDG3B68tsSHFBP39Qe
+JFCsUrrsMGex44ujgwEogkR3nFdlvCTBh4n2FXo98MAd57PJjtWM3wurWjEl
+8xnVbP4DlkDvz19ofiMIf7X87SAOzt58KohPxeIrXl7/+zfxAiX5XZiWJlKr
+0PjxGxERJvymp/s9/sZ1j6uwyXw/xKHqAhHU4PuC9q/4qgcX1X7+/l+BTeqa
+3Yrh90KcLVaWyO8xhVBYfR0ZfeavF+b4lb8OqSpv7edg3uFvHq24fQiVZyZ2
+4KF1HpXe3798/gJB2WUp0Kn/zxw9yDDuqwuqWIT9jeCZUMO+us312fQrs3S2
+eafqGUgQVAeja804rCS7fRLv1L52EURt78d1BdZtzg4vauUBqJsDh817FEVc
+37Mc1RIxicMqKw9ehNmPntP5gBJASRvpB64o56ToSvYz57QS6zl/KE1PmvIt
+cEfyJnPj6+5KTW60R3gTWGBjdoHnJWdBpWvAWUkpFKp0TxmG3Zm8HSaRDo4N
+ngiIAkf0gPNh76trLnuVdanKJycpoQKQE+UKU68VmKSLgk00iYSXEI8TIflZ
+NlPomGaUkWQ9DyJnW5OY0xV5guFZnMDDwOGMEegPLTDXVibelxG4dzYkzuTY
+M7knMCWTC9GMV5S6baHiNKeNGuywzXb1fYnhN8wDSrmV2m0b5h6uokkwywqF
+/nCra9zWsrNmjozQt+DUK5hpahyDKGD+1Bnnv6uxG/NsmEuIgcmLRXkyKt6j
+PzsHfzaj7IEYTMqJXiZ+wkGbc6V5o25hm+Rg2uYBoRtl/5KlStSBGTkw26Cf
+EgUziHD2MMoVRElIJI8yzLSmOBzoNhDmA5P+gZvvEptRXj7YXcgpQtKpCdxx
+SUlMFhDyS00XL8MFMBbvtqRfljWvvDXwVs95hl3OWJuEEXzgMjSaWSWQAuGd
+mLPJ3Jd7TjWYW157UjyjTDa8Raeck80sYJzV5kS/aAQMmPCyTMk4+pVi5FzO
+Qg7VdAViqZY6w5Rp4SLCnEFoUkY2s6fNHyTXxqA9RC0sai1Qh7DggYh5GeoW
+cQsnu8o90kzYNajosAGrDK9SCS+DUpWTyMVGuIthm0axCY/1ZsgZWT1YX3Bc
+po1bNeplot6wFC/ZHncMaein8KkzayRhngtMrOxF4dSFohnh7ILF6NYexcJc
+dgxctmJUd6zIKN8X5UEVRwfHZ+IyAk0+NFGxMLF5DkbDJe/DnKi8eaNMZ9Yd
+wIUg4hmMI5iEDvzIAJvoEkDACx1h24hG3wReEhgWfrqUBChIi5sEl+wSBD6k
+pEmA42lCgR0LTZg0o5bszX9jHjmwwUYBK7JUFGndzKeJB2EVyZTreqIoENtF
+NPq0ceZjvOetp/uVFFPIwtiMnmK9Aoy+26YINd6yJ5pDZ+umxM+MSd0w+H4m
+wb6Rj8RdYFutUkkctDrnYRO5FNgmtA0jYk3wqwck9yLlB5ROFIOaSAesBaAl
+caKKG07h2RmiYVw+7y2vZQGHX3d2NJcmLgTZhoFj5N0R5WUDTqMd8Cbekm7y
+pVJgWlSsaQueb5qq8cFrTm7Jk5yzvrR0aDY0Atwn/D1RVRSjx1RQbl67APo5
+p6vnCmy7+Z5sKDivHUnj2hsIzqNYOclDY7cZBT8bl83TSv+XiuZKWsvlFs2Q
+eBPdWnt54QUdwyKTe68rsAMluOWALqOidKbOWsdRmoRcnUq6kOOfEzWjzLIq
+jfWKzm05ZJSz1HH2PAwsIa+gyh8I4urhOytoITJ16AnSoRO5JgieYhHf1pJe
+YaAM/68JcJ4RY+PJfL03nESFzR5cj++0zcmGUASRREOA7mcMNi9jo2bOxmCZ
+1Cbj/UxhJYAF0eOZ3XuGo1AI4hEm8qJ4V2ffqyBCM6kmr3muy4yvf/zLTEqY
+W5RJouKBSUBq7JB1YPwARg6/56XXhfSpeodvUR4orgoHJsgoCWDTOZbMS1Jn
+M/83c8niKM4JcMFYzs7rVkQ5RvItLcwtiefIN4twwUFzTgnF0LNS6YBkM4ko
+WXp9L4V40Lm9K+eYI52CWN0aILAV+X9hCXpsz2YAAA==
 
 -->
 
