@@ -1,8 +1,8 @@
 ---
 title: An Information Model for Packet Discard Reporting
 abbrev: Info. Model for Pkt Discard Reporting
-docname: draft-opsawg-evans-discardmodel-00
-date: 2023-10-05
+docname: draft-opsawg-evans-discardmodel-01
+date: 2023-12-01
 category: info
 
 ipr: trust200902
@@ -76,51 +76,53 @@ informative:
      
 --- abstract
 
-Router reported packet loss is the primary signal of when a network is not doing its job.  Some packet loss is normal or intended in TCP/IP networks, however.  To minimise network packet loss through automated network operations we need clear and accurate signals of all packets which are dropped and why.  This document defines an information model for packet loss reporting, which classifies these signals to enable automated network mitigation of unintended packet loss.
+Router reported packet loss is the primary signal of when a network is not doing its job.  Some packet loss is normal or intended in TCP/IP networks, however.  To minimise network packet loss through automated network operations requires clear and accurate signals of all packets which are dropped and the reasons why.  This document defines an information model for packet loss reporting, which classifies these signals to enable automated network mitigation of unintended packet loss.
 
 --- middle
 
 Introduction        {#introduction}
 ============
 
-The job of a network is to transport packets.  Understanding both where and why packet loss occurs is essential for effective network operation.   Router-reported packet loss is the most direct signal for network operations to identify customer impact from unintended packet loss. Accurate accounting of packet loss is not enough, however, as some level of packet loss is normal in TCP/IP networks.  In automating network operations, there are only a relatively small number of automated actions that can be taken to mitigate customer impacting packet loss. Precise classification of packet loss signals is important to ensure the right action is taken as taking the wrong action can make problems worse. 
+The primary function of a network is to transport packets. Understanding both where and why packet loss occurs is essential for effective network operation.  Router-reported packet loss is the most direct signal for network operations to identify customer impact resulting from unintended packet loss. Accurate accounting of packet loss is not enough, however, as some level of packet loss is normal in TCP/IP networks.  In automating network operations, there are only a relatively small number of automated actions that can be taken to mitigate customer-impacting packet loss.  Hence, precise classification of packet loss signals is crucial both to ensure that customer impacting packet loss is detected and that the right action is taken to mitigate the impact, as taking the wrong action can make problems worse.
 
-The existing metrics for packet loss as defined in {{RFC1213}} - namely ifInDiscards, ifOutDiscards, ifInErrors, ifOutErrors - do not provide sufficient precision to be able to automatically identify the cause of the loss and mitigate the impact.  From a network operators' perspective, ifindiscards can represent both intended packet loss (i.e., packets discarded due to policy) and unintended packet loss (e.g., packets dropped in error). Further, these definitions are ambiguous, in that vendors can and have implemented them differently.  In some implementations, ifinerrors accounts only for errored packets which are dropped, whilst in others it accounts for all errored packets whether they are dropped or not.  Many implementations support more discard metrics than these; where they do, they are inconsistently implemented due to an absence of a clearly defined classification scheme and semantics for packet loss reporting.
+The existing metrics for packet loss, as defined in {{RFC1213}} - namely ifInDiscards, ifOutDiscards, ifInErrors, ifOutErrors - do not provide sufficient precision to automatically identify the cause of the loss and mitigate the impact.  From a network operator's perspective, ifInDiscards can represent both intended packet loss (i.e., packets discarded due to policy) and unintended packet loss (e.g., packets dropped in error). Furthermore, these definitions are ambiguous, as vendors can and have implemented them differently.  In some implementations, ifInErrors accounts only for errored packets that are dropped, while in others, it accounts for all errored packets, whether they are dropped or not.  Many implementations support more discard metrics than these; where they do, they have been inconsistently implemented due to the lack of a clearly defined classification scheme and semantics for packet loss reporting.
 
-Hence, this document defines an information model for packet loss reporting, which aims to address these issues by presenting a packet loss classification scheme that can enable automated mitigation of unintended packet loss.  This information model is independent of any specific implementations or protocols used to transport the data {{RFC3444}}.  There are multiple ways that this information model could be implemented, including SNMP {{RFC1157}}, IPFIX {{RFC5153}}, and NETCONF {{RFC6241}} / YANG {{RFC7950}}, but this document does not define specific data models.
+Hence, this document defines an information model for packet loss reporting, aiming to address these issues by presenting a packet loss classification scheme that can enable automated mitigation of unintended packet loss.  This information model is independent of any specific implementations or protocols used to transport the data {{RFC3444}}.  There are multiple ways that this information model could be implemented, including SNMP {{RFC1157}}, NETCONF {{RFC6241}} / YANG {{RFC7950}}, and IPFIX {{RFC5153}}, but they are outside of the scope of this document.
 
-Section 2 describes the problem.  Section 3 defines the information model and semantics with examples.  Section 4 gives examples of discard signal-to-cause-to-auto-mitigation action mapping.  Appendix B details our experience from implementing this model.
+Section 2 describes the problem. Section 3 defines the information model and semantics with examples.  Section 4 provides examples of discard signal-to-cause-to-auto-mitigation action mapping.  Appendix B details the authors' experience from implementing this model.
 
-The terms 'packet drop' and 'discard' are considered equivalent and are used interchangeably.
+The terms 'packet drop' and 'discard' are considered equivalent and are used interchangeably in this document.
+
 
 Problem statement   {#problem}
 =================
 
-Working backwards from the goal of auto-mitigation of unintended packet loss, there are only a relatively small number of potential auto-mitigation actions, e.g.:
+Working backwards from the goal of auto-mitigation of unintended packet loss, there are only a relatively small number of potential actions than can be taken to auto-mitigate 
+customer impacting packet loss:
 
-1. Take a device, link or set of devices and/or links out of service
-2. Return a device, link or set of devices and/or links back into service
-3. Move traffic to another device
-4. Roll-back a recent change to a device that might have caused the problem
-5. Escalate to a human (e.g., network operators) as a last resort
+1. Take a device, link, or set of devices and/or links out of service.
+2. Return a device, link, or set of devices and/or links back into service.
+3. Move traffic to other links or devices.
+4. Roll back a recent change to a device that might have caused the problem.
+5. Escalate to a human (e.g., network operator) as a last resort.
 
-Precise signal of impact is important as taking the wrong action can be worse than taking no action.  For example, taking a congested device out of service can make congestion worse by moving the traffic to other already congested links and/or devices.
+A precise signal of impact is crucial, as taking the wrong action can be worse than taking no action. For example, taking a congested device out of service can make congestion worse by moving the traffic to other links or devices, which are already congested.
 
-To be able to detect whether router reported packet loss is a problem and determine what actions should be taken to mitigate the impact and remediate the cause, depends on four primary features of the packet loss signal:
+To detect whether router-reported packet loss is a problem and to determine what actions should be taken to mitigate the impact and remediate the cause, depends on four primary features of the packet loss signal:
 
-1. the cause of the loss
-2. the rate and/or degree of the loss
-3. the duration of the loss
-4. the location of the loss
+1. The cause of the loss.
+2. The rate and/or degree of the loss.
+3. The duration of the loss.
+4. The location of the loss.
 
-Features 2, 3 and 4 are already addressed with passive monitoring statistics, e.g., obtained with SNMP {{RFC1157}} / MIB-II {{RFC1213}} or NETCONF {{RFC6241}} / YANG {{RFC7950}}.  Feature 1, however, is dependent on the classification scheme used for packet loss reporting.  In the next section we define a new classification scheme to address this problem.
+Features 2, 3, and 4 are already addressed with passive monitoring statistics, for example, obtained with SNMP {{RFC1157}} / MIB-II {{RFC1213}} or NETCONF {{RFC6241}} / YANG {{RFC7950}}. Feature 1, however, is dependent on the classification scheme used for packet loss reporting. In the next section, we define a new classification scheme to address this problem.
 
 
 Information model   {#model}
 =================
 
-The classification scheme is defined as a tree which follows the structure &lt;component&gt;&lt;direction&gt;&lt;type&gt;&lt;layer&gt;&lt;sub-type&gt;&lt;sub-sub-type&gt;&lt;metric&gt;, where:  
-a. component can be interface|device  
+The classification scheme is defined as a tree which follows the structure component/direction/type/layer/sub-type/sub-sub-type/.../metric, where:  
+a. component can be interface|device|control_plane|flow  
 b. direction can be ingress|egress  
 c. type can be traffic|discards, where traffic accounts for packets successfully received or transmitted, and discards account for packet drops  
 d. layer can be l2|l3
@@ -224,7 +226,7 @@ d. layer can be l2|l3
 |   |       |       |   `-- bytes
 |   |       |       |-- null_route/
 |   |       |       |   `-- packets
-|   |       |       `-- urpf/
+|   |       |       `-- rpf/
 |   |       |           `-- packets
 |   |       `-- no_buffer/
 |   |           |-- class_0/
@@ -312,16 +314,14 @@ d. layer can be l2|l3
 |                   |-- packets
 |                   `-- bytes
 `-- control_plane/
-    |-- traffic/
-    |   |-- packets
-    |   `-- bytes
-    `-- discards/
-        |-- packets
-        |-- bytes
-        `-- policy/
-            |-- acl/
-            |   `-- packets
-            `-- policer/
+    `-- ingress/
+        |-- traffic/
+        |   |-- packets
+        |   `-- bytes
+        `-- discards/
+            |-- packets
+            |-- bytes
+            `-- policy/
                 `-- packets
             
 ~~~~~~~~~~
@@ -333,48 +333,48 @@ Discard Class Descriptions {#class_descriptions}
 --------------------------
 
 discards/policy/  
-     These are intended discards, i.e., packets dropped due to a configured policy. There are multiple sub-classes.
+    These are intended discards, meaning packets dropped due to a configured policy. There are multiple sub-classes.
 
 discards/error/l2/rx/  
-     Frames dropped due to errors in the received L2 frame.  There are multiple sub-classes e.g., due to failing CRC, invalid header, invalid MAC address, invalid VLAN.
+    Frames dropped due to errors in the received L2 frame. There are multiple sub-classes, such as those resulting from failing CRC, invalid header, invalid MAC address, or invalid VLAN.
 
 discards/error/l3/rx/  
-    These are drops due to errors in the received packet, i.e., which indicate an upstream problem, rather than a problem with the device that is dropping the errored packets. There are multiple sub-classes, e.g., header checksum errors, MTU exceeded, incorrect version, incorrect header length, invalid options.
+    These drops occur due to errors in the received packet, indicating an upstream problem rather than an issue with the device dropping the errored packets. There are multiple sub-classes, including header checksum errors, MTU exceeded, and invalid packet, i.e. due to incorrect version, incorrect header length, or invalid options.
     
 discards/error/l3/rx/ttl_expired  
-     There can also be multiple causes for TTL-exceed drops: i) trace-route; ii) TTL set too low by the end-system; iii) routing loops
+    There can be multiple causes for TTL-exceed drops: i) trace-route; ii) TTL set too low by the end-system; iii) routing loops. 
     
 discards/error/l3/no_route/  
-     Discards due to a packet not matching any route.
+    Discards occur due to a packet not matching any route.
     
 discards/error/local/  
-    A device may drop packets within its switching pipeline due to internal errors, e.g., parity errors. Any errored discards not explicitly assigned to the above classes are accounted here.
+    A device may drop packets within its switching pipeline due to internal errors, such as parity errors. Any errored discards not explicitly assigned to the above classes are also accounted for here.
 
 discards/no_buffer/  
-     Discards due to no available buffer to enqueue the packet. These can be tail-drop discards or due to an active queue management algorithm, e.g., RED {{RED93}}, CODEL {{RFC8289}}.
+    Discards occur due to no available buffer to enqueue the packet. These can be tail-drop discards or due to an active queue management algorithm, such as RED {{RED93}} or CODEL {{RFC8289}}.
 
 
 Semantics {#semantics}
 ---------
-1-10 below apply to the packets forwarded by the device, i.e., rather than packets destined to/from the device:
+Rules 1-10 relate to packets forwarded by the device; rule 11 relates to packets destined to/from the device:
 
-1. All packet receipt, transmission and drops MUST be reported
-2. All packet receipt, transmission and drops SHOULD be attributed to the physical or logical interface where they occur.
-3. If a frame is discarded at L2, it MUST NOT be accounted for at L3
-4. An individual packet MUST NOT account against both the L2 traffic and L2 discard classes on a single direction, i.e., ingress or egress
-5. An individual packet MUST NOT account against both the L3 traffic and L3 discard classes on a single direction, i.e., ingress or egress
-6. The aggregate L2 and L3 traffic and discard classes MUST account for all underlying packets received, transmitted and dropped across all other classes
-7. The aggregate QOS traffic and discard (no buffer) classes MUST account for all underlying packets received, transmitted and dropped across all other classes
-8. In addition to the L2 and L3 aggregate classes, an individual dropped packet MUST only account against a single error, policy or no buffer discard sub class
-9. Where there may be multiple drop reasons for a packet, the ordering of discard class reporting MUST be defined
-10. If Diffserv {{RFC2475}} quality of service (QOS) is not used, no_buffer discards SHOULD be reported as class0
-11. Traffic from the device control plane SHOULD be accounted for the same as other egress traffic
+1. All instances of frame or packet receipt, transmission, and drops MUST be reported.
+2. All instances of frame or packet receipt, transmission, and drops SHOULD be attributed to the physical or logical interface of the device where they occur.
+3. An individual frame MUST only be accounted for by either the L2 traffic class or the L2 discard classes within a single direction, i.e., ingress or egress.
+4. An individual packet MUST only be accounted for by either the L3 traffic class or the L3 discard classes within a single direction, i.e., ingress or egress.
+5. A frame accounted for at L2 MUST NOT be accounted for at L3 and vice versa
+6. The aggregate L2 and L3 traffic and discard classes MUST account for all underlying packets received, transmitted, and dropped across all other classes.
+7. The aggregate qos traffic and discard (no buffer) classes MUST account for all underlying packets received, transmitted, and dropped across all other classes.
+8. In addition to the L2 and L3 aggregate classes, an individual dropped packet MUST only account against a single error, policy, or no_buffer discard subclass.
+9. When there are multiple drop reasons for a packet, the ordering of discard class reporting MUST be defined.
+10. If Diffserv {{RFC2475}} quality of service (QOS) is not used, no_buffer discards SHOULD be reported as class0.
+11. Traffic to the device control plane has its own class, however, traffic from the device control plane SHOULD be accounted for in the same way as other egress traffic.  
 
 
 Examples {#examples}
 --------
 
-Assuming all the requirements are met, a good unicast IPv4 packet received would increment:  
+Assuming all the requirements are met, a good unicast IPv4 packet received would increment:
 - interface/ingress/traffic/l3/v4/unicast/packets  
 - interface/ingress/traffic/l3/v4/unicast/bytes  
 - interface/ingress/traffic/qos/class_0/packets  
@@ -442,7 +442,13 @@ Terminology {#terminology}
 
 Contributors {#contributors}
 ============
-The authors would like to thank Nadav Chachmon for his valuable contribution to this work.
+
+    Nadav Chachmon
+    Cisco Systems, Inc.
+    170 West Tasman Dr.
+    San Jose, CA 95134
+    United States of America
+    Email: nchachmo@cisco.com
 
 Acknowledgments {#acknowledgements}
 ===============
@@ -485,16 +491,16 @@ Unintended                 error/rx/l2   error/rx/l3   no_buffer     error/tx/l3
 
 Implementation Experience {#experience}
 =========================
-This appendix captures experience gained from implementing this information model, as guidance for future implementers.
+This appendix captures the authors' experience gained from implementing and applying this information model across multiple vendors' platforms, as guidance for future implementers.
 
-1. The number and granularity of classes described in section 3 is a compromise between: providing sufficient detail to be able to take the appropriate automated actions whilst: a) not providing too much detail which may require deeper understanding rather than helping to surface the problem quickly; b) constraining the quantity of data produced where these metrics are produced per interface to limit data volume and device CPU impacts.  While further granularity is possible, we found the scheme described to be generally sufficient.
-2. There are multiple ways that we could have defined the discard classification tree, e.g., we could have used a multi-rooted tree, rooted in each protocol.  We opted instead to define a tree where protocol discards and causal discards are accounted orthogonally, as this reduces the number of classes and we found it sufficient to determine mitigation actions.
-3. NoBuffer discards can be realised differently with different memory architectures.  Whether a NoBuffer discard is attributed to ingress or egress can differ accordingly.  For successful auto-mitigation: where the discards are due to egress interface congestion, they should be reported on egress; where the discards are due to device-level congestion (exceeding the device forwarding rate), they should be reported on ingress. 
-4. Most platforms account for the number of packets where the TTL has expired, and the CPU has returned an ICMP Time Exceeded message. In practise, however, there is often a policer applied to limit the number of packets to the CPU.  Implicitly, this limits the rate of TTL discards processed by the CPU and hence it limits the number of discards reported.  One method to account for all packets discards due to TTL exceeded, even those that are dropped by a policer when being forwarded to the CPU, is to use accounting of all ingress packets received with TTL=1.
-5. Where a no route discard is implemented with a default null route, separate accounting is needed for any explicit null routes configured, in order to differentiate between interface/ingress/discards/policy/null_route/packets and interface/ingress/discards/errors/no_route/packets.
-6. It is useful to account separately for transit packets dropped by transit ACLs or policers, and packets dropped by ACLs or policers which limit the number of packets to the device control packets.
-7. It is not possible to identify a configuration error - i.e., when intended discards are unintended - with device packet loss metrics alone.  For example, to determine if ACL drops are intended or due to a misconfigured ACL some other method is needed, e.g., with configuration validation before deployment or in detecting a significant change in ACL drops after a change compared to before.
-8. Where traffic byte counters need to be 64-bit, packet and discard counters which increase at a lower rate may be encoded in fewer bits, e.g., 48-bit.
-9. Where the reporting device is the source or destination of a tunnel, the ingress protocol for a packet may be different to the egress protocol, e.g., if IPv4 is tunnelled over IPv6.  In this case, some implementations may attribute egress discards to the ingress protocol.
-
+1. The number and granularity of classes described in Section 3 represent a compromise.  It aims to offer sufficient detail to enable appropriate automated actions while avoiding excessive detail which may hinder quick problem identification.  Additionally, it helps constrain the quantity of data produced per interface to manage data volume and device CPU impacts.  Although further granularity is possible, the scheme described has generally proven to be sufficient.
+2. There are multiple possible ways to define the discard classification tree.  For example,  we could have used a multi-rooted tree, rooted in each protocol.  Instead we opted to define a tree where protocol discards and causal discards are accounted for orthogonally.  This decision reduces the number of combinations of classes and has proven sufficient for determining mitigation actions.
+3. NoBuffer discards can be realized differently with different memory architectures. Hence, whether a NoBuffer discard is attributed to ingress or egress can differ accordingly.  For successful auto-mitigation, discards due to egress interface congestion should be reported on egress, while discards due to device-level congestion (exceeding the device forwarding rate) should be reported on ingress.
+4. Platforms often account for the number of packets dropped where the TTL has expired, and the CPU has returned an ICMP Time Exceeded message.  There is typically a policer applied to limit the number of packets sent to the CPU, however, which implicitly limits the rate of TTL discards that are processed.  One method to account for all packet discards due to TTL exceeded, even those that are dropped by a policer when being forwarded to the CPU, is to use accounting of all ingress packets received with TTL=1.
+5. Where no route discards are implemented with a default null route, separate discard accounting is required for any explicit null routes configured, in order to differentiate between interface/ingress/discards/policy/null_route/packets and interface/ingress/discards/errors/no_route/packets.
+6. It is useful to account separately for transit packets dropped by transit ACLs or policers, and packets dropped by ACLs or policers which limit the number of packets to the device control plane.
+7. It is not possible to identify a configuration error - e.g., when intended discards are unintended - with device packet loss metrics alone.  For example, to determine if ACL drops are intended or due to a misconfigured ACL some other method is needed, i.e., with configuration validation before deployment or by detecting a significant change in ACL drops after a change compared to before.
+8. Where traffic byte counters need to be 64-bit, packet and discard counters that increase at a lower rate may be encoded in fewer bits, e.g., 48-bit.
+9. In cases where the reporting device is the source or destination of a tunnel, the ingress protocol for a packet may differ from the egress protocol; if IPv4 is tunneled over IPv6 for example.  Some implementations may attribute egress discards to the ingress protocol.
+10. While the classification tree is seven layers deep, a minimal implementation may only implement the top six layers.
 
