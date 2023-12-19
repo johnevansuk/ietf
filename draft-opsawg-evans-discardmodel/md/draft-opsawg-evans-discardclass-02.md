@@ -237,7 +237,7 @@ d. layer can be l2|l3
 |   |       |       |-- rpf/
 |   |       |       |   `-- packets
 |   |       |       `-- ddos/
-|   |       |           `-- packets				
+|   |       |           `-- packets
 |   |       `-- no_buffer/
 |   |           |-- class_0/
 |   |           |   |-- packets
@@ -332,7 +332,7 @@ d. layer can be l2|l3
             |-- packets
             |-- bytes
             `-- policy/
-                `-- packets            
+                `-- packets
 ~~~~~~~~~~
 
 For additional context, Appendix A provides an example of where packets may be dropped in a device.
