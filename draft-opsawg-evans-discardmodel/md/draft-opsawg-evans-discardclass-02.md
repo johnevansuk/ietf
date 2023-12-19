@@ -2,7 +2,7 @@
 title: An Information Model for Packet Discard Reporting
 abbrev: Info. Model for Pkt Discard Reporting
 docname: draft-opsawg-evans-discardmodel-02
-date: 2023-12-18
+date: 2023-12-19
 category: info
 
 ipr: trust200902
@@ -73,6 +73,7 @@ informative:
                ins: V. Jacobson
      RFC2475:
      RFC8289:
+     RFC7270:
      
 --- abstract
 
@@ -401,10 +402,9 @@ An IPv4 packet dropped on egress due to no buffers would increment:
 - interface/egress/discards/no_buffer/class_0/bytes  
 
 
-A Possible Signal-Cause-Mitigation Mapping {#mapping}
-==========================================
-
-Example discard signal-to-cause-to-mitigation mappings are shown in the table below:
+Example Signal-Cause-Mitigation Mapping {#mapping}
+=======================================
+The table below gives an example discard signal-to-cause-to-mitigation action mapping.  Mappings for a specific network will be dependent on the definition of unintended packet loss for that network.
 
 ~~~~~~~~~~
 +-------------------------------------------+---------------------+------------+----------+-------------+-----------------------+
