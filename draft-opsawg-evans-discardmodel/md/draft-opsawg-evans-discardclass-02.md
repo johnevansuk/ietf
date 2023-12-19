@@ -103,7 +103,7 @@ Terminology {#terminology}
 
 Problem statement   {#problem}
 =================
-At the highest-level, unintended packet loss is the discarding of packets that the network operator otherwise intends to deliver, i.e. which indicates an error state.  There are many possible reasons for unintended packet loss, including: erroring links may corrupt packets in transit; incorrect routing tables may result in packets being dropped because they do not match a valid route; configuration errors may result in a valid packet incorrectly matching an access control list (ACL) and being dropped.  Whilst the specific definition of unintended packet loss is network dependent, to there are a small set of potential actions that can be taken to minimise customer impact by auto-mitigating unintended packet loss:
+At the highest-level, unintended packet loss is the discarding of packets that the network operator otherwise intends to deliver, i.e. which indicates an error state.  There are many possible reasons for unintended packet loss, including: erroring links may corrupt packets in transit; incorrect routing tables may result in packets being dropped because they do not match a valid route; configuration errors may result in a valid packet incorrectly matching an access control list (ACL) and being dropped.  Whilst the specific definition of unintended packet loss is network dependent, for any network there are a small set of potential actions that can be taken to minimise customer impact by auto-mitigating unintended packet loss:
 
 1. Take a device, link, or set of devices and/or links out of service.
 2. Return a device, link, or set of devices and/or links back into service.
