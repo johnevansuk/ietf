@@ -384,7 +384,7 @@ Rules 1-10 relate to packets forwarded by the device; rule 11 relates to packets
 Examples {#examples}
 --------
 
-Assuming all the requirements are met, a good unicast IPv4 packet received would increment:
+Assuming all the requirements are met, a good unicast IPv4 packet received would increment:  
 - interface/ingress/traffic/l3/v4/unicast/packets  
 - interface/ingress/traffic/l3/v4/unicast/bytes  
 - interface/ingress/traffic/qos/class_0/packets  
@@ -395,7 +395,7 @@ A received unicast IPv6 packet dropped due to Hop Limit expiry would increment:
 - interface/ingress/discards/l3/v6/unicast/bytes  
 - interface/ingress/discards/l3/rx/ttl_expired/packets  
 
-An IPv4 packet dropped on egress due to no buffers would increment:
+An IPv4 packet dropped on egress due to no buffers would increment:  
 - interface/egress/discards/l3/v4/unicast/packets  
 - interface/egress/discards/l3/v4/unicast/bytes  
 - interface/egress/discards/no_buffer/class_0/packets  
