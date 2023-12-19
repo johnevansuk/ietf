@@ -90,7 +90,7 @@ The existing metrics for reporting packet loss, as defined in {{RFC1213}} - name
 
 Hence, this document defines an information model for packet loss reporting, aiming to address these issues by presenting a packet loss classification scheme that can enable automated mitigation of unintended packet loss.  Consistent with {{RFC3444}}, this information model is independent of any specific implementations or protocols used to transport the data.  There are multiple ways that this information model could be implemented (i.e., data models), including SNMP {{RFC1157}}, NETCONF {{RFC6241}} / YANG {{RFC7950}}, and IPFIX {{RFC5153}}, but they are outside of the scope of this document.  We further limit the scope of this document to reporting packet loss at layer 3 and frames discarded at layer 2, although the information model could be extended in future to cover segments dropped at layer 4. 
 
-Section 2 describes the problem. Section 3 defines the information model and semantics with examples.  Section 4 provides examples of discard signal-to-cause-to-auto-mitigation action mapping.  Appendix B details the authors' experience from implementing this model.
+Section 3 describes the problem. Section 4 defines the information model and semantics with examples.  Section 5 provides examples of discard signal-to-cause-to-auto-mitigation action mapping.  Appendix B details the authors' experience from implementing this model.
 
 The terms 'packet drop' and 'discard' are considered equivalent and are used interchangeably in this document.
 
