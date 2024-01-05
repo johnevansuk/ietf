@@ -465,7 +465,7 @@ The content of this draft has benefitted from feedback from JR Rivers, Ronan Wai
 
 Where do packets get dropped? 
 =============================
-The diagram below is an example of where and why packets may be dropped in a typical single ASIC, shared buffered type device, where packets ingress on the left and egress on the right.
+{{ex-drop}} depicts an example of where and why packets may be dropped in a typical single ASIC, shared buffered type device, where packets ingress on the left and egress on the right.
 
 ~~~~~~~~~~
                                                       +----------+
@@ -495,7 +495,7 @@ Unintended                 error/rx/l2   error/rx/l3   no_buffer     error/tx/l3
                                          ttl
 
 ~~~~~~~~~~
-{: #ex-rool title="Example of Packet Loss Root"}
+{: #ex-drop title="Example of where packets get dropped"}
 
 Implementation Experience {#experience}
 =========================
