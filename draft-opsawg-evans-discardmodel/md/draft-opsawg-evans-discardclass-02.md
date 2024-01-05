@@ -77,14 +77,14 @@ informative:
      
 --- abstract
 
-The primary function of a network is to transport packets.  Understanding both where and why packet loss occurs is essential for effective network operation.  Router-reported packet loss is the most direct signal for network operations to identify customer impact resulting from unintended packet loss.  This document defines an information model for packet loss reporting, which classifies these signals to enable automated network mitigation of unintended packet loss.
+The primary function of a network is to transport packets and deliver them according to a service level objective.  Understanding both where and why packet loss occurs within a network is essential for effective network operation.  Router-reported packet loss is the most direct signal for network operations to identify customer impact resulting from unintended packet loss.  This document defines an information model for packet loss reporting, which classifies these signals to enable automated network mitigation of unintended packet loss.
 
 --- middle
 
 Introduction        {#introduction}
 ============
 
-In automating network operations, a network operator needs to be able to detect anomalous packet loss, diagnose or root cause the loss, and then apply one of a set of possible actions to mitigate customer-impacting packet loss.  Some packet loss is normal or intended in IP networks, however.  Hence, precise classification of packet loss signals is crucial both to ensure that anomalous packet loss is detected and that the right action or actions are taken to mitigate the impact, as taking the wrong action can make problems worse.
+In automating network operations, a network operator needs to be able to detect anomalous packet loss, diagnose or root cause the loss, and then apply one of a set of possible actions to mitigate customer-impacting packet loss.  Some packet loss is normal or intended in IP networks, however.  Hence, precise classification of packet loss signals is crucial both to ensure that anomalous packet loss is easily detected and that the right action or sequence of actions are taken to mitigate the impact, as taking the wrong action can make problems worse.
 
 The existing metrics for reporting packet loss, as defined in {{RFC1213}} - namely ifInDiscards, ifOutDiscards, ifInErrors, ifOutErrors - do not provide sufficient precision to automatically identify the cause of the loss and mitigate the impact.  From a network operator's perspective, ifInDiscards can represent both intended packet loss (e.g., packets discarded due to policy) and unintended packet loss (e.g., packets dropped in error). Furthermore, these definitions are ambiguous, as vendors can and have implemented them differently.  In some implementations, ifInErrors accounts only for errored packets that are dropped, while in others, it accounts for all errored packets, whether they are dropped or not.  Many implementations support more discard metrics than these; where they do, they have been inconsistently implemented due to the lack of a standardised classification scheme and clear semantics for packet loss reporting.  {{RFC7270}} provides support for reporting discards per flow in IPFIX using forwardingStatus, however, the defined drop reason codes also lack sufficient clarity to support automated root cause analysis and mitigation of impact.
 
@@ -94,14 +94,16 @@ Section 3 describes the problem. Section 4 defines the information model and sem
 
 The terms 'packet drop' and 'discard' are considered equivalent and are used interchangeably in this document.
 
+This document considers only the signals that may trigger automated mitigation plans and not how they are defined or executed.
 
 Terminology {#terminology}
 ===========
 
 {::boilerplate bcp14-tagged}
 
+"A|B" means "A or B".
 
-Problem statement   {#problem}
+Problem Statement   {#problem}
 =================
 At the highest-level, unintended packet loss is the discarding of packets that the network operator otherwise intends to deliver, i.e. which indicates an error state.  There are many possible reasons for unintended packet loss, including: erroring links may corrupt packets in transit; incorrect routing tables may result in packets being dropped because they do not match a valid route; configuration errors may result in a valid packet incorrectly matching an access control list (ACL) and being dropped.  Whilst the specific definition of unintended packet loss is network dependent, for any network there are a small set of potential actions that can be taken to minimise customer impact by auto-mitigating unintended packet loss:
 
@@ -127,6 +129,7 @@ Information Model   {#model}
 =================
 
 The classification scheme is defined as a tree which follows the structure component/direction/type/layer/sub-type/sub-sub-type/.../metric, where:  
+
 a. component can be interface|device|control_plane|flow  
 b. direction can be ingress|egress  
 c. type can be traffic|discards, where traffic accounts for packets successfully received or transmitted, and discards account for packet drops  
@@ -342,26 +345,26 @@ For additional context, Appendix A provides an example of where packets may be d
 Discard Class Descriptions {#class_descriptions}
 --------------------------
 
-discards/policy/  
-    These are intended discards, meaning packets dropped due to a configured policy. There are multiple sub-classes.
+discards/policy/:  
+: These are intended discards, meaning packets dropped due to a configured policy. There are multiple sub-classes.
 
-discards/error/l2/rx/  
-    Frames dropped due to errors in the received L2 frame. There are multiple sub-classes, such as those resulting from failing CRC, invalid header, invalid MAC address, or invalid VLAN.
+discards/error/l2/rx/:  
+: Frames dropped due to errors in the received L2 frame. There are multiple sub-classes, such as those resulting from failing CRC, invalid header, invalid MAC address, or invalid VLAN.
 
-discards/error/l3/rx/  
-    These drops occur due to errors in the received packet, indicating an upstream problem rather than an issue with the device dropping the errored packets. There are multiple sub-classes, including header checksum errors, MTU exceeded, and invalid packet, i.e. due to incorrect version, incorrect header length, or invalid options.
+discards/error/l3/rx/:  
+: These drops occur due to errors in the received packet, indicating an upstream problem rather than an issue with the device dropping the errored packets. There are multiple sub-classes, including header checksum errors, MTU exceeded, and invalid packet, i.e. due to incorrect version, incorrect header length, or invalid options.
     
-discards/error/l3/rx/ttl_expired  
-    There can be multiple causes for TTL-exceed (or Hop limit) drops: i) trace-route; ii) TTL (Hop limit) set too low by the end-system; iii) routing loops. 
+discards/error/l3/rx/ttl_expired:  
+: There can be multiple causes for TTL-exceed (or Hop limit) drops: i) trace-route; ii) TTL (Hop limit) set too low by the end-system; iii) routing loops. 
     
-discards/error/l3/no_route/  
-    Discards occur due to a packet not matching any route.
+discards/error/l3/no_route/:  
+: Discards occur due to a packet not matching any route.
     
-discards/error/local/  
-    A device may drop packets within its switching pipeline due to internal errors, such as parity errors. Any errored discards not explicitly assigned to the above classes are also accounted for here.
+discards/error/local/:  
+: A device may drop packets within its switching pipeline due to internal errors, such as parity errors. Any errored discards not explicitly assigned to the above classes are also accounted for here.
 
-discards/no_buffer/  
-    Discards occur due to no available buffer to enqueue the packet. These can be tail-drop discards or due to an active queue management algorithm, such as RED {{RED93}} or CODEL {{RFC8289}}.
+discards/no_buffer/:  
+: Discards occur due to no available buffer to enqueue the packet. These can be tail-drop discards or due to an active queue management algorithm, such as RED {{RED93}} or CODEL {{RFC8289}}.
 
 
 Semantics {#semantics}
@@ -372,19 +375,19 @@ Rules 1-10 relate to packets forwarded by the device; rule 11 relates to packets
 2. All instances of frame or packet receipt, transmission, and drops SHOULD be attributed to the physical or logical interface of the device where they occur.
 3. An individual frame MUST only be accounted for by either the L2 traffic class or the L2 discard classes within a single direction, i.e., ingress or egress.
 4. An individual packet MUST only be accounted for by either the L3 traffic class or the L3 discard classes within a single direction, i.e., ingress or egress.
-5. A frame accounted for at L2 SHOULD NOT be accounted for at L3 and vice versa
+5. A frame accounted for at L2 SHOULD NOT be accounted for at L3 and vice versa.  An implementation MUST expose which layers a discard is counted against.
 6. The aggregate L2 and L3 traffic and discard classes SHOULD account for all underlying packets received, transmitted, and dropped across all other classes.
-7. The aggregate quality of service (QoS) traffic and no buffer discard classes MUST account for all underlying packets received, transmitted, and dropped across all other classes.
+7. The aggregate Quality of Service (QoS) traffic and no buffer discard classes MUST account for all underlying packets received, transmitted, and dropped across all other classes.
 8. In addition to the L2 and L3 aggregate classes, an individual dropped packet MUST only account against a single error, policy, or no_buffer discard subclass.
 9. When there are multiple drop reasons for a packet, the ordering of discard class reporting MUST be defined.
-10. If Diffserv {{RFC2475}} QoS is not used, no_buffer discards SHOULD be reported as class0.
+10. If Diffserv {{RFC2475}} is not used, no_buffer discards SHOULD be reported as class0.
 11. Traffic to the device control plane has its own class, however, traffic from the device control plane SHOULD be accounted for in the same way as other egress traffic.  
 
 
 Examples {#examples}
 --------
 
-Assuming all the requirements are met, a good unicast IPv4 packet received would increment:  
+Assuming all the requirements are met, a "good" unicast IPv4 packet received would increment:  
 - interface/ingress/traffic/l3/v4/unicast/packets  
 - interface/ingress/traffic/l3/v4/unicast/bytes  
 - interface/ingress/traffic/qos/class_0/packets  
@@ -404,7 +407,7 @@ An IPv4 packet dropped on egress due to no buffers would increment:
 
 Example Signal-Cause-Mitigation Mapping {#mapping}
 =======================================
-The table below gives an example discard signal-to-cause-to-mitigation action mapping.  Mappings for a specific network will be dependent on the definition of unintended packet loss for that network.
+{{ex-table}} gives an example discard signal-to-cause-to-mitigation action mapping.  Mappings for a specific network will be dependent on the definition of unintended packet loss for that network.
 
 ~~~~~~~~~~
 +-------------------------------------------+---------------------+------------+----------+-------------+-----------------------+
@@ -429,6 +432,7 @@ The table below gives an example discard signal-to-cause-to-mitigation action ma
 +-------------------------------------------+---------------------+------------+----------+-------------+-----------------------+
 
 ~~~~~~~~~~
+{: #ex-table title="Example Signal-Cause-Mitigation Mapping"}
 
 The 'Baseline' in the 'Discard Rate' column is network dependent.
 
@@ -491,6 +495,7 @@ Unintended                 error/rx/l2   error/rx/l3   no_buffer     error/tx/l3
                                          ttl
 
 ~~~~~~~~~~
+{: #ex-rool title="Example of Packet Loss Root"}
 
 Implementation Experience {#experience}
 =========================
