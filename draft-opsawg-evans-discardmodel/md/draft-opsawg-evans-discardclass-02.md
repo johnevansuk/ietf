@@ -127,7 +127,6 @@ Information Model   {#model}
 =================
 
 The classification scheme is defined as a tree which follows the structure component/direction/type/layer/sub-type/sub-sub-type/.../metric, where:  
-
 a. component can be interface|device|control_plane|flow  
 b. direction can be ingress|egress  
 c. type can be traffic|discards, where traffic accounts for packets successfully received or transmitted, and discards account for packet drops  
