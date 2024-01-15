@@ -6,7 +6,7 @@ date: 2024-01-15
 category: info
 
 ipr: trust200902
-workgroup: opsawg
+workgroup: Operations and Management Area Working Group 
 keyword: Internet-Draft
 
 stand_alone: yes
