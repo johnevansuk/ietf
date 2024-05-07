@@ -1,8 +1,8 @@
 ---
 title: An Information Model for Packet Discard Reporting
 abbrev: Info. Model for Pkt Discard Reporting
-docname: draft-opsawg-evans-discardmodel-02
-date: 2024-01-15
+docname: draft-ietf-opsawg-discardmodel-01
+date: 2024-05-07
 category: info
 
 ipr: trust200902
