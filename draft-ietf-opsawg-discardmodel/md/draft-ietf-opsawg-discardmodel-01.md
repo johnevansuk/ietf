@@ -215,7 +215,11 @@ d. layer can be l2|l3
 |   |       |   |   |   |   `-- packets
 |   |       |   |   |   `-- ttl_expired/
 |   |       |   |   |       `-- packets
-|   |       |   |   `-- no_route/
+|   |       |   |   |-- no_route/
+|   |       |   |   |   `-- packets
+|   |       |   |   |-- invalid_sid/
+|   |       |   |   |   `-- packets
+|   |       |   |   `-- invalid_label/
 |   |       |   |       `-- packets
 |   |       |   `-- local/
 |   |       |       |-- packets
