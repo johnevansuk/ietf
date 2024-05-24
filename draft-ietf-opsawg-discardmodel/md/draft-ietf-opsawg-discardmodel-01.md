@@ -352,19 +352,19 @@ discards/policy/:
 : These are intended discards, meaning packets dropped by a device due to a configured policy. There are multiple sub-classes.
 
 discards/error/l2/rx/:  
-: Frames dropped due to errors in the received L2 frame. There are multiple sub-classes, such as those resulting from failing CRC, invalid header, invalid MAC address, or invalid VLAN.
+: Frames discarded due to errors in the received L2 frame. There are multiple sub-classes, such as those resulting from failing CRC, invalid header, invalid MAC address, or invalid VLAN.
 
 discards/error/l3/rx/:  
-: These drops occur due to errors in the received packet, indicating an upstream problem rather than an issue with the device dropping the errored packets. There are multiple sub-classes, including header checksum errors, MTU exceeded, and invalid packet, i.e. due to incorrect version, incorrect header length, or invalid options.
+: These are discards which occur due to errors in the received packet, indicating an upstream problem rather than an issue with the device dropping the errored packets. There are multiple sub-classes, including header checksum errors, MTU exceeded, and invalid packet, i.e. due to incorrect version, incorrect header length, or invalid options.
     
 discards/error/l3/rx/ttl_expired:  
-: There can be multiple causes for TTL-expired (or Hop limit exceeded) drops: i) trace-route; ii) TTL (Hop limit) set too low by the end-system; iii) routing loops. 
+: There can be multiple causes for TTL-expired (or Hop limit exceeded) discards: i) trace-route; ii) TTL (Hop limit) set too low by the end-system; iii) routing loops. 
     
 discards/error/l3/no_route/:  
 : Discards occur due to a packet not matching any route.
     
 discards/error/local/:  
-: A device may drop packets within its switching pipeline due to internal errors, such as parity errors. Any errored discards not explicitly assigned to the above classes are also accounted for here.
+: A device may discard packets within its switching pipeline due to internal errors, such as parity errors. Any errored discards not explicitly assigned to the above classes are also accounted for here.
 
 discards/no_buffer/:  
 : Discards occur due to no available buffer to enqueue the packet. These can be tail-drop discards or due to an active queue management algorithm, such as RED {{RED93}} or CODEL {{RFC8289}}.
@@ -374,15 +374,15 @@ Requirements {#requirements}
 ------------
 Requirements 1-10 relate to packets forwarded by the device; requirement 11 relates to packets destined to or from the device:
 
-1. All instances of frame or packet receipt, transmission, and drops MUST be reported.
-2. All instances of frame or packet receipt, transmission, and drops SHOULD be attributed to the physical or logical interface of the device where they occur.
+1. All instances of frame or packet receipt, transmission, and discards MUST be reported.
+2. All instances of frame or packet receipt, transmission, and discards SHOULD be attributed to the physical or logical interface of the device where they occur.
 3. An individual frame MUST only be accounted for by either the L2 traffic class or the L2 discard classes within a single direction, i.e., ingress or egress.
 4. An individual packet MUST only be accounted for by either the L3 traffic class or the L3 discard classes within a single direction, i.e., ingress or egress.
 5. A frame accounted for at L2 SHOULD NOT be accounted for at L3 and vice versa.  An implementation MUST expose which layers a discard is counted against.
-6. The aggregate L2 and L3 traffic and discard classes SHOULD account for all underlying packets received, transmitted, and dropped across all other classes.
-7. The aggregate Quality of Service (QoS) traffic and no buffer discard classes MUST account for all underlying packets received, transmitted, and dropped across all other classes.
-8. In addition to the L2 and L3 aggregate classes, an individual dropped packet MUST only account against a single error, policy, or no_buffer discard subclass.
-9. When there are multiple drop reasons for a packet, the ordering of discard class reporting MUST be defined.
+6. The aggregate L2 and L3 traffic and discard classes SHOULD account for all underlying packets received, transmitted, and discarded across all other classes.
+7. The aggregate Quality of Service (QoS) traffic and no buffer discard classes MUST account for all underlying packets received, transmitted, and discarded across all other classes.
+8. In addition to the L2 and L3 aggregate classes, an individual discarded packet MUST only account against a single error, policy, or no_buffer discard subclass.
+9. When there are multiple reasons for discarding a packet, the ordering of discard class reporting MUST be defined.
 10. If Diffserv {{RFC2475}} is not used, no_buffer discards SHOULD be reported as class0.
 11. Traffic to the device control plane has its own class, however, traffic from the device control plane SHOULD be accounted for in the same way as other egress traffic.  
 
@@ -396,12 +396,12 @@ Assuming all the requirements are met, a "good" unicast IPv4 packet received wou
 - interface/ingress/traffic/qos/class_0/packets  
 - interface/ingress/traffic/qos/class_0/bytes  
 
-A received unicast IPv6 packet dropped due to Hop Limit expiry would increment:  
+A received unicast IPv6 packet discarded due to Hop Limit expiry would increment:  
 - interface/ingress/discards/l3/v6/unicast/packets  
 - interface/ingress/discards/l3/v6/unicast/bytes  
 - interface/ingress/discards/l3/rx/ttl_expired/packets  
 
-An IPv4 packet dropped on egress due to no buffers would increment:  
+An IPv4 packet discarded on egress due to no buffers would increment:  
 - interface/egress/discards/l3/v4/unicast/packets  
 - interface/egress/discards/l3/v4/unicast/bytes  
 - interface/egress/discards/no_buffer/class_0/packets  
@@ -468,7 +468,7 @@ The content of this draft has benefitted from feedback from JR Rivers, Ronan Wai
 
 Where do packets get dropped? 
 =============================
-{{ex-drop}} depicts an example of where and why packets may be dropped in a typical single ASIC, shared buffered type device, where packets ingress on the left and egress on the right.
+{{ex-drop}} depicts an example of where and why packets may be discarded in a typical single ASIC, shared buffered type device, where packets ingress on the left and egress on the right.
 
 ~~~~~~~~~~
                                                       +----------+
@@ -504,13 +504,13 @@ Implementation Experience {#experience}
 =========================
 This appendix captures the authors' experience gained from implementing and applying this information model across multiple vendors' platforms, as guidance for future implementers.
 
-1. The number and granularity of classes described in Section 3 represent a compromise.  It aims to offer sufficient detail to enable appropriate automated actions while avoiding excessive detail which may hinder quick problem identification.  Additionally, it helps constrain the quantity of data produced per interface to manage data volume and device CPU impacts.  Although further granularity is possible, the scheme described has generally proven to be sufficient for the task of auto-mitigating unintended packet loss.
-2. There are multiple possible ways to define the discard classification tree.  For example,  we could have used a multi-rooted tree, rooted in each protocol.  Instead, we opted to define a tree where protocol discards and causal discards are accounted for orthogonally.  This decision reduces the number of combinations of classes and has proven sufficient for determining mitigation actions.
-3. NoBuffer discards can be realized differently with different memory architectures. Hence, whether a NoBuffer discard is attributed to ingress or egress can differ accordingly.  For successful auto-mitigation, discards due to egress interface congestion should be reported on egress, while discards due to device-level congestion (exceeding the device forwarding rate) should be reported on ingress.
-4. Platforms often account for the number of packets dropped where the TTL has expired (or Hop Limit exceeded), and the CPU has returned an ICMP Time Exceeded message.  There is typically a policer applied to limit the number of packets sent to the device CPU, however, which implicitly limits the rate of TTL discards that are processed.  One method to account for all packet discards due to TTL expired, even those that are dropped by a policer when being forwarded to the CPU, is to use accounting of all ingress packets received with TTL=1.
+1. The number and granularity of classes described in Section 3 represent a compromise.  It aims to offer sufficient detail to enable appropriate automated actions while avoiding excessive detail, which may hinder quick problem identification.  Additionally, it helps constrain the quantity of data produced per interface to constrain data volume and device CPU impacts.  Although further granularity is possible, the scheme described has generally proven to be sufficient for the task of auto-mitigating unintended packet loss.
+2. There are multiple possible ways to define the discard classification tree.  For example, we could have used a multi-rooted tree, rooted in each protocol.  Instead, we opted to define a tree where protocol discards and causal discards are accounted for orthogonally.  This decision reduces the number of combinations of classes and has proven sufficient for determining mitigation actions.
+3. NoBuffer discards can be realized differently with different memory architectures. Whether a NoBuffer discard is attributed to ingress or egress can differ accordingly.  For successful auto-mitigation, discards due to egress interface congestion should be reported on egress, while discards due to device-level congestion (e.g. due to exceeding the device forwarding rate) should be reported on ingress.
+4. Platforms often account for the number of packets discarded where the TTL has expired (or Hop Limit exceeded), and the device CPU has returned an ICMP Time Exceeded message.  There is typically a policer applied to limit the number of packets sent to the device CPU, however, which implicitly limits the rate of TTL discards that are processed.  One method to account for all packet discards due to TTL expired, even those that are dropped by a policer when being forwarded to the CPU, is to use accounting of all ingress packets received with TTL=1.
 5. Where no route discards are implemented with a default null route, separate discard accounting is required for any explicit null routes configured, in order to differentiate between interface/ingress/discards/policy/null_route/packets and interface/ingress/discards/errors/no_route/packets.
-6. It is useful to account separately for transit packets dropped by transit ACLs or policers, and packets dropped by ACLs or policers which limit the number of packets to the device control plane.
-7. It is not possible to identify a configuration error - e.g., when intended discards are unintended - with device packet loss metrics alone.  For example, to determine if ACL drops are intended or due to a misconfigured ACL some other method is needed, i.e., with configuration validation before deployment or by detecting a significant change in ACL drops after a change compared to before.
+6. It is useful to account separately for transit packets discarded by transit ACLs or policers, and packets discarded by ACLs or policers which limit the number of packets to the device control plane.
+7. It is not possible to identify a configuration error - e.g., when intended discards are unintended - with device packet loss metrics alone.  For example, to determine if ACL drops are intended or due to a misconfigured ACL some other method is needed, i.e., with configuration validation before deployment or by detecting a significant change in ACL drops after a configuration change compared to before.
 8. Where traffic byte counters need to be 64-bit, packet and discard counters that increase at a lower rate may be encoded in fewer bits, e.g., 48-bit.
 9. Aggregate counters need to be able to deal with the possibility of discontinuities in the underlying counters.
 10. In cases where the reporting device is the source or destination of a tunnel, the ingress protocol for a packet may differ from the egress protocol; if IPv4 is tunneled over IPv6 for example.  Some implementations may attribute egress discards to the ingress protocol.
