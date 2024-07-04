@@ -316,9 +316,9 @@ d. layer can be l2|l3
              +-- bytes?     uint48
              +-- policy?    uint48
 
-{: #discard-tree title="Discard CLassification tree"}
-
 ~~~~~~~~~~
+
+{: #discard-tree title="Discard CLassification tree"}
 
 For additional context, Appendix A provides an example of where packets may be discarded in a device.
 
