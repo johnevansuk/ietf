@@ -64,7 +64,6 @@ author:
 
 normative:
      RFC2119:
-     RFC8791:
 
 informative:
      RFC1213:
@@ -82,6 +81,7 @@ informative:
      RFC2475:
      RFC8289:
      RFC7270:
+     RFC8791:
      
 --- abstract
 
@@ -318,7 +318,7 @@ d. layer can be l2|l3
 
 ~~~~~~~~~~
 
-{: #discard-tree title="Discard CLassification tree"}
+{: #discard-tree title="Discard Classification tree"}
 
 For additional context, Appendix A provides an example of where packets may be discarded in a device.
 
@@ -392,8 +392,9 @@ Example Signal-Cause-Mitigation Mapping {#mapping}
 
 The 'Baseline' in the 'Discard Rate' column is network dependent.
 
-Yang Module
+Yang Module {#module}
 ===========
+
 ~~~~~~~~~~
 module ietf-packet-discard-reporting {
   yang-version 1.1;
