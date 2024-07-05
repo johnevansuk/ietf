@@ -997,7 +997,7 @@ module ietf-packet-discard-reporting {
               type uint48;
               description
                 "Number of control plane packets discarded due to policy";
-	        }          
+            }          
 
           }
         }
@@ -1028,7 +1028,6 @@ module ietf-packet-discard-reporting {
     }
   }
 }
-
 ~~~~~~~~~~
 
 Security Considerations {#security}
