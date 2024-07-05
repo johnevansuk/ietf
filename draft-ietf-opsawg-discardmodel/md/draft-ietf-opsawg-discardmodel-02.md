@@ -64,6 +64,7 @@ author:
 
 normative:
      RFC2119:
+     RFC8791:
 
 informative:
      RFC1213:
@@ -81,7 +82,6 @@ informative:
      RFC2475:
      RFC8289:
      RFC7270:
-     RFC8791:
      
 --- abstract
 
@@ -135,7 +135,7 @@ Features 2, 3, and 4 are already addressed with passive monitoring statistics, f
 Information Model   {#model}
 =================
 
-The classification scheme is defined as a tree, shown in {{discard-tree}}, which follows the structure component/direction/type/layer/sub-type/sub-sub-type/.../metric, where:  
+The classification scheme is defined as a tree, which follows the structure component/direction/type/layer/sub-type/sub-sub-type/.../metric, where:  
 a. component can be interface|device|control_plane|flow  
 b. direction can be ingress|egress  
 c. type can be traffic|discards, where traffic accounts for packets successfully received or transmitted, and discards accounts for packet drops  
@@ -317,8 +317,6 @@ d. layer can be l2|l3
              +-- policy?    uint48
 
 ~~~~~~~~~~
-
-{: #discard-tree title="Discard Classification tree"}
 
 For additional context, Appendix A provides an example of where packets may be discarded in a device.
 
