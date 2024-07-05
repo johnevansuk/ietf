@@ -63,8 +63,6 @@ author:
     email: mohamed.boucadair@orange.com
 
 normative:
-     RFC2119:
-     RFC8791:
 
 informative:
      RFC1213:
@@ -109,6 +107,7 @@ Terminology {#terminology}
 
 A packet discard is considered to be any packet dropped by a device, which may be intentional (i.e. due to a configured policy, e.g. such as an Access Control List (ACL)) or unintentional (i.e. packets dropped in error).
 
+The meanings of the symbols in the YANG tree diagrams are defined in {{?RFC8340}}.
 
 Problem Statement   {#problem}
 =================
@@ -143,181 +142,181 @@ d. layer can be l2|l3
 
 ~~~~~~~~~~
 module: ietf-packet-discard-reporting
-  +--rw packet-discard-reporting
-     +--rw interface* [name]
-        +--rw name             string
-        +--rw ingress
-        |  +--rw traffic
-        |  |  +--rw l2
-        |  |  |  +--rw frames?   uint64
-        |  |  |  +--rw bytes?    uint64
-        |  |  +--rw l3
-        |  |  |  +--rw v4
-        |  |  |  |  +--rw packets?     uint64
-        |  |  |  |  +--rw bytes?       uint64
-        |  |  |  |  +--rw unicast
-        |  |  |  |  |  +--rw packets?   uint64
-        |  |  |  |  |  +--rw bytes?     uint64
-        |  |  |  |  +--rw multicast
-        |  |  |  |     +--rw packets?   uint64
-        |  |  |  |     +--rw bytes?     uint64
-        |  |  |  +--rw v6
-        |  |  |     +--rw packets?     uint64
-        |  |  |     +--rw bytes?       uint64
-        |  |  |     +--rw unicast
-        |  |  |     |  +--rw packets?   uint64
-        |  |  |     |  +--rw bytes?     uint64
-        |  |  |     +--rw multicast
-        |  |  |        +--rw packets?   uint64
-        |  |  |        +--rw bytes?     uint64
-        |  |  +--rw qos
-        |  |     +--rw class* [id]
-        |  |        +--rw id         string
-        |  |        +--rw packets?   uint64
-        |  |        +--rw bytes?     uint64
-        |  +--rw discards
-        |     +--rw l2
-        |     |  +--rw frames?   uint64
-        |     |  +--rw bytes?    uint64
-        |     +--rw l3
-        |     |  +--rw v4
-        |     |  |  +--rw packets?     uint64
-        |     |  |  +--rw bytes?       uint64
-        |     |  |  +--rw unicast
-        |     |  |  |  +--rw packets?   uint64
-        |     |  |  |  +--rw bytes?     uint64
-        |     |  |  +--rw multicast
-        |     |  |     +--rw packets?   uint64
-        |     |  |     +--rw bytes?     uint64
-        |     |  +--rw v6
-        |     |     +--rw packets?     uint64
-        |     |     +--rw bytes?       uint64
-        |     |     +--rw unicast
-        |     |     |  +--rw packets?   uint64
-        |     |     |  +--rw bytes?     uint64
-        |     |     +--rw multicast
-        |     |        +--rw packets?   uint64
-        |     |        +--rw bytes?     uint64
-        |     +--rw errors
-        |     |  +--rw l2
-        |     |  |  +--rw rx
-        |     |  |     +--rw frames?          uint48
-        |     |  |     +--rw crc-error?       uint48
-        |     |  |     +--rw invalid-mac?     uint48
-        |     |  |     +--rw invalid-vlan?    uint48
-        |     |  |     +--rw invalid-frame?   uint48
-        |     |  +--rw l3
-        |     |  |  +--rw rx
-        |     |  |  |  +--rw packets?          uint48
-        |     |  |  |  +--rw checksum-error?   uint48
-        |     |  |  |  +--rw mtu-exceeded?     uint48
-        |     |  |  |  +--rw invalid-packet?   uint48
-        |     |  |  |  +--rw ttl-expired?      uint48
-        |     |  |  +--rw no-route?        uint48
-        |     |  |  +--rw invalid-sid?     uint48
-        |     |  |  +--rw invalid-label?   uint48
-        |     |  +--rw hardware
-        |     |     +--rw packets?        uint48
-        |     |     +--rw parity-error?   uint48
-        |     +--rw policy
-        |     |  +--rw l2
-        |     |  |  +--rw frames?   uint48
-        |     |  |  +--rw acl?      uint48
-        |     |  +--rw l3
-        |     |     +--rw packets?      uint48
-        |     |     +--rw acl?          uint48
-        |     |     +--rw policer
-        |     |     |  +--rw packets?   uint48
-        |     |     |  +--rw bytes?     uint48
-        |     |     +--rw null-route?   uint48
-        |     |     +--rw rpf?          uint48
-        |     |     +--rw ddos?         uint48
-        |     +--rw no-buffer
-        |        +--rw class* [id]
-        |           +--rw id         string
-        |           +--rw packets?   uint64
-        |           +--rw bytes?     uint64
-        +--rw egress
-        |  +--rw traffic
-        |  |  +--rw l2
-        |  |  |  +--rw frames?   uint64
-        |  |  |  +--rw bytes?    uint64
-        |  |  +--rw l3
-        |  |  |  +--rw v4
-        |  |  |  |  +--rw packets?     uint64
-        |  |  |  |  +--rw bytes?       uint64
-        |  |  |  |  +--rw unicast
-        |  |  |  |  |  +--rw packets?   uint64
-        |  |  |  |  |  +--rw bytes?     uint64
-        |  |  |  |  +--rw multicast
-        |  |  |  |     +--rw packets?   uint64
-        |  |  |  |     +--rw bytes?     uint64
-        |  |  |  +--rw v6
-        |  |  |     +--rw packets?     uint64
-        |  |  |     +--rw bytes?       uint64
-        |  |  |     +--rw unicast
-        |  |  |     |  +--rw packets?   uint64
-        |  |  |     |  +--rw bytes?     uint64
-        |  |  |     +--rw multicast
-        |  |  |        +--rw packets?   uint64
-        |  |  |        +--rw bytes?     uint64
-        |  |  +--rw qos
-        |  |     +--rw class* [id]
-        |  |        +--rw id         string
-        |  |        +--rw packets?   uint64
-        |  |        +--rw bytes?     uint64
-        |  +--rw discards
-        |     +--rw l2
-        |     |  +--rw frames?   uint64
-        |     |  +--rw bytes?    uint64
-        |     +--rw l3
-        |     |  +--rw v4
-        |     |  |  +--rw packets?     uint64
-        |     |  |  +--rw bytes?       uint64
-        |     |  |  +--rw unicast
-        |     |  |  |  +--rw packets?   uint64
-        |     |  |  |  +--rw bytes?     uint64
-        |     |  |  +--rw multicast
-        |     |  |     +--rw packets?   uint64
-        |     |  |     +--rw bytes?     uint64
-        |     |  +--rw v6
-        |     |     +--rw packets?     uint64
-        |     |     +--rw bytes?       uint64
-        |     |     +--rw unicast
-        |     |     |  +--rw packets?   uint64
-        |     |     |  +--rw bytes?     uint64
-        |     |     +--rw multicast
-        |     |        +--rw packets?   uint64
-        |     |        +--rw bytes?     uint64
-        |     +--rw errors
-        |     |  +--rw l2
-        |     |  |  +--rw tx
-        |     |  |     +--rw frames?   uint48
-        |     |  +--rw l3
-        |     |     +--rw tx
-        |     |        +--rw packets?   uint48
-        |     +--rw policy
-        |     |  +--rw l3
-        |     |     +--rw acl?       uint48
-        |     |     +--rw policer
-        |     |        +--rw packets?   uint48
-        |     |        +--rw bytes?     uint48
-        |     +--rw no-buffer
-        |        +--rw class* [id]
-        |           +--rw id         string
-        |           +--rw packets?   uint64
-        |           +--rw bytes?     uint64
-        +--rw control-plane
-           +--rw ingress
-              +--rw traffic
-              |  +--rw packets?   uint48
-              |  +--rw bytes?     uint48
-              +--rw discards
-                 +--rw packets?   uint48
-                 +--rw bytes?     uint48
-                 +--rw policy
-                    +--rw packets?   uint48
 
+  structure packet-discard-reporting:
+    +-- interface* [name]
+       +-- name             string
+       +-- ingress
+       |  +-- traffic
+       |  |  +-- l2
+       |  |  |  +-- frames?   uint64
+       |  |  |  +-- bytes?    uint64
+       |  |  +-- l3
+       |  |  |  +-- v4
+       |  |  |  |  +-- packets?     uint64
+       |  |  |  |  +-- bytes?       uint64
+       |  |  |  |  +-- unicast
+       |  |  |  |  |  +-- packets?   uint64
+       |  |  |  |  |  +-- bytes?     uint64
+       |  |  |  |  +-- multicast
+       |  |  |  |     +-- packets?   uint64
+       |  |  |  |     +-- bytes?     uint64
+       |  |  |  +-- v6
+       |  |  |     +-- packets?     uint64
+       |  |  |     +-- bytes?       uint64
+       |  |  |     +-- unicast
+       |  |  |     |  +-- packets?   uint64
+       |  |  |     |  +-- bytes?     uint64
+       |  |  |     +-- multicast
+       |  |  |        +-- packets?   uint64
+       |  |  |        +-- bytes?     uint64
+       |  |  +-- qos
+       |  |     +-- class* [id]
+       |  |        +-- id         string
+       |  |        +-- packets?   uint64
+       |  |        +-- bytes?     uint64
+       |  +-- discards
+       |     +-- l2
+       |     |  +-- frames?   uint64
+       |     |  +-- bytes?    uint64
+       |     +-- l3
+       |     |  +-- v4
+       |     |  |  +-- packets?     uint64
+       |     |  |  +-- bytes?       uint64
+       |     |  |  +-- unicast
+       |     |  |  |  +-- packets?   uint64
+       |     |  |  |  +-- bytes?     uint64
+       |     |  |  +-- multicast
+       |     |  |     +-- packets?   uint64
+       |     |  |     +-- bytes?     uint64
+       |     |  +-- v6
+       |     |     +-- packets?     uint64
+       |     |     +-- bytes?       uint64
+       |     |     +-- unicast
+       |     |     |  +-- packets?   uint64
+       |     |     |  +-- bytes?     uint64
+       |     |     +-- multicast
+       |     |        +-- packets?   uint64
+       |     |        +-- bytes?     uint64
+       |     +-- errors
+       |     |  +-- l2
+       |     |  |  +-- rx
+       |     |  |     +-- frames?          uint48
+       |     |  |     +-- crc-error?       uint48
+       |     |  |     +-- invalid-mac?     uint48
+       |     |  |     +-- invalid-vlan?    uint48
+       |     |  |     +-- invalid-frame?   uint48
+       |     |  +-- l3
+       |     |  |  +-- rx
+       |     |  |  |  +-- packets?          uint48
+       |     |  |  |  +-- checksum-error?   uint48
+       |     |  |  |  +-- mtu-exceeded?     uint48
+       |     |  |  |  +-- invalid-packet?   uint48
+       |     |  |  |  +-- ttl-expired?      uint48
+       |     |  |  +-- no-route?        uint48
+       |     |  |  +-- invalid-sid?     uint48
+       |     |  |  +-- invalid-label?   uint48
+       |     |  +-- hardware
+       |     |     +-- packets?        uint48
+       |     |     +-- parity-error?   uint48
+       |     +-- policy
+       |     |  +-- l2
+       |     |  |  +-- frames?   uint48
+       |     |  |  +-- acl?      uint48
+       |     |  +-- l3
+       |     |     +-- packets?      uint48
+       |     |     +-- acl?          uint48
+       |     |     +-- policer
+       |     |     |  +-- packets?   uint48
+       |     |     |  +-- bytes?     uint48
+       |     |     +-- null-route?   uint48
+       |     |     +-- rpf?          uint48
+       |     |     +-- ddos?         uint48
+       |     +-- no-buffer
+       |        +-- class* [id]
+       |           +-- id         string
+       |           +-- packets?   uint64
+       |           +-- bytes?     uint64
+       +-- egress
+       |  +-- traffic
+       |  |  +-- l2
+       |  |  |  +-- frames?   uint64
+       |  |  |  +-- bytes?    uint64
+       |  |  +-- l3
+       |  |  |  +-- v4
+       |  |  |  |  +-- packets?     uint64
+       |  |  |  |  +-- bytes?       uint64
+       |  |  |  |  +-- unicast
+       |  |  |  |  |  +-- packets?   uint64
+       |  |  |  |  |  +-- bytes?     uint64
+       |  |  |  |  +-- multicast
+       |  |  |  |     +-- packets?   uint64
+       |  |  |  |     +-- bytes?     uint64
+       |  |  |  +-- v6
+       |  |  |     +-- packets?     uint64
+       |  |  |     +-- bytes?       uint64
+       |  |  |     +-- unicast
+       |  |  |     |  +-- packets?   uint64
+       |  |  |     |  +-- bytes?     uint64
+       |  |  |     +-- multicast
+       |  |  |        +-- packets?   uint64
+       |  |  |        +-- bytes?     uint64
+       |  |  +-- qos
+       |  |     +-- class* [id]
+       |  |        +-- id         string
+       |  |        +-- packets?   uint64
+       |  |        +-- bytes?     uint64
+       |  +-- discards
+       |     +-- l2
+       |     |  +-- frames?   uint64
+       |     |  +-- bytes?    uint64
+       |     +-- l3
+       |     |  +-- v4
+       |     |  |  +-- packets?     uint64
+       |     |  |  +-- bytes?       uint64
+       |     |  |  +-- unicast
+       |     |  |  |  +-- packets?   uint64
+       |     |  |  |  +-- bytes?     uint64
+       |     |  |  +-- multicast
+       |     |  |     +-- packets?   uint64
+       |     |  |     +-- bytes?     uint64
+       |     |  +-- v6
+       |     |     +-- packets?     uint64
+       |     |     +-- bytes?       uint64
+       |     |     +-- unicast
+       |     |     |  +-- packets?   uint64
+       |     |     |  +-- bytes?     uint64
+       |     |     +-- multicast
+       |     |        +-- packets?   uint64
+       |     |        +-- bytes?     uint64
+       |     +-- errors
+       |     |  +-- l2
+       |     |  |  +-- tx
+       |     |  |     +-- frames?   uint48
+       |     |  +-- l3
+       |     |     +-- tx
+       |     |        +-- packets?   uint48
+       |     +-- policy
+       |     |  +-- l3
+       |     |     +-- acl?       uint48
+       |     |     +-- policer
+       |     |        +-- packets?   uint48
+       |     |        +-- bytes?     uint48
+       |     +-- no-buffer
+       |        +-- class* [id]
+       |           +-- id         string
+       |           +-- packets?   uint64
+       |           +-- bytes?     uint64
+       +-- control-plane
+          +-- ingress
+             +-- traffic
+             |  +-- packets?   uint48
+             |  +-- bytes?     uint48
+             +-- discards
+                +-- packets?   uint48
+                +-- bytes?     uint48
+                +-- policy
+                   +-- packets?   uint48
 ~~~~~~~~~~
 
 For additional context, Appendix A provides an example of where packets may be discarded in a device.
@@ -365,11 +364,8 @@ Example Signal-Cause-Mitigation Mapping {#mapping}
 =======================================
 {{ex-table}} gives an example discard signal-to-cause-to-mitigation action mapping.  Mappings for a specific network will be dependent on the definition of unintended packet loss for that network.
 
-~~~~~~~~~~
-+-------------------------------------------+---------------------+------------+----------+-------------+-----------------------+
-| Discard class                             | Cause               | Discard    | Discard  | Unintended? | Possible actions      |
-|                                           |                     | rate       | duration |             |                       |
-+-------------------------------------------+---------------------+------------+----------+-------------+-----------------------+
+| Discard class           | Cause |Discard rate     | Discard duration|Unintended?| Possible actions      |
+|:-----------------------:|:-----:|:---------------:|:----------------|:---------:|:----------------------|
 | ingress/discards/errors/l2/rx             | Upstream device     | >Baseline  | O(1min)  | Y           | Take upstream link or |
 |                                           | or link errror      |            |          |             | device out-of-service |
 | ingress/discards/errors/l3/rx/ttl_expired | Tracert             | <=Baseline |          | N           | no action             |
@@ -386,8 +382,6 @@ Example Signal-Cause-Mitigation Mapping {#mapping}
 |                                           |                     |            |          |             | into service or move  |
 |                                           |                     |            |          |             | traffic               |
 +-------------------------------------------+---------------------+------------+----------+-------------+-----------------------+
-
-~~~~~~~~~~
 {: #ex-table title="Example Signal-Cause-Mitigation Mapping"}
 
 The 'Baseline' in the 'Discard Rate' column is network dependent.
@@ -1032,12 +1026,33 @@ module ietf-packet-discard-reporting {
 
 Security Considerations {#security}
 =======================
-There are no new security considerations introduced by this document.
 
+The document defines a YANG modules using {{!RFC8791}}. As such, this document does
+not define data nodes. Following  the guidance in {{Section 3.7 of ?ietf-netmod-rfc8407bis}},
+the YANG security template is not used.
 
 IANA Considerations {#iana}
 ===================
-There are no new IANA considerations introduced by this document.
+
+   IANA is requested to register the following URI in the "ns" subregistry within
+   the "IETF XML Registry" {{!RFC3688}}:
+
+~~~~
+   URI:  urn:ietf:params:xml:ns:ietf-packet-discard-reporting
+   Registrant Contact:  The IESG.
+   XML:  N/A; the requested URI is an XML namespace.
+~~~~
+
+   IANA is requested to register the following YANG module in the "YANG Module
+   Names" subregistry {{!RFC6020}} within the "YANG Parameters" registry:
+
+~~~~
+   Name:  ietf-packet-discard-reporting
+   Namespace:  urn:ietf:params:xml:ns:ietf-packet-discard-reporting
+   Prefix:  plr
+   Maintained by IANA?  N
+   Reference:  RFC XXXX
+~~~~
 
 
 Contributors {#contributors}
