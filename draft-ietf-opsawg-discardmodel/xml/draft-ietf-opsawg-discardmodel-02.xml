@@ -77,7 +77,7 @@
       </address>
     </author>
 
-    <date year="2024" month="July" day="04"/>
+    <date year="2024" month="July" day="08"/>
 
     <area>Operations and Management Area</area>
     <workgroup>OPSAWG</workgroup>
@@ -122,6 +122,8 @@ appear in all capitals, as shown here.</t>
 
 <t>A packet discard is considered to be any packet dropped by a device, which may be intentional (i.e. due to a configured policy, e.g. such as an Access Control List (ACL)) or unintentional (i.e. packets dropped in error).</t>
 
+<t>The meanings of the symbols in the YANG tree diagrams are defined in <xref target="RFC8340"/>.</t>
+
 </section>
 <section anchor="problem"><name>Problem Statement</name>
 <t>At the highest-level, unintended packet loss is the discarding of packets that the network operator otherwise intends to deliver, i.e. which indicates an error state.  There are many possible reasons for unintended packet loss, including: erroring links may corrupt packets in transit; incorrect routing tables may result in packets being dropped because they do not match a valid route; configuration errors may result in a valid packet incorrectly matching an access control list (ACL) and being dropped.  Whilst the specific definition of unintended packet loss is network dependent, for any network there are a small set of potential actions that can be taken to minimise customer impact by auto-mitigating unintended packet loss:</t>
@@ -157,181 +159,180 @@ c. type can be traffic|discards, where traffic accounts for packets successfully
 d. layer can be l2|l3</t>
 
 <figure><artwork><![CDATA[
-module: ietf-packet-discard-reporting
-  +--rw packet-discard-reporting
-     +--rw interface* [name]
-        +--rw name             string
-        +--rw ingress
-        |  +--rw traffic
-        |  |  +--rw l2
-        |  |  |  +--rw frames?   uint64
-        |  |  |  +--rw bytes?    uint64
-        |  |  +--rw l3
-        |  |  |  +--rw v4
-        |  |  |  |  +--rw packets?     uint64
-        |  |  |  |  +--rw bytes?       uint64
-        |  |  |  |  +--rw unicast
-        |  |  |  |  |  +--rw packets?   uint64
-        |  |  |  |  |  +--rw bytes?     uint64
-        |  |  |  |  +--rw multicast
-        |  |  |  |     +--rw packets?   uint64
-        |  |  |  |     +--rw bytes?     uint64
-        |  |  |  +--rw v6
-        |  |  |     +--rw packets?     uint64
-        |  |  |     +--rw bytes?       uint64
-        |  |  |     +--rw unicast
-        |  |  |     |  +--rw packets?   uint64
-        |  |  |     |  +--rw bytes?     uint64
-        |  |  |     +--rw multicast
-        |  |  |        +--rw packets?   uint64
-        |  |  |        +--rw bytes?     uint64
-        |  |  +--rw qos
-        |  |     +--rw class* [id]
-        |  |        +--rw id         string
-        |  |        +--rw packets?   uint64
-        |  |        +--rw bytes?     uint64
-        |  +--rw discards
-        |     +--rw l2
-        |     |  +--rw frames?   uint64
-        |     |  +--rw bytes?    uint64
-        |     +--rw l3
-        |     |  +--rw v4
-        |     |  |  +--rw packets?     uint64
-        |     |  |  +--rw bytes?       uint64
-        |     |  |  +--rw unicast
-        |     |  |  |  +--rw packets?   uint64
-        |     |  |  |  +--rw bytes?     uint64
-        |     |  |  +--rw multicast
-        |     |  |     +--rw packets?   uint64
-        |     |  |     +--rw bytes?     uint64
-        |     |  +--rw v6
-        |     |     +--rw packets?     uint64
-        |     |     +--rw bytes?       uint64
-        |     |     +--rw unicast
-        |     |     |  +--rw packets?   uint64
-        |     |     |  +--rw bytes?     uint64
-        |     |     +--rw multicast
-        |     |        +--rw packets?   uint64
-        |     |        +--rw bytes?     uint64
-        |     +--rw errors
-        |     |  +--rw l2
-        |     |  |  +--rw rx
-        |     |  |     +--rw frames?          uint48
-        |     |  |     +--rw crc-error?       uint48
-        |     |  |     +--rw invalid-mac?     uint48
-        |     |  |     +--rw invalid-vlan?    uint48
-        |     |  |     +--rw invalid-frame?   uint48
-        |     |  +--rw l3
-        |     |  |  +--rw rx
-        |     |  |  |  +--rw packets?          uint48
-        |     |  |  |  +--rw checksum-error?   uint48
-        |     |  |  |  +--rw mtu-exceeded?     uint48
-        |     |  |  |  +--rw invalid-packet?   uint48
-        |     |  |  |  +--rw ttl-expired?      uint48
-        |     |  |  +--rw no-route?        uint48
-        |     |  |  +--rw invalid-sid?     uint48
-        |     |  |  +--rw invalid-label?   uint48
-        |     |  +--rw hardware
-        |     |     +--rw packets?        uint48
-        |     |     +--rw parity-error?   uint48
-        |     +--rw policy
-        |     |  +--rw l2
-        |     |  |  +--rw frames?   uint48
-        |     |  |  +--rw acl?      uint48
-        |     |  +--rw l3
-        |     |     +--rw packets?      uint48
-        |     |     +--rw acl?          uint48
-        |     |     +--rw policer
-        |     |     |  +--rw packets?   uint48
-        |     |     |  +--rw bytes?     uint48
-        |     |     +--rw null-route?   uint48
-        |     |     +--rw rpf?          uint48
-        |     |     +--rw ddos?         uint48
-        |     +--rw no-buffer
-        |        +--rw class* [id]
-        |           +--rw id         string
-        |           +--rw packets?   uint64
-        |           +--rw bytes?     uint64
-        +--rw egress
-        |  +--rw traffic
-        |  |  +--rw l2
-        |  |  |  +--rw frames?   uint64
-        |  |  |  +--rw bytes?    uint64
-        |  |  +--rw l3
-        |  |  |  +--rw v4
-        |  |  |  |  +--rw packets?     uint64
-        |  |  |  |  +--rw bytes?       uint64
-        |  |  |  |  +--rw unicast
-        |  |  |  |  |  +--rw packets?   uint64
-        |  |  |  |  |  +--rw bytes?     uint64
-        |  |  |  |  +--rw multicast
-        |  |  |  |     +--rw packets?   uint64
-        |  |  |  |     +--rw bytes?     uint64
-        |  |  |  +--rw v6
-        |  |  |     +--rw packets?     uint64
-        |  |  |     +--rw bytes?       uint64
-        |  |  |     +--rw unicast
-        |  |  |     |  +--rw packets?   uint64
-        |  |  |     |  +--rw bytes?     uint64
-        |  |  |     +--rw multicast
-        |  |  |        +--rw packets?   uint64
-        |  |  |        +--rw bytes?     uint64
-        |  |  +--rw qos
-        |  |     +--rw class* [id]
-        |  |        +--rw id         string
-        |  |        +--rw packets?   uint64
-        |  |        +--rw bytes?     uint64
-        |  +--rw discards
-        |     +--rw l2
-        |     |  +--rw frames?   uint64
-        |     |  +--rw bytes?    uint64
-        |     +--rw l3
-        |     |  +--rw v4
-        |     |  |  +--rw packets?     uint64
-        |     |  |  +--rw bytes?       uint64
-        |     |  |  +--rw unicast
-        |     |  |  |  +--rw packets?   uint64
-        |     |  |  |  +--rw bytes?     uint64
-        |     |  |  +--rw multicast
-        |     |  |     +--rw packets?   uint64
-        |     |  |     +--rw bytes?     uint64
-        |     |  +--rw v6
-        |     |     +--rw packets?     uint64
-        |     |     +--rw bytes?       uint64
-        |     |     +--rw unicast
-        |     |     |  +--rw packets?   uint64
-        |     |     |  +--rw bytes?     uint64
-        |     |     +--rw multicast
-        |     |        +--rw packets?   uint64
-        |     |        +--rw bytes?     uint64
-        |     +--rw errors
-        |     |  +--rw l2
-        |     |  |  +--rw tx
-        |     |  |     +--rw frames?   uint48
-        |     |  +--rw l3
-        |     |     +--rw tx
-        |     |        +--rw packets?   uint48
-        |     +--rw policy
-        |     |  +--rw l3
-        |     |     +--rw acl?       uint48
-        |     |     +--rw policer
-        |     |        +--rw packets?   uint48
-        |     |        +--rw bytes?     uint48
-        |     +--rw no-buffer
-        |        +--rw class* [id]
-        |           +--rw id         string
-        |           +--rw packets?   uint64
-        |           +--rw bytes?     uint64
-        +--rw control-plane
-           +--rw ingress
-              +--rw traffic
-              |  +--rw packets?   uint48
-              |  +--rw bytes?     uint48
-              +--rw discards
-                 +--rw packets?   uint48
-                 +--rw bytes?     uint48
-                 +--rw policy
-                    +--rw packets?   uint48
+  structure packet-discard-reporting:
+    +-- interface* [name]
+       +-- name             string
+       +-- ingress
+       |  +-- traffic
+       |  |  +-- l2
+       |  |  |  +-- frames?   uint64
+       |  |  |  +-- bytes?    uint64
+       |  |  +-- l3
+       |  |  |  +-- v4
+       |  |  |  |  +-- packets?     uint64
+       |  |  |  |  +-- bytes?       uint64
+       |  |  |  |  +-- unicast
+       |  |  |  |  |  +-- packets?   uint64
+       |  |  |  |  |  +-- bytes?     uint64
+       |  |  |  |  +-- multicast
+       |  |  |  |     +-- packets?   uint64
+       |  |  |  |     +-- bytes?     uint64
+       |  |  |  +-- v6
+       |  |  |     +-- packets?     uint64
+       |  |  |     +-- bytes?       uint64
+       |  |  |     +-- unicast
+       |  |  |     |  +-- packets?   uint64
+       |  |  |     |  +-- bytes?     uint64
+       |  |  |     +-- multicast
+       |  |  |        +-- packets?   uint64
+       |  |  |        +-- bytes?     uint64
+       |  |  +-- qos
+       |  |     +-- class* [id]
+       |  |        +-- id         string
+       |  |        +-- packets?   uint64
+       |  |        +-- bytes?     uint64
+       |  +-- discards
+       |     +-- l2
+       |     |  +-- frames?   uint64
+       |     |  +-- bytes?    uint64
+       |     +-- l3
+       |     |  +-- v4
+       |     |  |  +-- packets?     uint64
+       |     |  |  +-- bytes?       uint64
+       |     |  |  +-- unicast
+       |     |  |  |  +-- packets?   uint64
+       |     |  |  |  +-- bytes?     uint64
+       |     |  |  +-- multicast
+       |     |  |     +-- packets?   uint64
+       |     |  |     +-- bytes?     uint64
+       |     |  +-- v6
+       |     |     +-- packets?     uint64
+       |     |     +-- bytes?       uint64
+       |     |     +-- unicast
+       |     |     |  +-- packets?   uint64
+       |     |     |  +-- bytes?     uint64
+       |     |     +-- multicast
+       |     |        +-- packets?   uint64
+       |     |        +-- bytes?     uint64
+       |     +-- errors
+       |     |  +-- l2
+       |     |  |  +-- rx
+       |     |  |     +-- frames?          uint48
+       |     |  |     +-- crc-error?       uint48
+       |     |  |     +-- invalid-mac?     uint48
+       |     |  |     +-- invalid-vlan?    uint48
+       |     |  |     +-- invalid-frame?   uint48
+       |     |  +-- l3
+       |     |  |  +-- rx
+       |     |  |  |  +-- packets?          uint48
+       |     |  |  |  +-- checksum-error?   uint48
+       |     |  |  |  +-- mtu-exceeded?     uint48
+       |     |  |  |  +-- invalid-packet?   uint48
+       |     |  |  |  +-- ttl-expired?      uint48
+       |     |  |  +-- no-route?        uint48
+       |     |  |  +-- invalid-sid?     uint48
+       |     |  |  +-- invalid-label?   uint48
+       |     |  +-- hardware
+       |     |     +-- packets?        uint48
+       |     |     +-- parity-error?   uint48
+       |     +-- policy
+       |     |  +-- l2
+       |     |  |  +-- frames?   uint48
+       |     |  |  +-- acl?      uint48
+       |     |  +-- l3
+       |     |     +-- packets?      uint48
+       |     |     +-- acl?          uint48
+       |     |     +-- policer
+       |     |     |  +-- packets?   uint48
+       |     |     |  +-- bytes?     uint48
+       |     |     +-- null-route?   uint48
+       |     |     +-- rpf?          uint48
+       |     |     +-- ddos?         uint48
+       |     +-- no-buffer
+       |        +-- class* [id]
+       |           +-- id         string
+       |           +-- packets?   uint64
+       |           +-- bytes?     uint64
+       +-- egress
+       |  +-- traffic
+       |  |  +-- l2
+       |  |  |  +-- frames?   uint64
+       |  |  |  +-- bytes?    uint64
+       |  |  +-- l3
+       |  |  |  +-- v4
+       |  |  |  |  +-- packets?     uint64
+       |  |  |  |  +-- bytes?       uint64
+       |  |  |  |  +-- unicast
+       |  |  |  |  |  +-- packets?   uint64
+       |  |  |  |  |  +-- bytes?     uint64
+       |  |  |  |  +-- multicast
+       |  |  |  |     +-- packets?   uint64
+       |  |  |  |     +-- bytes?     uint64
+       |  |  |  +-- v6
+       |  |  |     +-- packets?     uint64
+       |  |  |     +-- bytes?       uint64
+       |  |  |     +-- unicast
+       |  |  |     |  +-- packets?   uint64
+       |  |  |     |  +-- bytes?     uint64
+       |  |  |     +-- multicast
+       |  |  |        +-- packets?   uint64
+       |  |  |        +-- bytes?     uint64
+       |  |  +-- qos
+       |  |     +-- class* [id]
+       |  |        +-- id         string
+       |  |        +-- packets?   uint64
+       |  |        +-- bytes?     uint64
+       |  +-- discards
+       |     +-- l2
+       |     |  +-- frames?   uint64
+       |     |  +-- bytes?    uint64
+       |     +-- l3
+       |     |  +-- v4
+       |     |  |  +-- packets?     uint64
+       |     |  |  +-- bytes?       uint64
+       |     |  |  +-- unicast
+       |     |  |  |  +-- packets?   uint64
+       |     |  |  |  +-- bytes?     uint64
+       |     |  |  +-- multicast
+       |     |  |     +-- packets?   uint64
+       |     |  |     +-- bytes?     uint64
+       |     |  +-- v6
+       |     |     +-- packets?     uint64
+       |     |     +-- bytes?       uint64
+       |     |     +-- unicast
+       |     |     |  +-- packets?   uint64
+       |     |     |  +-- bytes?     uint64
+       |     |     +-- multicast
+       |     |        +-- packets?   uint64
+       |     |        +-- bytes?     uint64
+       |     +-- errors
+       |     |  +-- l2
+       |     |  |  +-- tx
+       |     |  |     +-- frames?   uint48
+       |     |  +-- l3
+       |     |     +-- tx
+       |     |        +-- packets?   uint48
+       |     +-- policy
+       |     |  +-- l3
+       |     |     +-- acl?       uint48
+       |     |     +-- policer
+       |     |        +-- packets?   uint48
+       |     |        +-- bytes?     uint48
+       |     +-- no-buffer
+       |        +-- class* [id]
+       |           +-- id         string
+       |           +-- packets?   uint64
+       |           +-- bytes?     uint64
+       +-- control-plane
+          +-- ingress
+             +-- traffic
+             |  +-- packets?   uint48
+             |  +-- bytes?     uint48
+             +-- discards
+                +-- packets?   uint48
+                +-- bytes?     uint48
+                +-- policy
+                   +-- packets?   uint48
 
 ]]></artwork></figure>
 
@@ -440,77 +441,486 @@ module ietf-packet-discard-reporting {
                <mailto:akadosh@cisco.com>
 
      Author:   Mohamed Boucadair
-                  <mailto:mohamed.boucadair@orange.com>";
-
+               <mailto:mohamed.boucadair@orange.com>";
   description
-    "This module defines an information model for packet discard reporting.";
+    "This module defines an information model for packet discard
+     reporting.
+
+     Copyright (c) 2024 IETF Trust and the persons identified as
+     authors of the code.  All rights reserved.
+
+     Redistribution and use in source and binary forms, with or
+     without modification, is permitted pursuant to, and subject
+     to the license terms contained in, the Revised BSD License
+     set forth in Section 4.c of the IETF Trust's Legal Provisions
+     Relating to IETF Documents
+     (https://trustee.ietf.org/license-info).
+
+     This version of this YANG module is part of RFC XXXX; see the
+     RFC itself for full legal notices.";
 
   revision 2024-06-04 {
     description
       "Initial revision.";
     reference
-      "draft-ietf-opsawg-discardmodel: An Information Model for Packet Discard Reporting";
-  }
-
-  typedef uint48-or-64 {
-    description 
-      "Union type representing either a 48-bit or 64-bit unsigned integer. 48-bit counters are used for packet and discard counters that increase at a lower rate, while 64-bit counters are used for traffic byte counters that may increase more rapidly."; 
-    type union {
-      type uint48; type uint64;
-    }
+      "RFC XXXX: An Information Model for Packet Discard Reporting";
   }
 
   typedef uint48 {
     type uint64 {
       range "0..281474976710655";
     }
+    description
+      "48-bit unsigned integer type";
   }
 
+  typedef uint48-or-64 {
+    type union {
+      type uint48;
+      type uint64;
+    }
+    description
+      "Union type representing either a 48-bit or 64-bit unsigned
+       integer. 48-bit counters are used for packet and discard
+       counters that increase at a lower rate, while 64-bit counters
+       are used for traffic byte counters that may increase more
+       rapidly.";
+  }
 
   /*
    * Groupings
    */
 
-  grouping ip {
+  grouping basic-packets-64 {
     description
-      "IP traffic counters";
+      "Basic grouping with 64-bit packets";
     leaf packets {
       type uint64;
       description
-        "Number of IPv4 packets";
+        "Number of L3 packets";
     }
+  }
+
+  grouping basic-packets-bytes-64 {
+    description
+      "Basic grouping with 64-bit packets and bytes";
+    uses basic-packets-64;
     leaf bytes {
       type uint64;
       description
-        "Number of IPv4 bytes";
+        "Number of L3 bytes";
     }
+  }
+
+  grouping basic-frames-64 {
+    description
+      "Basic grouping with 64-bit frames";
+    leaf frames {
+      type uint64;
+      description
+        "Number of L2 frames";
+    }
+  }
+
+  grouping basic-frames-bytes-64 {
+    description
+      "Basic grouping with 64-bit packets and bytes";
+    uses basic-frames-64;
+    leaf bytes {
+      type uint64;
+      description
+        "Number of L2 bytes";
+    }
+  }
+
+  grouping basic-packets-48 {
+    description
+      "Basic grouping with 48-bit packets";
+    leaf packets {
+      type uint48;
+      description
+        "Number of L3 packets";
+    }
+  }
+
+  grouping basic-packets-bytes-48 {
+    description
+      "Basic grouping with 48-bit packets and bytes";
+    uses basic-packets-48;
+    leaf bytes {
+      type uint48;
+      description
+        "Number of L3 bytes";
+    }
+  }
+
+  grouping basic-frames-48 {
+    description
+      "Basic grouping with 48-bit frames";
+    leaf frames {
+      type uint48;
+      description
+        "Number of L2 frames";
+    }
+  }
+
+  grouping basic-frames-bytes-48 {
+    description
+      "Basic grouping with 48-bit packets and bytes";
+    uses basic-frames-48;
+    leaf bytes {
+      type uint48;
+      description
+        "Number of L2 bytes";
+    }
+  }
+
+  grouping l2-traffic {
+    description
+      "Layer 2 traffic counters";
+    uses basic-frames-bytes-64;
+  }
+
+  grouping ip {
+    description
+      "IP traffic counters";
+    uses basic-packets-bytes-64;
     container unicast {
       description
-        "IPv4 unicast ingress traffic counters";
-      leaf packets {
-        type uint64;
-        description
-          "Number of IPv4 unicast packets";
-      }
-      leaf bytes {
-        type uint64;
-        description
-          "Number of IPv4 unicast bytes";
-      }
+        "Unicast traffic counters";
+      uses basic-packets-bytes-64;
     }
     container multicast {
       description
-        "IPv4 multicast ingress traffic counters";
+        "Multicast traffic counters";
+      uses basic-packets-bytes-64;
+    }
+  }
+
+  grouping l3-traffic {
+    description
+      "Layer 3 traffic counters";
+    container v4 {
+      description
+        "IPv4 traffic counters";
+      uses ip;
+    }
+    container v6 {
+      description
+        "IPv6 traffic counters";
+      uses ip;
+    }
+  }
+
+  grouping qos {
+    description
+      "Quality of Service (QoS) traffic counters";
+    list class {
+      key "id";
+      min-elements 1;
+      description
+        "QoS class traffic counters";
+      leaf id {
+        type string;
+        description
+          "QoS class identifier";
+      }
+      uses basic-packets-bytes-64;
+    }
+  }
+
+  grouping traffic {
+    description
+      "Traffic counters";
+    container l2 {
+      description
+        "Layer 2 traffic counters";
+      uses l2-traffic;
+    }
+    container l3 {
+      description
+        "Layer 3 traffic counters";
+      uses l3-traffic;
+    }
+    container qos {
+      description
+        "Quality of Service (QoS) traffic counters";
+      uses qos;
+    }
+  }
+
+  grouping control-plane {
+    description
+      "Control plane packet counters";
+    container ingress {
+      description
+        "Control plane ingress counters";
+      container traffic {
+        description
+          "Control plane ingress traffic counters";
+        uses basic-packets-bytes-48;
+      }
+      container discards {
+        description
+          "Control plane ingress packet discard counters";
+        uses basic-packets-bytes-48;
+        container policy {
+          description
+            "Number of control plane packets discarded due to policy";
+          uses basic-packets-48;
+        }
+      }
+    }
+  }
+
+  grouping errors-l2-rx {
+    description
+      "Layer 2 ingress frame errors";
+    container rx {
+      description
+        "Layer 2 ingress frame error counters";
+      leaf frames {
+        type uint48;
+        description
+          "Number of errored L2 frames";
+      }
+      leaf crc-error {
+        type uint48;
+        description
+          "Number of frames received with CRC error";
+      }
+      leaf invalid-mac {
+        type uint48;
+        description
+          "Number of frames received with invalid MAC address";
+      }
+      leaf invalid-vlan {
+        type uint48;
+        description
+          "Number of frames received with invalid VLAN tag";
+      }
+      leaf invalid-frame {
+        type uint48;
+        description
+          "Number of invalid frames received";
+      }
+    }
+  }
+
+  grouping errors-l3-rx {
+    description
+      "Layer 3 ingress packet error counters";
+    container rx {
+      description
+        "Layer 3 ingress packet receive error counters";
       leaf packets {
-        type uint64;
+        type uint48;
         description
-          "Number of IPv4 multicast packets";
+          "Number of errored L3 packets";
       }
-      leaf bytes {
-        type uint64;
+      leaf checksum-error {
+        type uint48;
         description
-          "Number of IPv4 multicast bytes";
+          "Number of packets received with checksum error";
       }
+      leaf mtu-exceeded {
+        type uint48;
+        description
+          "Number of packets received exceeding MTU";
+      }
+      leaf invalid-packet {
+        type uint48;
+        description
+          "Number of invalid packets received";
+      }
+      leaf ttl-expired {
+        type uint48;
+        description
+          "Number of packets received with expired TTL";
+      }
+    }
+    leaf no-route {
+      type uint48;
+      description
+        "Number of packets with no route";
+    }
+    leaf invalid-sid {
+      type uint48;
+      description
+        "Number of packets with invalid SID";
+    }
+    leaf invalid-label {
+      type uint48;
+      description
+        "Number of packets with invalid label";
+    }
+  }
+
+  grouping errors-l3-hw {
+    description
+      "Hardware error counters";
+    leaf packets {
+      type uint48;
+      description
+        "Number of local errored packets";
+    }
+    leaf parity-error {
+      type uint48;
+      description
+        "Number of packets with parity error";
+    }
+  }
+
+  grouping errors-rx {
+    description
+      "Ingress error counters";
+    container l2 {
+      description
+        "Layer 2 received frame error counters";
+      uses errors-l2-rx;
+    }
+    container l3 {
+      description
+        "Layer 3 received packet error counters";
+      uses errors-l3-rx;
+    }
+    container hardware {
+      description
+        "Hardware error counters";
+      uses errors-l3-hw;
+    }
+  }
+
+  grouping errors-l2-tx {
+    description
+      "Layer 2 transmit error counters";
+    container tx {
+      description
+        "Layer 2 transmit frame error counters";
+      leaf frames {
+        type uint48;
+        description
+          "Number of errored L2 frames during transmission";
+      }
+    }
+  }
+
+  grouping errors-l3-tx {
+    description
+      "Layer 3 transmit error counters";
+    container tx {
+      description
+        "Layer 3 transmit packet error counters";
+      leaf packets {
+        type uint48;
+        description
+          "Number of errored L3 packets during transmission";
+      }
+    }
+  }
+
+  grouping errors-tx {
+    description
+      "Egress error counters";
+    container l2 {
+      description
+        "Layer 2 transmit frame error counters";
+      uses errors-l2-tx;
+    }
+    container l3 {
+      description
+        "Layer 3 transmit packet error counters";
+      uses errors-l3-tx;
+    }
+  }
+
+  grouping policy-l2-rx {
+    description
+      "Layer 2 policy ingress packet discard counters";
+    leaf frames {
+      type uint48;
+      description
+        "Number of L2 frames discarded due to policy";
+    }
+    leaf acl {
+      type uint48;
+      description
+        "Number of frames discarded due to L2 ACL";
+    }
+  }
+
+  grouping policy-l3-rx {
+    description
+      "Layer 3 policy ingress packet discard counters";
+    leaf packets {
+      type uint48;
+      description
+        "Number of L3 packets discarded due to policy";
+    }
+    leaf acl {
+      type uint48;
+      description
+        "Number of packets discarded due to L3 ACL";
+    }
+    container policer {
+      description
+        "Policer ingress packet discard counters";
+      uses basic-packets-bytes-48;
+    }
+    leaf null-route {
+      type uint48;
+      description
+        "Number of packets discarded due to null route";
+    }
+    leaf rpf {
+      type uint48;
+      description
+        "Number of packets discarded due to RPF check failure";
+    }
+    leaf ddos {
+      type uint48;
+      description
+        "Number of packets discarded due to DDoS protection";
+    }
+  }
+
+  grouping policy-rx {
+    description
+      "Policy-related ingress packet discard counters";
+    container l2 {
+      description
+        "Layer 2 policy ingress packet discard counters";
+      uses policy-l2-rx;
+    }
+    container l3 {
+      description
+        "Layer 3 policy ingress packet discard counters";
+      uses policy-l3-rx;
+    }
+  }
+
+  grouping policy-l3-tx {
+    description
+      "Layer 3 policy egress packet discard counters";
+    leaf acl {
+      type uint48;
+      description
+        "Number of packets discarded due to L3 egress ACL";
+    }
+    container policer {
+      description
+        "Policer egress packet discard counters";
+      uses basic-packets-bytes-48;
+    }
+  }
+
+  grouping policy-tx {
+    description
+      "Policy-related egress packet discard counters";
+    container l3 {
+      description
+        "Layer 3 policy egress packet discard counters";
+      uses policy-l3-tx;
     }
   }
 
@@ -523,275 +933,35 @@ module ietf-packet-discard-reporting {
       container traffic {
         description
           "Ingress traffic counters";
-        container l2 {
-          description
-            "Layer 2 ingress traffic counters";
-          leaf frames {
-            type uint64;
-            description
-              "Number of L2 frames";
-          }
-          leaf bytes {
-            type uint64;
-            description
-              "Number of L2 bytes";
-          }
-        }
-        container l3 {
-          description
-            "Layer 3 ingress traffic counters";
-          container v4 {
-            description
-              "IPv4 ingress traffic counters";
-            uses ip;
-          }
-          container v6 {
-            description
-              "IPv6 ingress traffic counters";
-            uses ip;
-          }
-        }
-        container qos {
-          description
-            "Quality of Service (QoS) ingress traffic counters";
-          list class {
-            key "id";
-            min-elements 1;
-            description
-              "QoS class ingress traffic counters";
-            leaf id {
-              type string;
-              description
-                "QoS class identifier";
-            }
-            leaf packets {
-              type uint64;
-              description
-                "Number of packets in the QoS class";
-            }
-            leaf bytes {
-              type uint64;
-              description
-                "Number of bytes in the QoS class";
-            }
-          }
-        }
+        uses traffic;
       }
       container discards {
         description
           "Ingress packet discard counters";
         container l2 {
           description
-            "Layer 2 ingress packet discard counters";
-          leaf frames {
-            type uint64;
-            description
-              "Number of discarded L2 frames";
-          }
-          leaf bytes {
-            type uint64;
-            description
-              "Number of discarded L2 bytes";
-          }
+            "Layer 2 ingress discards traffic counters";
+          uses l2-traffic;
         }
         container l3 {
           description
-            "Layer 3 ingress packet discard counters";
-          container v4 {
-            description
-              "IPv4 ingress packet discard counters";
-            uses ip;
-          }
-          container v6 {
-            description
-              "IPv6 ingress packet discard counters";
-            uses ip;
-          }
+            "Layer 3 ingress discards traffic counters";
+          uses l3-traffic;
         }
         container errors {
           description
             "Ingress packet error counters";
-          container l2 {
-            description
-              "Layer 2 ingress packet error counters";
-            container rx {
-              description
-                "Layer 2 ingress packet receive error counters";
-              leaf frames {
-                type uint48;
-                description
-                  "Number of errored L2 frames";
-              }
-              leaf crc-error {
-                type uint48;
-                description
-                  "Number of frames received with CRC error";
-              }
-              leaf invalid-mac {
-                type uint48;
-                description
-                  "Number of frames received with invalid MAC address";
-              }
-              leaf invalid-vlan {
-                type uint48;
-                description
-                  "Number of frames received with invalid VLAN tag";
-              }
-              leaf invalid-frame {
-                type uint48;
-                description
-                  "Number of invalid frames received";
-              }
-            }
-          }
-          container l3 {
-            description
-              "Layer 3 ingress packet error counters";
-            container rx {
-              description
-                "Layer 3 ingress packet receive error counters";
-              leaf packets {
-                type uint48;
-                description
-                  "Number of errored L3 packets";
-              }
-              leaf checksum-error {
-                type uint48;
-                description
-                  "Number of packets received with checksum error";
-              }
-              leaf mtu-exceeded {
-                type uint48;
-                description
-                  "Number of packets received exceeding MTU";
-              }
-              leaf invalid-packet {
-                type uint48;
-                description
-                  "Number of invalid packets received";
-              }
-              leaf ttl-expired {
-                type uint48;
-                description
-                  "Number of packets received with expired TTL";
-              }
-            }
-            leaf no-route {
-              type uint48;
-              description
-                "Number of packets with no route";
-            }
-            leaf invalid-sid {
-              type uint48;
-              description
-                "Number of packets with invalid SID";
-            }
-            leaf invalid-label {
-              type uint48;
-              description
-                "Number of packets with invalid label";
-            }
-          }
-          container hardware {
-            description
-              "Hardware error counters";
-            leaf packets {
-              type uint48;
-              description
-                "Number of local errored packets";
-            }
-            leaf parity-error {
-              type uint48;
-              description
-                "Number of packets with parity error";
-            }
-          }
+          uses errors-rx;
         }
         container policy {
           description
             "Policy-related ingress packet discard counters";
-          container l2 {
-            description
-              "Layer 2 policy ingress packet discard counters";
-            leaf frames {
-              type uint48;
-              description
-                "Number of L2 frames discarded due to policy";
-            }
-            leaf acl {
-              type uint48;
-              description
-                "Number of frames discarded due to L2 ACL";
-            }
-          }
-          container l3 {
-            description
-              "Layer 3 policy ingress packet discard counters";
-            leaf packets {
-              type uint48;
-              description
-                "Number of L3 packets discarded due to policy";
-            }
-            leaf acl {
-              type uint48;
-              description
-                "Number of packets discarded due to L3 ACL";
-            }
-            container policer {
-              description
-                "Policer ingress packet discard counters";
-              leaf packets {
-                type uint48;
-                description
-                  "Number of packets discarded by the policer";
-              }
-              leaf bytes {
-                type uint48;
-                description
-                  "Number of bytes discarded by the policer";
-              }
-            }
-            leaf null-route {
-              type uint48;
-              description
-                "Number of packets discarded due to null route";
-            }
-            leaf rpf {
-              type uint48;
-              description
-                "Number of packets discarded due to RPF check failure";
-            }
-            leaf ddos {
-              type uint48;
-              description
-                "Number of packets discarded due to DDoS protection";
-            }
-          }
+          uses policy-rx;
         }
         container no-buffer {
           description
             "Ingress packet discard counters due to buffer unavailability";
-          list class {
-            key "id";
-            min-elements 1;
-            description
-              "Per-QoS class ingress packet discard counters due to buffer unavailability";
-            leaf id {
-              type string;
-              description
-                "QoS class identifier";
-            }
-            leaf packets {
-              type uint64;
-              description
-                "Number of packets discarded due to buffer unavailability";
-            }
-            leaf bytes {
-              type uint64;
-              description
-                "Number of bytes discarded due to buffer unavailability";
-            }
-          }
+          uses qos;
         }
       }
     }
@@ -801,59 +971,7 @@ module ietf-packet-discard-reporting {
       container traffic {
         description
           "Egress traffic counters";
-        container l2 {
-          description
-            "Layer 2 egress traffic counters";
-          leaf frames {
-            type uint64;
-            description
-              "Number of L2 frames";
-          }
-          leaf bytes {
-            type uint64;
-            description
-              "Number of L2 bytes";
-          }
-        }
-        container l3 {
-          description
-            "Layer 3 egress traffic counters";
-          container v4 {
-            description
-              "IPv4 egress traffic counters";
-            uses ip;
-          }
-          container v6 {
-            description
-              "IPv6 egress traffic counters";
-            uses ip;
-          }
-        }
-        container qos {
-          description
-            "Quality of Service (QoS) egress traffic counters";
-          list class {
-            key "id";
-            min-elements 1;
-            description
-              "QoS class egress traffic counters";
-            leaf id {
-              type string;
-              description
-                "QoS class identifier";
-            }
-            leaf packets {
-              type uint64;
-              description
-                "Number of packets in the QoS class";
-            }
-            leaf bytes {
-              type uint64;
-              description
-                "Number of bytes in the QoS class";
-            }
-          }
-        }
+        uses traffic;
       }
       container discards {
         description
@@ -861,195 +979,89 @@ module ietf-packet-discard-reporting {
         container l2 {
           description
             "Layer 2 egress packet discard counters";
-          leaf frames {
-            type uint64;
-            description
-              "Number of discarded L2 frames";
-          }
-          leaf bytes {
-            type uint64;
-            description
-              "Number of discarded L2 bytes";
-          }
+          uses l2-traffic;
         }
         container l3 {
           description
             "Layer 3 egress packet discard counters";
-          container v4 {
-            description
-              "IPv4 egress packet discard counters";
-            uses ip;
-          }
-          container v6 {
-            description
-              "IPv6 egress packet discard counters";
-            uses ip;
-          }
+          uses l3-traffic;
         }
         container errors {
           description
             "Egress packet error counters";
-          container l2 {
-            description
-              "Layer 2 egress packet error counters";
-            container tx {
-              description
-                "Layer 2 egress packet transmit error counters";
-              leaf frames {
-                type uint48;
-                description
-                  "Number of errored L2 frames during transmission";
-              }
-            }
-          }
-          container l3 {
-            description
-              "Layer 3 egress packet error counters";
-            container tx {
-              description
-                "Layer 3 egress packet transmit error counters";
-              leaf packets {
-                type uint48;
-                description
-                  "Number of errored L3 packets during transmission";
-              }
-            }
-          }
+          uses errors-tx;
         }
         container policy {
           description
             "Policy-related egress packet discard counters";
-          container l3 {
-            description
-              "Layer 3 policy egress packet discard counters";
-            leaf acl {
-              type uint48;
-              description
-                "Number of packets discarded due to L3 egress ACL";
-            }
-            container policer {
-              description
-                "Policer egress packet discard counters";
-              leaf packets {
-                type uint48;
-                description
-                  "Number of packets discarded by the egress policer";
-              }
-              leaf bytes {
-                type uint48;
-                description
-                  "Number of bytes discarded by the egress policer";
-              }
-            }
-          }
+          uses policy-tx;
         }
         container no-buffer {
           description
             "Egress packet discard counters due to buffer unavailability";
-          list class {
-            key "id";
-            min-elements 1;
-            description
-              "Per-QoS class egress packet discard counters due to buffer unavailability";
-            leaf id {
-              type string;
-              description
-                "QoS class identifier";
-            }
-            leaf packets {
-              type uint64;
-              description
-                "Number of packets discarded due to buffer unavailability";
-            }
-            leaf bytes {
-              type uint64;
-              description
-                "Number of bytes discarded due to buffer unavailability";
-            }
-          }
+          uses qos;
         }
       }
     }
     container control-plane {
       description
-        "Control plane packet loss counters";
-      container ingress {
-        description
-          "Control plane ingress packet loss counters";
-        container traffic {
-          description
-            "Control plane ingress traffic counters";
-          leaf packets {
-            type uint48;
-            description
-              "Number of control plane packets";
-          }
-          leaf bytes {
-            type uint48;
-            description
-              "Number of control plane bytes";
-          }
-        }
-        container discards {
-          description
-            "Control plane ingress packet discard counters";
-          leaf packets {
-            type uint48;
-            description
-              "Number of discarded control plane packets";
-          }
-          leaf bytes {
-            type uint48;
-            description
-              "Number of discarded control plane bytes";
-          }
-          container policy {
-            description
-              "Control plane policy discard counters";
-            leaf packets {
-              type uint48;
-              description
-                "Number of control plane packets discarded due to policy";
-            }          
-
-          }
-        }
-      }
+        "Control plane packet counters";
+      uses control-plane;
     }
   }
-  
-  
+
   /*
    * Main Structure
    */
-  container packet-discard-reporting {
+  sx:structure packet-discard-reporting {
     description
       "Container for packet discard reporting data.";
-
     list interface {
       key "name";
       description
-        "List of interfaces for which packet discard reporting data is provided.";
-
+        "List of interfaces for which packet discard reporting
+         data is provided.";
       leaf name {
         type string;
         description
           "Name of the interface.";
       }
-
       uses interface;
     }
   }
 }
+
 ]]></artwork></figure>
 
 </section>
 <section anchor="security"><name>Security Considerations</name>
-<t>There are no new security considerations introduced by this document.</t>
+
+<t>The document defines a YANG modules using <xref target="RFC8791"/>. As such, this document does
+not define data nodes. Following  the guidance in Section 3.7 of ietf-netmod-rfc8407bis,
+the YANG security template is not used.</t>
 
 </section>
 <section anchor="iana"><name>IANA Considerations</name>
-<t>There are no new IANA considerations introduced by this document.</t>
+
+<t>IANA is requested to register the following URI in the "ns" subregistry within
+   the "IETF XML Registry" <xref target="RFC3688"/>:</t>
+
+<figure><artwork><![CDATA[
+   URI:  urn:ietf:params:xml:ns:ietf-packet-discard-reporting
+   Registrant Contact:  The IESG.
+   XML:  N/A; the requested URI is an XML namespace.
+]]></artwork></figure>
+
+<t>IANA is requested to register the following YANG module in the "YANG Module
+   Names" subregistry <xref target="RFC6020"/> within the "YANG Parameters" registry:</t>
+
+<figure><artwork><![CDATA[
+   Name:  ietf-packet-discard-reporting
+   Namespace:  urn:ietf:params:xml:ns:ietf-packet-discard-reporting
+   Prefix:  plr
+   Maintained by IANA?  N
+   Reference:  RFC XXXX
+]]></artwork></figure>
 
 </section>
 <section anchor="contributors"><name>Contributors</name>
@@ -1093,6 +1105,20 @@ Email: nchachmo@cisco.com
   <seriesInfo name='DOI' value='10.17487/RFC2119'/>
 </reference>
 
+<reference anchor='RFC8174'>
+  <front>
+    <title>Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words</title>
+    <author fullname='B. Leiba' initials='B.' surname='Leiba'/>
+    <date month='May' year='2017'/>
+    <abstract>
+      <t>RFC 2119 specifies common key words that may be used in protocol specifications. This document aims to reduce the ambiguity by clarifying that only UPPERCASE usage of the key words have the defined special meanings.</t>
+    </abstract>
+  </front>
+  <seriesInfo name='BCP' value='14'/>
+  <seriesInfo name='RFC' value='8174'/>
+  <seriesInfo name='DOI' value='10.17487/RFC8174'/>
+</reference>
+
 <reference anchor='RFC8791'>
   <front>
     <title>YANG Data Structure Extensions</title>
@@ -1108,18 +1134,31 @@ Email: nchachmo@cisco.com
   <seriesInfo name='DOI' value='10.17487/RFC8791'/>
 </reference>
 
-<reference anchor='RFC8174'>
+<reference anchor='RFC3688'>
   <front>
-    <title>Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words</title>
-    <author fullname='B. Leiba' initials='B.' surname='Leiba'/>
-    <date month='May' year='2017'/>
+    <title>The IETF XML Registry</title>
+    <author fullname='M. Mealling' initials='M.' surname='Mealling'/>
+    <date month='January' year='2004'/>
     <abstract>
-      <t>RFC 2119 specifies common key words that may be used in protocol specifications. This document aims to reduce the ambiguity by clarifying that only UPPERCASE usage of the key words have the defined special meanings.</t>
+      <t>This document describes an IANA maintained registry for IETF standards which use Extensible Markup Language (XML) related items such as Namespaces, Document Type Declarations (DTDs), Schemas, and Resource Description Framework (RDF) Schemas.</t>
     </abstract>
   </front>
-  <seriesInfo name='BCP' value='14'/>
-  <seriesInfo name='RFC' value='8174'/>
-  <seriesInfo name='DOI' value='10.17487/RFC8174'/>
+  <seriesInfo name='BCP' value='81'/>
+  <seriesInfo name='RFC' value='3688'/>
+  <seriesInfo name='DOI' value='10.17487/RFC3688'/>
+</reference>
+
+<reference anchor='RFC6020'>
+  <front>
+    <title>YANG - A Data Modeling Language for the Network Configuration Protocol (NETCONF)</title>
+    <author fullname='M. Bjorklund' initials='M.' role='editor' surname='Bjorklund'/>
+    <date month='October' year='2010'/>
+    <abstract>
+      <t>YANG is a data modeling language used to model configuration and state data manipulated by the Network Configuration Protocol (NETCONF), NETCONF remote procedure calls, and NETCONF notifications. [STANDARDS-TRACK]</t>
+    </abstract>
+  </front>
+  <seriesInfo name='RFC' value='6020'/>
+  <seriesInfo name='DOI' value='10.17487/RFC6020'/>
 </reference>
 
 
@@ -1283,6 +1322,21 @@ Email: nchachmo@cisco.com
   <seriesInfo name='DOI' value='10.17487/RFC7270'/>
 </reference>
 
+<reference anchor='RFC8340'>
+  <front>
+    <title>YANG Tree Diagrams</title>
+    <author fullname='M. Bjorklund' initials='M.' surname='Bjorklund'/>
+    <author fullname='L. Berger' initials='L.' role='editor' surname='Berger'/>
+    <date month='March' year='2018'/>
+    <abstract>
+      <t>This document captures the current syntax used in YANG module tree diagrams. The purpose of this document is to provide a single location for this definition. This syntax may be updated from time to time based on the evolution of the YANG language.</t>
+    </abstract>
+  </front>
+  <seriesInfo name='BCP' value='215'/>
+  <seriesInfo name='RFC' value='8340'/>
+  <seriesInfo name='DOI' value='10.17487/RFC8340'/>
+</reference>
+
 
 
 
@@ -1379,226 +1433,239 @@ Unintended                 error/rx/l2   error/l3/rx   no_buffer     error/l3/tx
   </back>
 
 <!-- ##markdown-source:
-H4sIAJe9h2YAA+19aXfbRrLod/yKvsqH2AlJrd7kmSS0JE+U8aKx5OuXM2du
-Dgg0SYxBgMEiibF0f8v7Le+XvVq6G42FIChLcs695pmJBaC7urauqt6q+/2+
-kwVZKPfFMBLH0ThOZm4WxJF4HfsyFPAsTlzvo8zEYZB6buKLd3IeJ1kQTRx3
-NErk+T5VG9gVPjaV9mMvcmfQkJ+446wfyGzcj+epezHp+1x4hhD6WzuO72ZQ
-bmdrZ6+/9aS/ted48GISJ4t9EUBbjhPMk32RJXma7WxtPYMabiLdffF2LhPC
-PhVu5IvXbuRO5ExGmRjCd+ciTj5OkjifQ8mT0+GHvwnno1zAWx9pyGQSyax/
-iNg5TpoBhN/cMI4Ak4VMnXmwL/6ZxV5PpEBQIscp/LWY4R//chw3z6Zxsu+I
-viPgF0TpvvhlII7O3SilN0z6L/E0sl7GyQT4PnP/iCN6TgGuzPbFtjhJgsgL
-5m4oTkLXkz3xIU7SaTAXp1SESntBBgx5FUe+qu4B//bF0cHOUOy8HKpXeZQh
-397/nZ7lzA3CffFvCTi4sz9+cqnxgRcP8o+Cfg7/x6Lj7UCcLMLFXEYfY4uW
-t6H8mAKTksrXZUTtbW+JM5kkCzE8l+KNRcKpdDNQQXqTyAnIb198GFokPXu6
-vfWsQs+pTU88X4QFLbM6DSCLn123JAo5HidyUbwmvH/JowCUSLyRGWpLWhbL
-9u4uKEoUn3MX+eAubCryKFqcuxU6Dkp07G09baXj31PA5qd/MxKDCAVtETEc
-iL+7fpxOLTKG50HiRvZ7ouMAelQsThdpJmegqMeRNyiT8mRLfJBpJs7cdAb1
-D5OBTQq8+SVO2yh5tL2710aJ+5Ew+slDRFgmFiWvB+JFnHuu7waJRczreAr/
-+pVvRNBboHIiyy2+hHeetFudMYDBSAP4KaZ6hIATsXE7l/tUR7x7ebCzvf2s
-eHr65Nn2PlgXbQbtkts727vW0/ajJ8XT7t7eXvH0aPuRVfLxzt528fTk2aMt
-/XR0+EyXo5+yw++gT8UzceQm4UIcykx6pGwTMIEX7iIlC3sQA1EpvR+ex4Fv
-+MA/Y43KP2L96UC8DOOF37H4fw7EL64Xj1LVm4lpe08eWUzbeWqx8MnOE02g
-0+/3hTsClXM9sKhnUynmSTBzwQKM84ipisfCFRF3NhGkIovBrIN5RKch5uR4
-2JaDZwBxJCKbyplwPQ+MNjgVLO+KVCbngSdFKM/BA8WjfyPLzuVAiPeRLxMy
-5Vh4FGdTcTGViSSQF9OFakKEcZqK2PPyJBUXQTYNojJaMk3BiwQu+zewHNyC
-KRJrxwNtHkpEpp+Q4wNltptACoENsxh6nh8kAEWkwSRScGvQiB+Bj02PF8ID
-dxfPgAfBDGBm0DHTPETXKsYJKAwYDfBhQHCpSUDobArNgvfNyRP6chxEEpkq
-Asvdz4z3tvFNtPfuAbcCbyq80E3TYBxIIiSVCn1CVEbuKJSoTTEABTQ0PbMg
-CyaulvcSPB1Sl1ng+2BBHXDHSeznrCTq9+mbwHp77fzV+mEN3TJypM7KniVR
-fksclz7hPgK8EXn406cuB/wBWGGcpzaWPZCaO4nANIJVEkkcZ8Jzc3hCqXIB
-1Cx4Amzmc+jAED+wkqcAAv6YQ6GA2OQZCSv+SCPhPksYCSmL8hS+VhWKrFqI
-+Bi+gvoen2hqAadpfAFdIwEAP8sIo4k5qF4AaGtxekY6NnAtW2jES3IP1Z+6
-EMk6zRMk213CKeo1bhoAC5ihgBazBmogt5JgMs0UFxD5VP6eI3LELcUbF5tw
-PwIzbS5hbWYQcDvFAmQJ4O1FAnZRw/RAw2dQGYiNgeEz6NkQQ8kBWyJ5GaTE
-4JnMksBjs2rUvSxzaIR7DXH20yflDa6vRZ8cF9AYjI8jFfJChWD8Ns/sx+Po
-KEmgdfWJH6C2H4P4MsTwHLq5SPMxyCLAbsoSQjrQxCnF9twQ29IGAUlm9QOe
-aQ0kLjfwCoT/Es1EvRd8C4IDKzlnm9Yr0UJcBLaArUGsSPxN3Vc8kIPJoGdM
-torooZCfU6+ax2HgLR4Sds0WoAYiiedzZrlEfj0Ex5UnQFAyixNAk+0PCSYo
-1MWdjYJJDspIYjuHVpDTSAW2PHXPiR8hjQqkz+7ED8CgJ/AiXACXwJCk2M1M
-MW0/CjGSA4IgBHxGBAIhn4AfDEGp6hmAkCKDDCh0e6AmRhoQXlbAQRAg3CoY
-rCWxOCK6sOFhlwHVAXxhlLOoIguaNCcXiqzSwjCqDrhFzL7nyh0SdD/u8R/E
-pZGU6CE8gAY9hZhT4pySK6kdIKuMHLpaaApsi181LqkHvGbP64XSxR4PkWem
-+16j2wHyqLthVAHdTfWTgrxyp/W10mIEPw7jCzaEL4//j8hT8pNxcuFS4HAK
-jMoLy0iEm06OLAawbopWJMb2wArGTKbVRYG+BMJl5ILGp/B9lm+AkVa4ACba
-PVNZW9U1HUfZ5exWXLUbzHRs5PvQc7WvDtI0B3CjhVD9GUu5JSjNMiNlxj5U
-c/GdXLvAeFVpEYVXLFSMmq+vFdF1AumlL+cILyLfiYqOZgrxq2k8siOJYYAe
-g8fKUf9KsSTJ181ciocoAoT/zzB+AjCCAmvlmhqRgW4a+hgl2F3gQTCQYLAQ
-LBdLH/awy4Q5hZunb16fKG8BowWk9M3R2cHbNy/5JQ4MQKc3xa/DN39Tag6j
-AyyHisJ6S69xQIGvR3lW2IE4z1L0Gcr0wyhrrh4sFQJqP0iItslsihD0Imsp
-jRxrdIECGBO6CwCxS7iNE/B6tpE333cA+RBGE/lkyr5nOSflZRGtjPOMwokY
-PmOUn8oJIlQ4AdPA3kA4zqkaE+1CF0m9JBhxOKo9/UDoAnuVAnV0kJwEQg8I
-xrlF0k956aKcKeRSoB4V1kd/RQZq28qxUj+L+9Tp8Q/sJX2rg6i4ZAaBIZs2
-Dfqx7o9LkSQboIdSrHDwNwTCyDXgH6oQqp4aGeFw0OpoOKy9voYGh3PsTcGl
-GBbEYK9mepAcdgfaic3cBUqqkDONi3wa4NjgXmCMBwNwxp+Hk+m3ABcMcUBB
-HY1QTN/heA00j8ijiMxWQ/I5OHBj90oKq4cZ2EcRLfBkkwnoQ6MpmoeumgLE
-6ApsvOU+lY1Hl30pvRxqYvsQVARRHMaTBQwzsuKpNMrgyPEjQMI5w1RsvH5/
-erbR43/Fm7f097ujf7w/hrE9/n368/DVK/OHo0qc/vz2/avD4q+i5sHb16+P
-3hxyZXgrSq+cjdfDXzfYOmy8PTk7fvtm+GoDZVLuxS73JDRWOKkJukXBd+ro
-vkByfHFw8v/+7/YeaMh/qHkQMEb88HT7CRhm1IWIWyMx8CMy0gENRgeO2gAx
-i+fOgwyEQxFXCtyOBGoRsPW7fyJn/rUv/jLy5tt7P6gXSHDppeZZ6SXxrP6m
-VpmZ2PCqoRnDzdL7CqfL+A5/LT1rvlsvHWeojaW2BjhiUkrMjgjHl5GZbtBW
-DTyx7k56gK26HPlR1GUYc5Gb0fGWi4DHEOJSlEhBdU9g4AwxCFRnSzH0PPT6
-4HVhvByKV+B6xYPhwauHD1HvlZcuQV8edAN5J2xWBQZNPJ2Og3FlbMvjcO4n
-Q/YyUxjiyTTr07xMb1nYr+ZEFOvQNJhhqPHJ1ZkWoIKi6AscxDLUlMfuNEsE
-phCJYo5CEIHhjDJ1SBSGqZksRwIkHT0259iP49JmrC0/v89AEfEwiD6y1QQr
-nOTzYgoLOynGIkH2nILqhOZ+EnDiZAsxquKKPKmD5XXVkaTYVquMNBMOCz18
-BPuHohfnbhj4BBQCe60mbBElj1vKLegaii6DF3R2AknhIfkU1CZPaVNotIls
-Qwk9jDdgmJOqKEPHasUgbXmUSFMZSsgm6uvxwAhkoz9lRmTgAmdofszESqam
-6MzMio5aR6VZhAiioFTWZtOwL9oOG4hqRnTfcbYH4gxnForOi5Lv8TQGYcPv
-yQdtxolSDBAMflPTlQNnZyDeSXDh0bqARjgSAdziAtYuLsDBsA20DAcoSGqs
-gj5qOtGQBg6EUO9iYBxBcUEfPHK6U5woZxPDRZWzpXkaGhKS5vmlSMt5NBBH
-0HFDmmzAutMc1xPUWL7aax+SgYJQLqXpS4g0B2Q91XSUmgs1AyNr5mnlVA8I
-meZ31OiWS0axKjIQL8njU6DT05/JmOJEOg76mOayjIpJJK+YcedmQF9mEEIp
-dFayXdt30twQDIy/KBrHCMRMPOoRv1+ZRzajW23QcOimLDPNrDEEDF2AFTT9
-oDoC+GQVc7dNpqlQeCb9QH8ggfdUd8RoDLpjnhSz+NLFADTVY5D63KHqK03z
-VKT++CUhUli9fTlJZKXYLhfztSkrfdzjj2HsNXx0XmoEYViyy6HMXkkCanwM
-3KVoeY6D33OcnwdrxSYdXQXOFHop2yKjQvEIIt5I16yO9WBY9/r4Rf/4uDRd
-CPW7DQFBXRl1sW3NUWCQV4yHIxZR44Cd+mnLrMpxpJzqZQaqTmoCCqqjY5oj
-vFg2F2DPKgBGxhLgFHx1+wDGCRTjN0UJFE03NxIUM65kMHDVUvegMdiu+IKD
-hmIQ5MWzeRwBYzZ5XQWAbWaLudykYeNmmo/69Ih/mIfBYLDJk2I9HvnsC+G4
-gwKYtiwUSI9dT15xr7xSzvA3HGnIK5prEs5oIEzjRc0J8upK0j9QyBsIbNs4
-JjYcV76ZLVYzcsqglGYIdUgAoR665HGO08Fov0FpaUhDMQb07QwnHGnZTBuN
-BjjktBElcNs8uFY4hTtX4a7j/Lf5OSDDHNcmadMG19abNvpGrRwhvu/3kwvR
-UkDoMoaj34l/4hz6v8zqI3/Hd6XVSBC1AWFBIbaat1f6g2Kf/cF8C3cqr80X
-ntf4ET7kgN/jvWXlRouMizWXU83sLqt+3gD4qsw8hr4UjQZMupSGgMYD19tY
-ogmBFoBNGKxsn+bblmIg1sNArIGB4vvj+pemRpfDaWqzQ+mlfBfr8V2sx3fR
-ge9iPb7bxVdhwKV+j9PKewOAbD/0/8D/V72IKQUDFP2r2ID1KeiMPhfR1tP+
-IprNiF2tzYyIRhE2lmsyI3b18wbAXc1IpfQKda6UblBnYelIB1HUi7dKo9J+
-ozoLS8brYCDWwKDJjIiljS6H09Rmh9JL+S7W47tYj++iA9/Feny3i6/CgEvx
-BMYykTT1RfMxuWwXfNFd1Q/R2HvaXslLvD7h9OMalYKIJlz6M9f7ce1K5xBq
-/rhuJaLtx5ZKy43MKv41m5pVZJlaEOh7H9N8VnCxS61ZlvflpSelL/2VLLyq
-coMx7dpWloXQ1hwietVUWy0VtcZ9mn4zvFhZQ6OWBqvpKdcI3ZEMV4t2Cg7s
-Asa8XW1WC0CrAi58r5CcKkpT1Dfqt2U32soT1wtXiGi5ni9hw0omFG124xky
-QiZrGe8lAJcZ79b2IxgsFsq5sngyH69Dne/HlgFo0QfoIaMct9tUvpoCS4JC
-US7VGhRWyq7yR3bZ5c5IuaGv482v482v482v482v4821zEil9Nfx5tfx5v/Y
-8WbWebz5GcFqUyMtTLlZdN6GgBX+flbs2xnjdjH+zww31TJTn5aZnFr16vKH
-/a0akRoUVnG7UnA5n+3Wap6rnSk1KMs4srxgRXW7NGmvaDm4H8D1/UBtg0JO
-y8usd7t7JB3HeWdvLv30jb3X9BqPPJlfueR2f3tLJFLvq9CtqR3svHeM96xj
-Q8/tPaxie1vVTO2qPm5fiHg7GtBOOzILCLxSPwxDPPaX4QZSWtYnWyWKJUNa
-bJwDm9RKY5rS0nFpqZG2+I2k0DsXaKX/ViCrfX24mS6DbjjKM7XNGzcfTBcp
-HpBBkGE8oT/NIqPeF6A2eViHHujQH20yGEa0swIknuN5PEKPSKHdj9gmL6Gq
-lXXgvwz00Qzxases2JJFocVYfq/3BNJ7aZ0vxCMJoSyWjHnXWk/3atqiSn/R
-Nocyeopp3fHbXYLf7q3g9wjwUywrY+FmyIJiP2YdTyzBu8pJNOcySXGTPpJb
-2uHPtMrLOR6+450AtGiN2wNK2y4ZtDtxUd0GzmPeIeJOAFXa8QL4YGsWRywd
-M1xQKCtczfmcHA+Uhotif3xq1t97S1ffER0voX30AIL3B6l2Bs6TKn7/APni
-sRJQ2VO1C+nBP+LThyV0o1iwX6shTmy6e7Sf0iYSbUB1Jyx4W9CjqvT4GIvR
-4KKRmi5r7JUMC1WkoKxntr3SEajfKnxI8xG1OHCeDcQHPIiZ1c972Bs8rY2n
-+iwMHweKAbtE7Uctcdk6JKFtndqtMnC2t4AxY3EYjMe4h4w39eCB6etrPqyZ
-0eacXh1z27yZTV+uOpKzBZBxJ1WxzcwyZ3pnJkUJYgp1AjyadhFxXfuUk6pf
-Mf4VCJaZLXXVgHcNpdjNL8DtQUOsFWpzi4IOvRf83pE+JPHpG31eovB3jjNM
-05xOKaFu0XlQ2/uRsFAOrtiYxLG/occi4vjkfK/kMnDnywXtbwsij+vjLp5+
-Yfw3lcHaVPhthrub53ubCuKm7hDr1KEoZUWN3+N0k/j/21bHNuwaugVnWJBp
-8eBxZcd5cSDv53guXtFBH1q7WHRljtZCovRxR+4sqdTGHrtKcrmZZeFvapHF
-asvBZDSWpAsqcS8za5ui11jCdBWlsgHnVWrQXqeJzmoN089XKMPqekYldN8S
-p3zo6IBOHL0uzr+85iNGuPmO/2rYftf8cz59kpd92o8OBmsCaleKfltOO7Ud
-dFL4qGOuxb5wvT34IsDtyLK+u7HTxvExxTIQRyhwg1Kg/32/+6+57PdLHr5f
-Xsp+71yZZEjsPdp+V4KEWXurIZQfrsR7w5If4emkmlyAaztXovuvuewVb9PV
-D2Yz7lWl1BKYfwop1CwQz/FshjtgiCp0vJ9jphx3ph0kv/3hhZvKEHfIwsPb
-B9vgwB7in7+W6tLRgFwDwI3gGKmsKwW12R9jHjyyUufvVeOf9FTsZe/H477e
-y37VxoOqMUY6ErBLSVaB/Ze/GiaUMHhTKmU23pdrr4nBQRxB2DKhE4QF7KoU
-0of8/tc7wOCdOqETxuBWl2LQrAd4yKJPhyzU2QqDweC7TY5hNwffidYf9mks
-WH3b/HArUgDHQ8vEBsq9S6EJg3EwUYe3lmKwrhTWweCYN12oSRRt+6oYbBEK
-VSnY52PM8bV2DGKcvSgLmdMK6YNc6/GALJJlyQoedP8t8wvND1WLVDFFFgZL
-456Gtqy0V9bbz7VIn49BNym8oMGk50LsguN70sn7lYJ9ZAwdzAxPjN0rBnoA
-Wqn9J4gP7Jjx0774RofBnJbtrxsdY+6Naz7X8q1WiW/1sPlbkxITbMG3MOQO
-81nUeOoRAthfXZxcoFMXfIQG/qicRa8dz2g/nSE+OUIsAGwfp9gQ4+3B9nOH
-U++lUIvXFzbyJNpHQPtzN3Fn6f7lLNyP0n2sud/awAYCmycQsV+KeZg8d+Ax
-mFHyDapHbZsDO308evSJmlR10svn9AhPmIzHJLTbePfyQFBmPj4mdYjZD07N
-wZ8jTCOB9KSEwDU2GycTNwr+IMEwVcdHZy910s8H7WlCMdUmnQ78G6YKfUhQ
-cX4Ek9gRLADxQY5gdCmmWTZP9zc3MSEDpmb4KJMB0joABDYvJpuc3nSTCYFq
-eBAb6mGuwize568/6QoOFxtyMj74q5Is1Pr9RUFoTOP5Qw3QskydDRAriTTr
-sGppM5vQqmaxrIOpp61sgFPLIVmH05wxshlcW3LIHzZIXzlDwrzQmzOVpQK7
-V9d0PHqQXJy3Y+AJOGDqeJzY9nF/a0/1gGqzqLA47IUgQFcabCzpHe3ZdG+Q
-1rfoRnhODYhWy2f9OOk/bsBYaExgLIrDdjzcZjKGYT9SyxCuABijIEPH83iP
-/sojnEigNbNMTjBBnSrCs44JTwRWDzOWput1QZoAoKkfF1Mu4aRxGF9Aszhu
-1cm3VLPN0LVrwmmWClxc4zOwKaVW4s4DP1yAVJh8ojonBnxS/OBXxLrnxcPj
-PZbjdTOTVW2ruIFHuio2tgaDnafbe0/2nj15/GR76/GjRxsliPDfze/wxXds
-wHDehR438dNEvRLBvEX3TorFIsUH1UYo3SI3Q41QTVsTUAD7Jp+NQCDx2J7a
-Sy3sFXye5/pM6ASkBJtsOHTgxMyjfmqDR1B0Sb3ktYQtSxjTiHxzc3UCdNNl
-NmliGll1K+3ZjNOtVRloNuZ0YGFR9gswsWj8vthYtLiMkdflfmiWqFtcgSrC
-iVTK+drKPCxEpJndLiBVqCaJAo4W1qdVfDheJV0barhjAVwGEoC+4qRiq1XH
-iFKlJvtUgtMoz7aGS3J9taOgllq7rrZcVaJbabisROV2r5sYu7sOY3e7MbYA
-f75XIbCFDuoOneALdMIpuKRl/LUQeLwWAo9vBYEmRv8ep904vXQ5v5tOY7Id
-XjYo041ZyDYCv0LGLIj6MtRbiDqrHOCjGunILlL4wK/gpPSdd8g9r3xa3nwZ
-AU5uG8ik0uR1HYG6q7CwaOp1K7Aoep6dtgmG7ga91Tg1WYHbwIjhroFPXX31
-v4USm50Hna17ZYhzJ0Z+dRt3Z+uLheYvZvVLKNyX/e/C81twA12auQ9vcAt4
-NHFfTc53kkClR/Haxgq+V3pUK71LelVLO3ZLyWXNhrUaqiWtqa0r7a229Wb8
-2QPp2sc2rErdSmfWbu7X+Ltuwsqc874zxBTdxWYmzCd18O6AMe6GpXWw/H7x
-VA2L18MDnRZqPYzxVPuXQfk/Xw3fiMydrIcvb3K9K4Q1bhXEV6DY7PZb3EIH
-w1FzDXdqOGqtrWM4loWBt245dmuzCPrXbDpKGQ7uDL3qhl7Wct34OlbETq5w
-f+hyi7SZ9uz9ep1RKctd98Yqyt2QtNJH3LPsdatnZ6/WsBwKbZ3CYvkYpo7x
-mqMqQjKKOVPt6iGVlSLjrpHSEj89PuyOFyXiuC/MqLFOwz7bKuskIN29wM+6
-RqsF7jYMvzEHeB9M5U6ULvMCRXqSu5YLt9VoZdtH47Z4eDNYt3ED7wfr8wEv
-/4YDuJsMJBSS6w2h2iL7z5eEieWX3Te0Wldc7y667jKsAOHhQdUo3034dnNx
-3V1/LiKoP5vAlqIFKLdLrNaPZd3mtCJxoiqtJ6l7in3rfFHnThWp3UKh5knR
-28KRod8Qw6YIyGRKuk9Fw1a7RkTJfHyfqL07ecnjCTF2gzBPOmCI+aDuE8XD
-w/iU7n/io6o39sQmX8CNJvFqu1IUdgpkHrnnwEB3FOCK0BdY5zmRSb++1vPZ
-yP/vWQ+q6V0X5tz7KtFnY7ls7ai6D0R22GNwdHtbDI7ucIeB/LrBoNbubSww
-deHrZywsdQF/lwtKt9D+3ewu6KTP97y5oBuz/rf4kq97CxQiR3e/tUB+3Vlw
-3zsL1mD559v/L72v4PbQ+NxtBUf3s6tA3mRtMLvhpoJyYzpdzZ9yUwGejKc7
-wawkVl9k9fYeBVRtbC0B3f/i7a2J6JZn8m9kMD9jZngtm/WFpl4Vjvc0A7sW
-R770BKxG9k8/D7sWonc2U9ceZP65J+ra9fLrPN3XeboV83SlNLLt03X6zmgu
-2nLUqO2w0dKhXhl6ZQK6uZX2mcKWHt/c1uoJvmbtXGoiO428vAaufs7w7xaQ
-WHf81zCeX5v5ncffdyGDorf9KaSxDJ02uayINFtbrnRsrv1ltwM0yqHrzoDi
-T6ejRcT/8//0AenXwMoilQS9w2QNFpPbkmk0HtY8MHXbMgIIzBih0gKomKJ6
-EFRFFJidw5DeaLExqQTvVlQAOCMep8htRUDw9b2Y49o3yOhF8PI258YAYdmJ
-WErszAmXDVIDQ8S1bofnQXSB55acrkuZuk+ll9MmK+BtCrjq3B2fvknVl6Xp
-DTEVi8r9GsV0qbGugkK2gQWoin7u6bgVbyCOvXzG6Vic4+GbYb39wI3cxrbr
-7RKA9dqkHotJrmny5xvPeiw3ygx94/ruuTiYut50pgRygIkzxOkizeQs7Ynj
-yBvQ++0nW+KDBLU5c1O8rf0w4fen8PcvMV75fTAUzx5t73I++vdRgAPU04xS
-ioNkhzOZBJ5LH48wu8a+iDxuuEjW4ThD72MUX4TSn+js5655ozOgNzCOc7FH
-GesQMgVTXFBe25GM5JgyFXMK27GUPuVRoqdf3ol3AWa36Yl3cQS0fHCB20DM
-NAEoh/JFAuaqp3K+JF78BxL8B7C63+9TOibH+UBy84us6RN1T/IcMyy2Z9Hk
-3JlY+Poak/kEXtacOh4RuJguVqSQhy5HScxV7uPh6fFBT6RTF2czOFDE5OfY
-LzmzV6+SmN6k6eZ5/VCOOXWGLL1Ogsk0K2fMrFrsbj875dINQdh5o24O4uDk
-/eeC+FwsvudEU/91I16gKv/mzXNC5AocID7cEBHB5LTRsSLz1nlL0qwu8l4n
-tdgyEE4Jvq1od/FUaqycyuz2nxydhie5FP0fhDiZLjSRP2DeXK940nuN+OmF
-ynnMTzy7kTbWMzCv8G81RXu5DpUnwZxSma37zaLS+t25/KC1Y50nuP2nknDi
-vGbLN4CnkiSl+53g6UnIlm/d+7Oqlyfz8dqVcE8hJ7J0nCJTcK00zZFj7tNw
-xzxRMlR4KidDNN9IgTpyRVXCvfzdKTAt6VScN6hazubalOEPnXU1wV/thhcr
-BMDsfjph1gHNex0WMTAFaZSr2wqMK5e8lH+OY5JOKolhzvJ9vBAi5ejRyEwX
-7ImZdCP7IgeFGoaQ+t4ZPXJyMZQaB5Ocjk9QC3TbRPU6hDQf9c3NDgVOipGY
-Hlkh9nLJvna1Qqm2EJjTSHpZbFWjENfkMFhxMd0WXu8BxgxLAZEc5UGEiQ8H
-7w565iDMVLo+XmnQcAKVboawj3k2ELVbEFVw28xx8OCJ7oZZQaK+MAJvtvBc
-whlCPpP9GYZXo1DOMAsZX8UCHzF/XJoCVDpAYt3CQJKkpamprJ56Wc3CIPLC
-nM7RMWsqRwChxOuz90Kf7+MwuHzCjS940QQDvDjBq1+EShjZs16pJkIZTbJp
-id8xq/0yllsd0nAfSPKAKSOLMkorzwPZs7NX5hzdA3jGCw5CdcEB0/LQCG5f
-BHRPiid5A/dzEcALgCAemGoPYQwIHjCOMUGcWaSI/H5K4ySsAnUSK/EzML+J
-Gm2ZlBppa1hWG32lCN38MXMzb8oqsuC93g1sQjupQA61ZuAIQY/h7eNHoI14
-1UcKfzPguXLHhRBheB3pQ1RWR7PPLaV4u9DCaJzpBYgycB7MBlhIvO5DZetT
-t4+4I0wfq++dQcV0wzSu3BmC0rWJLK41aOMaJuvlKXDQBeV/sA9Gv+cyl7y9
-n9gwUL1X6U8GddioGyLiQhR8MwHgzFBmRd5PN5zEwI/prGDQu6NDvLzl6PDZ
-LgznAMrB28OjV3yfy9Odp8+ur2leoHxH0dHlHEbGlCkbrz3RDy3XLziUYdLV
-l4557hynolJmMKW5TL8VBSSBV+Lo0a+5IIlVykcwfMkPDZvrSSrVdT6ml51D
-o9TAPHQzLIy39IDDywMf7+kiAY5zSrNq2gJbMKC7wnCkHvFcHrY9SVwIN1ir
-cG5PqQW7whEPak95d77YLRJEko+agZmcBSnYHnEMb4IZXVwWk9jTHOfrAyzq
-S5QvKwJpBtALsk4CTK4NzIpntJCuLz/gnI/ueRyQVURrARp8LhWcnrLy2Leg
-76A5+z0PvI/GZuslLY9YiHdSmeviwgUYQ7SC4TylWR2wOcoz/J67UIuZQJNs
-cz3HM6eVEj3LB1QUFangOWYE5tkB1e1xKAuMB4JSbD4EdcgnUxBJQt7EZjlO
-5anbH/j2ohTM/0xa/Mf5k4mMZILo07yfpHubRtLm8VhdDJa56UckAdlq7vYA
-LjbfwUFXvDU4KI0SXhdEMuUcquz07EsxDJvBekvUA7yeT02cgKAoIWeINJyr
-jJ0uNwJmPqZL4KBWT6gHYKh0cfIzibPYi0NUK+A0uCwCBR6KjZhCxqXaOuhT
-dQoDgvJAd+Ta75Lq3UgxiCSesG5Ae9SrfelxwlewqrmnOnVkTX/PRiqXfGp3
-GWwQhaVEVBEOKK9MZgGFgLU7V1K6ye5N/KJys5QyjxCShMEfZOJp/ihCs05R
-iHkB4eUsTsDYJ+BQ8DQNWiO6SEslca0CR80r38ZXux+OmucWiGt02RaxCaUM
-Bhc75jgPy8qGAYchQAdhDK/oRV6Rjz2dkorYt2eZy4J0AtgqPO5nKq+iBeuB
-HExMIFQkKLBiNXURI77FDLMPlzSveEE3+J1oIwvChi5UuqStrBn1pRBzYyEF
-M6gd1ZDoVTkk4vjOQhhtCdZLJIgUXQjI5Pjg9Yk4C2aYRVulfYDwPgWvSCqM
-TYJ01UQkRgBmfw16moDFzbFYMwFk4cuXlQEe1oVkbILRuaggg6BxT6EbZwAY
-UmwER/l4Xe6oqDbSB1TfRnRd2DQmhKqX35XXQIzsEaxiYk9IMoY0+DAtlAZW
-mvALvFFuJGlsYu7iVBQSaQHZObzDR+GhbpBz6QJMex20mrYBEPrrNt2lyLPQ
-OkNC2ewUjlhVw0Hf2AVjaB0hhDBGYv72orKNTZDq29bUFYwY/Kk4zwKSWqNH
-jP35QjzqNtpakOcdyexCyqjtrq/afIS5BItHIUsrqgsxTKitR0N4rSOECkAJ
-cBpNhyV3TTpok8rrHKVB1tCpMPZXH4cHr8hgKTGn3H0aq1SL6ssoW7pBy3V9
-dAEkU4LhtnGYaEc5/lhYw3i29byvsi/QSPVYI2vzBJzbunDWfWXnGQV7xwV0
-nCTw8JLHOKp5XrKR7HBA9cZIPPWLtDw7YQXZ4JRSa9YBK6QxLgiS/1C9lG49
-4GEo3ynKOWtKVNJwkv8cyTEm3fblPIwXFLDzBaeImsfRL11JRlEEfFU3vYDK
-WviCzU1qrFQlMQSlhRWKh7AxuuGS+2FzYnDEX4VPnFa8d/P85HoFCCL8WK3/
-jCV+BLCgiixnTo1O11oOi8s1G9Bxlf744O2LOQbWrECfFvJJSsC7HNxtcfrD
-uihUg1Z3WgKvXLoe1ngiazGZtSpgu53GecL3i9i35aAJFFkeRTLsqaVhZQx1
-xMWXwykm8oiXQgZzWaUsV3iOCsnpBVMFGVUR/ArfkDguFBnU+hSVsHylLK+8
-meDFXCxofE3ciChfxfmBAgr83hDAIkYp+RR1R60v5bxHnSMKZngzcXnciHjQ
-1afmPQfh4NdTGBUyEBh2/X+46/yfr7cAAA==
+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
+aKsAAA==
 
 -->
 
