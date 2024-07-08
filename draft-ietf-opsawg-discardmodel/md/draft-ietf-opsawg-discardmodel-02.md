@@ -369,16 +369,17 @@ An IPv4 packet discarded on egress due to no buffers would increment:
 - interface/egress/discards/l3/v4/unicast/packets  
 - interface/egress/discards/l3/v4/unicast/bytes  
 - interface/egress/discards/no_buffer/class_0/packets  
-- interface/egress/discards/no_buffer/class_0/bytes  
-
+- interface/egress/discards/no_buffer/class_0/bytes
 
 Example Signal-Cause-Mitigation Mapping {#mapping}
 =======================================
-
 {{ex-table}} gives an example discard signal-to-cause-to-mitigation action mapping.  Mappings for a specific network will be dependent on the definition of unintended packet loss for that network.
 
-| Discard class           | Cause |Discard rate     | Discard duration|Unintended?| Possible actions      |
-|:-----------------------:|:-----:|:---------------:|:----------------|:---------:|:----------------------|
+~~~~~~~~~~
++-------------------------------------------+---------------------+------------+----------+-------------+-----------------------+
+| Discard class                             | Cause               | Discard    | Discard  | Unintended? | Possible actions      |
+|                                           |                     | rate       | duration |             |                       |
++-------------------------------------------+---------------------+------------+----------+-------------+-----------------------+
 | ingress/discards/errors/l2/rx             | Upstream device     | >Baseline  | O(1min)  | Y           | Take upstream link or |
 |                                           | or link errror      |            |          |             | device out-of-service |
 | ingress/discards/errors/l3/rx/ttl_expired | Tracert             | <=Baseline |          | N           | no action             |
@@ -395,6 +396,8 @@ Example Signal-Cause-Mitigation Mapping {#mapping}
 |                                           |                     |            |          |             | into service or move  |
 |                                           |                     |            |          |             | traffic               |
 +-------------------------------------------+---------------------+------------+----------+-------------+-----------------------+
+
+~~~~~~~~~~
 {: #ex-table title="Example Signal-Cause-Mitigation Mapping"}
 
 The 'Baseline' in the 'Discard Rate' column is network dependent.
