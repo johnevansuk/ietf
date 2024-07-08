@@ -1036,7 +1036,7 @@ module ietf-packet-discard-reporting {
 Security Considerations {#security}
 =======================
 
-The document defines a YANG modules using {{!RFC8791}}. As such, this document does
+The document defines a YANG module using {{!RFC8791}}. As such, this document does
 not define data nodes. Following  the guidance in {{Section 3.7 of ?I-D.ietf-netmod-rfc8407bis}},
 the YANG security template is not used.
 
