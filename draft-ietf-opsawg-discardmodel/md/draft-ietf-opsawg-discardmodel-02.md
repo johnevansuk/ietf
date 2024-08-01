@@ -1,8 +1,8 @@
 ---
 title: An Information Model for Packet Discard Reporting
 abbrev: IM for Packet Discard Reporting
-docname: draft-ietf-opsawg-discardmodel-02
-date: 2024-07-08
+docname: draft-ietf-opsawg-discardmodel-03
+date: 2024-08-01
 category: std
 
 ipr: trust200902
@@ -145,7 +145,7 @@ c. Type can be traffic&#124;discards, where traffic accounts for packets success
 d. Layer can be l2&#124;l3
 
 ~~~~~~~~~~
-  structure packet-discard-reporting:
+structure packet-discard-reporting:
     +-- interface* [name]
        +-- name             string
        +-- ingress
@@ -203,37 +203,37 @@ d. Layer can be l2&#124;l3
        |     +-- errors
        |     |  +-- l2
        |     |  |  +-- rx
-       |     |  |     +-- frames?          uint48
-       |     |  |     +-- crc-error?       uint48
-       |     |  |     +-- invalid-mac?     uint48
-       |     |  |     +-- invalid-vlan?    uint48
-       |     |  |     +-- invalid-frame?   uint48
+       |     |  |     +-- frames?          uint32
+       |     |  |     +-- crc-error?       uint32
+       |     |  |     +-- invalid-mac?     uint32
+       |     |  |     +-- invalid-vlan?    uint32
+       |     |  |     +-- invalid-frame?   uint32
        |     |  +-- l3
        |     |  |  +-- rx
-       |     |  |  |  +-- packets?          uint48
-       |     |  |  |  +-- checksum-error?   uint48
-       |     |  |  |  +-- mtu-exceeded?     uint48
-       |     |  |  |  +-- invalid-packet?   uint48
-       |     |  |  |  +-- ttl-expired?      uint48
-       |     |  |  +-- no-route?        uint48
-       |     |  |  +-- invalid-sid?     uint48
-       |     |  |  +-- invalid-label?   uint48
+       |     |  |  |  +-- packets?          uint32
+       |     |  |  |  +-- checksum-error?   uint32
+       |     |  |  |  +-- mtu-exceeded?     uint32
+       |     |  |  |  +-- invalid-packet?   uint32
+       |     |  |  |  +-- ttl-expired?      uint32
+       |     |  |  +-- no-route?        uint32
+       |     |  |  +-- invalid-sid?     uint32
+       |     |  |  +-- invalid-label?   uint32
        |     |  +-- hardware
-       |     |     +-- packets?        uint48
-       |     |     +-- parity-error?   uint48
+       |     |     +-- packets?        uint32
+       |     |     +-- parity-error?   uint32
        |     +-- policy
        |     |  +-- l2
-       |     |  |  +-- frames?   uint48
-       |     |  |  +-- acl?      uint48
+       |     |  |  +-- frames?   uint32
+       |     |  |  +-- acl?      uint32
        |     |  +-- l3
-       |     |     +-- packets?      uint48
-       |     |     +-- acl?          uint48
+       |     |     +-- packets?      uint32
+       |     |     +-- acl?          uint32
        |     |     +-- policer
-       |     |     |  +-- packets?   uint48
-       |     |     |  +-- bytes?     uint48
-       |     |     +-- null-route?   uint48
-       |     |     +-- rpf?          uint48
-       |     |     +-- ddos?         uint48
+       |     |     |  +-- packets?   uint32
+       |     |     |  +-- bytes?     uint32
+       |     |     +-- null-route?   uint32
+       |     |     +-- rpf?          uint32
+       |     |     +-- ddos?         uint32
        |     +-- no-buffer
        |        +-- class* [id]
        |           +-- id         string
@@ -294,16 +294,16 @@ d. Layer can be l2&#124;l3
        |     +-- errors
        |     |  +-- l2
        |     |  |  +-- tx
-       |     |  |     +-- frames?   uint48
+       |     |  |     +-- frames?   uint32
        |     |  +-- l3
        |     |     +-- tx
-       |     |        +-- packets?   uint48
+       |     |        +-- packets?   uint32
        |     +-- policy
        |     |  +-- l3
-       |     |     +-- acl?       uint48
+       |     |     +-- acl?       uint32
        |     |     +-- policer
-       |     |        +-- packets?   uint48
-       |     |        +-- bytes?     uint48
+       |     |        +-- packets?   uint32
+       |     |        +-- bytes?     uint32
        |     +-- no-buffer
        |        +-- class* [id]
        |           +-- id         string
@@ -312,13 +312,13 @@ d. Layer can be l2&#124;l3
        +-- control-plane
           +-- ingress
              +-- traffic
-             |  +-- packets?   uint48
-             |  +-- bytes?     uint48
+             |  +-- packets?   uint32
+             |  +-- bytes?     uint32
              +-- discards
-                +-- packets?   uint48
-                +-- bytes?     uint48
+                +-- packets?   uint32
+                +-- bytes?     uint32
                 +-- policy
-                   +-- packets?   uint48
+                   +-- packets?   uint32
 
 ~~~~~~~~~~
 
@@ -402,7 +402,7 @@ YANG Module {#module}
 The "ietf-packet-discard-reporting" uses the "sx" structure defined in {{!RFC8791}}.
 
 ~~~~~~~~~~
-<CODE BEGINS> file "ietf-packet-discard-reporting@2024-07-04.yang"
+  <CODE BEGINS> file "ietf-packet-discard-reporting@2024-07-04.yang"
 module ietf-packet-discard-reporting {
   yang-version 1.1;
   namespace
@@ -459,22 +459,22 @@ module ietf-packet-discard-reporting {
       "RFC XXXX: An Information Model for Packet Discard Reporting";
   }
 
-  typedef uint48 {
+  typedef uint32 {
     type uint64 {
       range "0..281474976710655";
     }
     description
-      "48-bit unsigned integer type";
+      "32-bit unsigned integer type";
   }
 
-  typedef uint48-or-64 {
+  typedef uint32-or-64 {
     type union {
-      type uint48;
+      type uint32;
       type uint64;
     }
     description
-      "Union type representing either a 48-bit or 64-bit unsigned
-       integer. 48-bit counters are used for packet and discard
+      "Union type representing either a 32-bit or 64-bit unsigned
+       integer. 32-bit counters are used for packet and discard
        counters that increase at a lower rate, while 64-bit counters
        are used for traffic byte counters that may increase more
        rapidly.";
@@ -526,43 +526,43 @@ module ietf-packet-discard-reporting {
     }
   }
 
-  grouping basic-packets-48 {
+  grouping basic-packets-32 {
     description
-      "Basic grouping with 48-bit packets";
+      "Basic grouping with 32-bit packets";
     leaf packets {
-      type uint48;
+      type uint32;
       description
         "Number of L3 packets";
     }
   }
 
-  grouping basic-packets-bytes-48 {
+  grouping basic-packets-bytes-32 {
     description
-      "Basic grouping with 48-bit packets and bytes";
-    uses basic-packets-48;
+      "Basic grouping with 32-bit packets and bytes";
+    uses basic-packets-32;
     leaf bytes {
-      type uint48;
+      type uint32;
       description
         "Number of L3 bytes";
     }
   }
 
-  grouping basic-frames-48 {
+  grouping basic-frames-32 {
     description
-      "Basic grouping with 48-bit frames";
+      "Basic grouping with 32-bit frames";
     leaf frames {
-      type uint48;
+      type uint32;
       description
         "Number of L2 frames";
     }
   }
 
-  grouping basic-frames-bytes-48 {
+  grouping basic-frames-bytes-32 {
     description
-      "Basic grouping with 48-bit packets and bytes";
-    uses basic-frames-48;
+      "Basic grouping with 32-bit packets and bytes";
+    uses basic-frames-32;
     leaf bytes {
-      type uint48;
+      type uint32;
       description
         "Number of L2 bytes";
     }
@@ -651,16 +651,16 @@ module ietf-packet-discard-reporting {
       container traffic {
         description
           "Control plane ingress traffic counters";
-        uses basic-packets-bytes-48;
+        uses basic-packets-bytes-32;
       }
       container discards {
         description
           "Control plane ingress packet discard counters";
-        uses basic-packets-bytes-48;
+        uses basic-packets-bytes-32;
         container policy {
           description
             "Number of control plane packets discarded due to policy";
-          uses basic-packets-48;
+          uses basic-packets-32;
         }
       }
     }
@@ -673,27 +673,27 @@ module ietf-packet-discard-reporting {
       description
         "Layer 2 ingress frame error counters";
       leaf frames {
-        type uint48;
+        type uint32;
         description
           "Number of errored L2 frames";
       }
       leaf crc-error {
-        type uint48;
+        type uint32;
         description
           "Number of frames received with CRC error";
       }
       leaf invalid-mac {
-        type uint48;
+        type uint32;
         description
           "Number of frames received with invalid MAC address";
       }
       leaf invalid-vlan {
-        type uint48;
+        type uint32;
         description
           "Number of frames received with invalid VLAN tag";
       }
       leaf invalid-frame {
-        type uint48;
+        type uint32;
         description
           "Number of invalid frames received";
       }
@@ -707,43 +707,43 @@ module ietf-packet-discard-reporting {
       description
         "Layer 3 ingress packet receive error counters";
       leaf packets {
-        type uint48;
+        type uint32;
         description
           "Number of errored L3 packets";
       }
       leaf checksum-error {
-        type uint48;
+        type uint32;
         description
           "Number of packets received with checksum error";
       }
       leaf mtu-exceeded {
-        type uint48;
+        type uint32;
         description
           "Number of packets received exceeding MTU";
       }
       leaf invalid-packet {
-        type uint48;
+        type uint32;
         description
           "Number of invalid packets received";
       }
       leaf ttl-expired {
-        type uint48;
+        type uint32;
         description
           "Number of packets received with expired TTL";
       }
     }
     leaf no-route {
-      type uint48;
+      type uint32;
       description
         "Number of packets with no route";
     }
     leaf invalid-sid {
-      type uint48;
+      type uint32;
       description
         "Number of packets with invalid SID";
     }
     leaf invalid-label {
-      type uint48;
+      type uint32;
       description
         "Number of packets with invalid label";
     }
@@ -753,12 +753,12 @@ module ietf-packet-discard-reporting {
     description
       "Hardware error counters";
     leaf packets {
-      type uint48;
+      type uint32;
       description
         "Number of local errored packets";
     }
     leaf parity-error {
-      type uint48;
+      type uint32;
       description
         "Number of packets with parity error";
     }
@@ -791,7 +791,7 @@ module ietf-packet-discard-reporting {
       description
         "Layer 2 transmit frame error counters";
       leaf frames {
-        type uint48;
+        type uint32;
         description
           "Number of errored L2 frames during transmission";
       }
@@ -805,7 +805,7 @@ module ietf-packet-discard-reporting {
       description
         "Layer 3 transmit packet error counters";
       leaf packets {
-        type uint48;
+        type uint32;
         description
           "Number of errored L3 packets during transmission";
       }
@@ -831,12 +831,12 @@ module ietf-packet-discard-reporting {
     description
       "Layer 2 policy ingress packet discard counters";
     leaf frames {
-      type uint48;
+      type uint32;
       description
         "Number of L2 frames discarded due to policy";
     }
     leaf acl {
-      type uint48;
+      type uint32;
       description
         "Number of frames discarded due to L2 ACL";
     }
@@ -846,32 +846,32 @@ module ietf-packet-discard-reporting {
     description
       "Layer 3 policy ingress packet discard counters";
     leaf packets {
-      type uint48;
+      type uint32;
       description
         "Number of L3 packets discarded due to policy";
     }
     leaf acl {
-      type uint48;
+      type uint32;
       description
         "Number of packets discarded due to L3 ACL";
     }
     container policer {
       description
         "Policer ingress packet discard counters";
-      uses basic-packets-bytes-48;
+      uses basic-packets-bytes-32;
     }
     leaf null-route {
-      type uint48;
+      type uint32;
       description
         "Number of packets discarded due to null route";
     }
     leaf rpf {
-      type uint48;
+      type uint32;
       description
         "Number of packets discarded due to RPF check failure";
     }
     leaf ddos {
-      type uint48;
+      type uint32;
       description
         "Number of packets discarded due to DDoS protection";
     }
@@ -896,14 +896,14 @@ module ietf-packet-discard-reporting {
     description
       "Layer 3 policy egress packet discard counters";
     leaf acl {
-      type uint48;
+      type uint32;
       description
         "Number of packets discarded due to L3 egress ACL";
     }
     container policer {
       description
         "Policer egress packet discard counters";
-      uses basic-packets-bytes-48;
+      uses basic-packets-bytes-32;
     }
   }
 
