@@ -2,7 +2,7 @@
 title: An Information Model for Packet Discard Reporting
 abbrev: IM for Packet Discard Reporting
 docname: draft-ietf-opsawg-discardmodel-03
-date: 2024-08-01
+date: 2024-08-08
 category: std
 
 ipr: trust200902
