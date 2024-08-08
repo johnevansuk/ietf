@@ -459,27 +459,6 @@ module ietf-packet-discard-reporting {
       "RFC XXXX: An Information Model for Packet Discard Reporting";
   }
 
-  typedef uint32 {
-    type uint64 {
-      range "0..281474976710655";
-    }
-    description
-      "32-bit unsigned integer type";
-  }
-
-  typedef uint32-or-64 {
-    type union {
-      type uint32;
-      type uint64;
-    }
-    description
-      "Union type representing either a 32-bit or 64-bit unsigned
-       integer. 32-bit counters are used for packet and discard
-       counters that increase at a lower rate, while 64-bit counters
-       are used for traffic byte counters that may increase more
-       rapidly.";
-  }
-
   /*
    * Groupings
    */
