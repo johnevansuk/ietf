@@ -88,13 +88,11 @@ In automating network operations, a network operator needs to be able to detect 
 
 The existing metrics for reporting packet loss, as defined in {{?RFC1213}} (namely ifInDiscards, ifOutDiscards, ifInErrors, and ifOutErrors), do not provide sufficient precision to automatically identify the cause of the loss and mitigate the impact.  From a network operator's perspective, ifInDiscards can represent both intended packet loss (e.g., packets discarded due to policy) and unintended packet loss (e.g., packets dropped in error). Furthermore, these definitions are ambiguous, as vendors can and have implemented them differently.  In some implementations, ifInErrors accounts only for errored packets that are dropped, while in others, it accounts for all errored packets, whether they are dropped or not.  Many implementations support more discard metrics than these; where they do, they have been inconsistently implemented due to the lack of a standardised classification scheme and clear semantics for packet loss reporting. {{?RFC7270}} provides support for reporting discards per flow in IPFIX using forwardingStatus, however, the defined drop reason codes also lack sufficient clarity (e.g., "For us" Reason Code) to support automated root cause analysis and impact mitigation.
 
-Hence, this document defines an information model for packet loss reporting, aiming to address these issues by presenting a packet loss classification scheme that can enable automated mitigation of unintended packet loss.  In line with {{?RFC3444}}, this information model remains independent of specific implementations or transport protocols. We selected YANG to represent the information model for three main reasons. First, YANG, along with its data structure extensions {{!RFC8791}}, allows us to define the model in an abstract way, decoupled from specific implementations. This abstraction provides flexibility for diverse potential implementations, with the structure and groupings easily adaptable to data models such as SNMP {{?RFC1157}}, NETCONF {{?RFC6241}}, RESTCONF {{?RFC8040}}, or IPFIX {{?RFC7011}}.  Second, YANG ensures a lossless translation from the information model to a YANG data model, preserving both semantics and structure. Lastly, YANG capitalises on the community’s broad familiarity with its syntax and use, facilitating easier adoption and evolution.
+Hence, this document defines an information model for packet loss reporting, aiming to address these issues by presenting a packet loss classification scheme that can enable automated mitigation of unintended packet loss.  In line with {{?RFC3444}}, this information model remains independent of specific implementations or transport protocols.
 
-The specific implementations of this information model (i.e., protocols and associated data models) are outside the scope of this document.  The scope of this document is limited to reporting packet loss at Layer 3 and frames discarded at Layer 2, although the information model might be extended in future to cover segments dropped at Layer 4. 
+The specific implementations of this information model (i.e., protocols and associated data models) are outside the scope of this document.  The scope of this document is limited to reporting packet loss at Layer 3 and frames discarded at Layer 2, although the information model might be extended in future to cover segments dropped at Layer 4. This document considers only the signals that may trigger automated mitigation plans and not how they are defined or executed.
 
 {{problem}} describes the problem to be solved. Section 4 describes the information model and requirements with a set of examples.  Section 5 provides examples of discard signal-to-cause-to-auto-mitigation action mapping.  Section 6 presents the information model as an abstract data structure in YANG, in accordance with {{!RFC8791}}.  Appendix A provides an example of where packets may be discarded in a device.  Appendix B details the authors' experience from implementing this model.
-
-This document considers only the signals that may trigger automated mitigation plans and not how they are defined or executed.
 
 Terminology {#terminology}
 ===========
@@ -138,6 +136,15 @@ FEATURE-LOSS-RATE, FEATURE-LOSS-DURATION, and FEATURE-LOSS-LOCATION are already 
 
 Information Model   {#model}
 =================
+
+Design Rationale {#rationale}
+----------------
+
+This document uses YANG to represent the information model for three main reasons. First, YANG, along with its data structure extensions {{!RFC8791}}, allows designers to define the model in an abstract way, decoupled from specific implementations. This abstraction ensures consistency and provides flexibility for diverse potential implementations, with the structure and groupings easily adaptable to data models such as those specific to SNMP {{?RFC1157}}, NETCONF {{?RFC6241}}, RESTCONF {{?RFC8040}}, or IPFIX {{?RFC7011}}.  Second, this approach ensures a lossless translation from the information model to a YANG data model, preserving both semantics and structure. Lastly, YANG capitalises on the community’s broad familiarity with its syntax and use, facilitating easier adoption and evolution.
+
+
+Structure {#structure}
+---------
 
 The classification scheme is defined as a tree that follows the structure: component/direction/type/layer/sub-type/sub-sub-type/.../metric, where:
 
@@ -333,12 +340,12 @@ Requirements 1-10 relate to packets forwarded by the device, while requirement 1
 
 1. All instances of frame or packet receipt, transmission, and discards MUST be reported.
 2. All instances of frame or packet receipt, transmission, and discards SHOULD be attributed to the physical or logical interface of the device where they occur.
-3. An individual frame MUST only be accounted for by either the L2 traffic class or the L2 discard classes within a single direction, i.e., ingress or egress.
-4. An individual packet MUST only be accounted for by either the L3 traffic class or the L3 discard classes within a single direction, i.e., ingress or egress.
-5. A frame accounted for at L2 SHOULD NOT be accounted for at L3 and vice versa.  An implementation MUST indicate which layers a discard is counted against.
-6. The aggregate L2 and L3 traffic and discard classes SHOULD account for all underlying packets received, transmitted, and discarded across all other classes.
+3. An individual frame MUST only be accounted for by either the Layer 2 traffic class or the Layer 2 discard classes within a single direction, i.e., ingress or egress.
+4. An individual packet MUST only be accounted for by either the Layer 3 traffic class or the Layer 3 discard classes within a single direction, i.e., ingress or egress.
+5. A frame accounted for at Layer 2 SHOULD NOT be accounted for at Layer 3 and vice versa.  An implementation MUST indicate which layers a discard is counted against.
+6. The aggregate Layer 2 and Layer 3 traffic and discard classes SHOULD account for all underlying packets received, transmitted, and discarded across all other classes.
 7. The aggregate Quality of Service (QoS) traffic and no buffer discard classes MUST account for all underlying packets received, transmitted, and discarded across all other classes.
-8. In addition to the L2 and L3 aggregate classes, an individual discarded packet MUST only account against a single error, policy, or no_buffer discard subclass.
+8. In addition to the Layer 2 and Layer 3 aggregate classes, an individual discarded packet MUST only account against a single error, policy, or no_buffer discard subclass.
 9. When there are multiple reasons for discarding a packet, the ordering of discard class reporting MUST be defined.
 10. If Diffserv {{RFC2475}} is not used, no_buffer discards SHOULD be reported as class0.
 11. Traffic to the device control plane has its own class, however, traffic from the device control plane SHOULD be accounted for in the same way as other egress traffic.  
