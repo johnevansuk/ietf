@@ -403,7 +403,7 @@ Example Signal-Cause-Mitigation Mapping {#mapping}
 ~~~~~~~~~~
 {: #ex-table title="Example Signal-Cause-Mitigation Mapping"}
 
-The 'Baseline' in the 'Discard Rate' column is network dependent.
+The 'Baseline' in the 'Discard Rate' column is both discard class and network dependent.
 
 YANG Module {#module}
 ===========
