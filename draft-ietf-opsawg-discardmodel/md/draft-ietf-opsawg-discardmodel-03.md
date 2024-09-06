@@ -1050,7 +1050,7 @@ Contributors {#contributors}
 
 Acknowledgments {#acknowledgements}
 ===============
-The content of this draft has benefitted from feedback from JR Rivers, Ronan Waide, Chris DeBruin, and Marcoz Sanz.
+The content of this document has benefitted from feedback from JR Rivers, Ronan Waide, Chris DeBruin, and Marcoz Sanz.
 
 --- back
 
