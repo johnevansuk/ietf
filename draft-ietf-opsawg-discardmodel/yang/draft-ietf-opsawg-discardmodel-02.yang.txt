@@ -4,6 +4,12 @@ module ietf-packet-discard-reporting {
     "urn:ietf:params:xml:ns:yang:ietf-packet-discard-reporting";
   prefix plr;
 
+  import iana-routing-types {
+    prefix "iana-rt-types";
+    reference
+      "RFC 8294: Common YANG Data Types for the Routing Area";
+  }
+
   import ietf-yang-structure-ext {
     prefix sx;
     reference
@@ -100,9 +106,9 @@ module ietf-packet-discard-reporting {
     }
   }
 
-  grouping basic-packets-48 {
+  grouping basic-packets-32 {
     description
-      "Basic grouping with 48-bit packets";
+      "Basic grouping with 32-bit packets";
     leaf packets {
       type uint32;
       description
@@ -110,10 +116,10 @@ module ietf-packet-discard-reporting {
     }
   }
 
-  grouping basic-packets-bytes-48 {
+  grouping basic-packets-bytes-32 {
     description
-      "Basic grouping with 48-bit packets and bytes";
-    uses basic-packets-48;
+      "Basic grouping with 32-bit packets and bytes";
+    uses basic-packets-32;
     leaf bytes {
       type uint32;
       description
@@ -121,9 +127,9 @@ module ietf-packet-discard-reporting {
     }
   }
 
-  grouping basic-frames-48 {
+  grouping basic-frames-32 {
     description
-      "Basic grouping with 48-bit frames";
+      "Basic grouping with 32-bit frames";
     leaf frames {
       type uint32;
       description
@@ -131,10 +137,10 @@ module ietf-packet-discard-reporting {
     }
   }
 
-  grouping basic-frames-bytes-48 {
+  grouping basic-frames-bytes-32 {
     description
-      "Basic grouping with 48-bit packets and bytes";
-    uses basic-frames-48;
+      "Basic grouping with 32-bit packets and bytes";
+    uses basic-frames-32;
     leaf bytes {
       type uint32;
       description
@@ -150,33 +156,34 @@ module ietf-packet-discard-reporting {
 
   grouping ip {
     description
-      "IP traffic counters";
-    uses basic-packets-bytes-64;
-    container unicast {
+      "Traffic counters";
+    list address-family-stats {
+      key "address-family";
       description
-        "Unicast traffic counters";
+        "Per address family traffic counters";
+      leaf address-family {
+        type iana-rt-types:address-family;
+        description
+          "Address-family";
+      }
       uses basic-packets-bytes-64;
-    }
-    container multicast {
-      description
-        "Multicast traffic counters";
-      uses basic-packets-bytes-64;
+      container unicast {
+        description
+          "Unicast traffic counters";
+        uses basic-packets-bytes-64;
+      }
+      container multicast {
+        description
+          "Multicast traffic counters";
+        uses basic-packets-bytes-64;
+      }
     }
   }
 
   grouping l3-traffic {
     description
       "Layer 3 traffic counters";
-    container v4 {
-      description
-        "IPv4 traffic counters";
       uses ip;
-    }
-    container v6 {
-      description
-        "IPv6 traffic counters";
-      uses ip;
-    }
   }
 
   grouping qos {
@@ -225,16 +232,16 @@ module ietf-packet-discard-reporting {
       container traffic {
         description
           "Control plane ingress traffic counters";
-        uses basic-packets-bytes-48;
+        uses basic-packets-bytes-32;
       }
       container discards {
         description
           "Control plane ingress packet discard counters";
-        uses basic-packets-bytes-48;
+        uses basic-packets-bytes-32;
         container policy {
           description
             "Number of control plane packets discarded due to policy";
-          uses basic-packets-48;
+          uses basic-packets-32;
         }
       }
     }
@@ -432,7 +439,7 @@ module ietf-packet-discard-reporting {
     container policer {
       description
         "Policer ingress packet discard counters";
-      uses basic-packets-bytes-48;
+      uses basic-packets-bytes-32;
     }
     leaf null-route {
       type uint32;
@@ -477,7 +484,7 @@ module ietf-packet-discard-reporting {
     container policer {
       description
         "Policer egress packet discard counters";
-      uses basic-packets-bytes-48;
+      uses basic-packets-bytes-32;
     }
   }
 
