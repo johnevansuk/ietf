@@ -1,0 +1,144 @@
+module: ietf-packet-discard-reporting
+
+  structure packet-discard-reporting:
+    +-- interface* [name]
+       +-- name             string
+       +-- ingress
+       |  +-- traffic
+       |  |  +-- l2
+       |  |  |  +-- frames?   uint64
+       |  |  |  +-- bytes?    uint64
+       |  |  +-- l3
+       |  |  |  +-- address-family-stats* [address-family]
+       |  |  |     +-- address-family    iana-rt-types:address-family
+       |  |  |     +-- packets?          uint64
+       |  |  |     +-- bytes?            uint64
+       |  |  |     +-- unicast
+       |  |  |     |  +-- packets?   uint64
+       |  |  |     |  +-- bytes?     uint64
+       |  |  |     +-- multicast
+       |  |  |        +-- packets?   uint64
+       |  |  |        +-- bytes?     uint64
+       |  |  +-- qos
+       |  |     +-- class* [id]
+       |  |        +-- id         string
+       |  |        +-- packets?   uint64
+       |  |        +-- bytes?     uint64
+       |  +-- discards
+       |     +-- l2
+       |     |  +-- frames?   uint64
+       |     |  +-- bytes?    uint64
+       |     +-- l3
+       |     |  +-- address-family-stats* [address-family]
+       |     |     +-- address-family    iana-rt-types:address-family
+       |     |     +-- packets?          uint64
+       |     |     +-- bytes?            uint64
+       |     |     +-- unicast
+       |     |     |  +-- packets?   uint64
+       |     |     |  +-- bytes?     uint64
+       |     |     +-- multicast
+       |     |        +-- packets?   uint64
+       |     |        +-- bytes?     uint64
+       |     +-- errors
+       |     |  +-- l2
+       |     |  |  +-- rx
+       |     |  |     +-- frames?          uint32
+       |     |  |     +-- crc-error?       uint32
+       |     |  |     +-- invalid-mac?     uint32
+       |     |  |     +-- invalid-vlan?    uint32
+       |     |  |     +-- invalid-frame?   uint32
+       |     |  +-- l3
+       |     |  |  +-- rx
+       |     |  |  |  +-- packets?          uint32
+       |     |  |  |  +-- checksum-error?   uint32
+       |     |  |  |  +-- mtu-exceeded?     uint32
+       |     |  |  |  +-- invalid-packet?   uint32
+       |     |  |  |  +-- ttl-expired?      uint32
+       |     |  |  +-- no-route?        uint32
+       |     |  |  +-- invalid-sid?     uint32
+       |     |  |  +-- invalid-label?   uint32
+       |     |  +-- hardware
+       |     |     +-- packets?        uint32
+       |     |     +-- parity-error?   uint32
+       |     +-- policy
+       |     |  +-- l2
+       |     |  |  +-- frames?   uint32
+       |     |  |  +-- acl?      uint32
+       |     |  +-- l3
+       |     |     +-- packets?      uint32
+       |     |     +-- acl?          uint32
+       |     |     +-- policer
+       |     |     |  +-- packets?   uint32
+       |     |     |  +-- bytes?     uint32
+       |     |     +-- null-route?   uint32
+       |     |     +-- rpf?          uint32
+       |     |     +-- ddos?         uint32
+       |     +-- no-buffer
+       |        +-- class* [id]
+       |           +-- id         string
+       |           +-- packets?   uint64
+       |           +-- bytes?     uint64
+       +-- egress
+       |  +-- traffic
+       |  |  +-- l2
+       |  |  |  +-- frames?   uint64
+       |  |  |  +-- bytes?    uint64
+       |  |  +-- l3
+       |  |  |  +-- address-family-stats* [address-family]
+       |  |  |     +-- address-family    iana-rt-types:address-family
+       |  |  |     +-- packets?          uint64
+       |  |  |     +-- bytes?            uint64
+       |  |  |     +-- unicast
+       |  |  |     |  +-- packets?   uint64
+       |  |  |     |  +-- bytes?     uint64
+       |  |  |     +-- multicast
+       |  |  |        +-- packets?   uint64
+       |  |  |        +-- bytes?     uint64
+       |  |  +-- qos
+       |  |     +-- class* [id]
+       |  |        +-- id         string
+       |  |        +-- packets?   uint64
+       |  |        +-- bytes?     uint64
+       |  +-- discards
+       |     +-- l2
+       |     |  +-- frames?   uint64
+       |     |  +-- bytes?    uint64
+       |     +-- l3
+       |     |  +-- address-family-stats* [address-family]
+       |     |     +-- address-family    iana-rt-types:address-family
+       |     |     +-- packets?          uint64
+       |     |     +-- bytes?            uint64
+       |     |     +-- unicast
+       |     |     |  +-- packets?   uint64
+       |     |     |  +-- bytes?     uint64
+       |     |     +-- multicast
+       |     |        +-- packets?   uint64
+       |     |        +-- bytes?     uint64
+       |     +-- errors
+       |     |  +-- l2
+       |     |  |  +-- tx
+       |     |  |     +-- frames?   uint32
+       |     |  +-- l3
+       |     |     +-- tx
+       |     |        +-- packets?   uint32
+       |     +-- policy
+       |     |  +-- l3
+       |     |     +-- acl?       uint32
+       |     |     +-- policer
+       |     |        +-- packets?   uint32
+       |     |        +-- bytes?     uint32
+       |     +-- no-buffer
+       |        +-- class* [id]
+       |           +-- id         string
+       |           +-- packets?   uint64
+       |           +-- bytes?     uint64
+       +-- control-plane
+          +-- ingress
+             +-- traffic
+             |  +-- packets?   uint32
+             |  +-- bytes?     uint32
+             +-- discards
+                +-- packets?   uint32
+                +-- bytes?     uint32
+                +-- policy
+                   +-- packets?   uint32
