@@ -2,7 +2,7 @@
 title: An Information Model for Packet Discard Reporting
 abbrev: IM for Packet Discard Reporting
 docname: draft-ietf-opsawg-discardmodel-04
-date: 2024-08-08
+date: 2024-09-19
 category: std
 
 ipr: trust200902
@@ -380,12 +380,17 @@ The "ietf-packet-discard-reporting" uses the "sx" structure defined in {{!RFC879
 
 ~~~~~~~~~~
   <CODE BEGINS>
-file "ietf-packet-discard-reporting@2024-07-04.yang"
 module ietf-packet-discard-reporting {
   yang-version 1.1;
   namespace
     "urn:ietf:params:xml:ns:yang:ietf-packet-discard-reporting";
   prefix plr;
+
+  import iana-routing-types {
+    prefix "iana-rt-types";
+    reference
+      "RFC 8294: Common YANG Data Types for the Routing Area";
+  }
 
   import ietf-yang-structure-ext {
     prefix sx;
@@ -533,33 +538,34 @@ module ietf-packet-discard-reporting {
 
   grouping ip {
     description
-      "IP traffic counters";
-    uses basic-packets-bytes-64;
-    container unicast {
+      "Traffic counters";
+    list address-family-stats {
+      key "address-family";
       description
-        "Unicast traffic counters";
+        "Per address family traffic counters";
+      leaf address-family {
+        type iana-rt-types:address-family;
+        description
+          "Address-family";
+      }
       uses basic-packets-bytes-64;
-    }
-    container multicast {
-      description
-        "Multicast traffic counters";
-      uses basic-packets-bytes-64;
+      container unicast {
+        description
+          "Unicast traffic counters";
+        uses basic-packets-bytes-64;
+      }
+      container multicast {
+        description
+          "Multicast traffic counters";
+        uses basic-packets-bytes-64;
+      }
     }
   }
 
   grouping l3-traffic {
     description
       "Layer 3 traffic counters";
-    container v4 {
-      description
-        "IPv4 traffic counters";
       uses ip;
-    }
-    container v6 {
-      description
-        "IPv6 traffic counters";
-      uses ip;
-    }
   }
 
   grouping qos {
@@ -963,7 +969,6 @@ module ietf-packet-discard-reporting {
   /*
    * Main Structure
    */
-
   sx:structure packet-discard-reporting {
     description
       "Container for packet discard reporting data.";
