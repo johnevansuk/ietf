@@ -154,7 +154,7 @@ c. Type can be traffic&#124;discards, where traffic accounts for packets success
 d. Layer can be l2&#124;l3
 
 ~~~~~~~~~~
-structure packet-discard-reporting:
+  structure packet-discard-reporting:
     +-- interface* [name]
        +-- name             string
        +-- ingress
@@ -163,18 +163,10 @@ structure packet-discard-reporting:
        |  |  |  +-- frames?   uint64
        |  |  |  +-- bytes?    uint64
        |  |  +-- l3
-       |  |  |  +-- v4
-       |  |  |  |  +-- packets?     uint64
-       |  |  |  |  +-- bytes?       uint64
-       |  |  |  |  +-- unicast
-       |  |  |  |  |  +-- packets?   uint64
-       |  |  |  |  |  +-- bytes?     uint64
-       |  |  |  |  +-- multicast
-       |  |  |  |     +-- packets?   uint64
-       |  |  |  |     +-- bytes?     uint64
-       |  |  |  +-- v6
-       |  |  |     +-- packets?     uint64
-       |  |  |     +-- bytes?       uint64
+       |  |  |  +-- address-family-stats* [address-family]
+       |  |  |     +-- address-family    iana-rt-types:address-family
+       |  |  |     +-- packets?          uint64
+       |  |  |     +-- bytes?            uint64
        |  |  |     +-- unicast
        |  |  |     |  +-- packets?   uint64
        |  |  |     |  +-- bytes?     uint64
@@ -191,18 +183,10 @@ structure packet-discard-reporting:
        |     |  +-- frames?   uint64
        |     |  +-- bytes?    uint64
        |     +-- l3
-       |     |  +-- v4
-       |     |  |  +-- packets?     uint64
-       |     |  |  +-- bytes?       uint64
-       |     |  |  +-- unicast
-       |     |  |  |  +-- packets?   uint64
-       |     |  |  |  +-- bytes?     uint64
-       |     |  |  +-- multicast
-       |     |  |     +-- packets?   uint64
-       |     |  |     +-- bytes?     uint64
-       |     |  +-- v6
-       |     |     +-- packets?     uint64
-       |     |     +-- bytes?       uint64
+       |     |  +-- address-family-stats* [address-family]
+       |     |     +-- address-family    iana-rt-types:address-family
+       |     |     +-- packets?          uint64
+       |     |     +-- bytes?            uint64
        |     |     +-- unicast
        |     |     |  +-- packets?   uint64
        |     |     |  +-- bytes?     uint64
@@ -254,18 +238,10 @@ structure packet-discard-reporting:
        |  |  |  +-- frames?   uint64
        |  |  |  +-- bytes?    uint64
        |  |  +-- l3
-       |  |  |  +-- v4
-       |  |  |  |  +-- packets?     uint64
-       |  |  |  |  +-- bytes?       uint64
-       |  |  |  |  +-- unicast
-       |  |  |  |  |  +-- packets?   uint64
-       |  |  |  |  |  +-- bytes?     uint64
-       |  |  |  |  +-- multicast
-       |  |  |  |     +-- packets?   uint64
-       |  |  |  |     +-- bytes?     uint64
-       |  |  |  +-- v6
-       |  |  |     +-- packets?     uint64
-       |  |  |     +-- bytes?       uint64
+       |  |  |  +-- address-family-stats* [address-family]
+       |  |  |     +-- address-family    iana-rt-types:address-family
+       |  |  |     +-- packets?          uint64
+       |  |  |     +-- bytes?            uint64
        |  |  |     +-- unicast
        |  |  |     |  +-- packets?   uint64
        |  |  |     |  +-- bytes?     uint64
@@ -282,18 +258,10 @@ structure packet-discard-reporting:
        |     |  +-- frames?   uint64
        |     |  +-- bytes?    uint64
        |     +-- l3
-       |     |  +-- v4
-       |     |  |  +-- packets?     uint64
-       |     |  |  +-- bytes?       uint64
-       |     |  |  +-- unicast
-       |     |  |  |  +-- packets?   uint64
-       |     |  |  |  +-- bytes?     uint64
-       |     |  |  +-- multicast
-       |     |  |     +-- packets?   uint64
-       |     |  |     +-- bytes?     uint64
-       |     |  +-- v6
-       |     |     +-- packets?     uint64
-       |     |     +-- bytes?       uint64
+       |     |  +-- address-family-stats* [address-family]
+       |     |     +-- address-family    iana-rt-types:address-family
+       |     |     +-- packets?          uint64
+       |     |     +-- bytes?            uint64
        |     |     +-- unicast
        |     |     |  +-- packets?   uint64
        |     |     |  +-- bytes?     uint64
