@@ -313,9 +313,9 @@ Requirements 1-10 relate to packets forwarded by the device, while requirement 1
 5. A frame accounted for at Layer 2 SHOULD NOT be accounted for at Layer 3 and vice versa.  An implementation MUST indicate which layers a discard is counted against.
 6. The aggregate Layer 2 and Layer 3 traffic and discard classes SHOULD account for all underlying packets received, transmitted, and discarded across all other classes.
 7. The aggregate Quality of Service (QoS) traffic and no buffer discard classes MUST account for all underlying packets received, transmitted, and discarded across all other classes.
-8. In addition to the Layer 2 and Layer 3 aggregate classes, an individual discarded packet MUST only account against a single error, policy, or no_buffer discard subclass.
+8. In addition to the Layer 2 and Layer 3 aggregate classes, an individual discarded packet MUST only account against a single error, policy, or no-buffer discard subclass.
 9. When there are multiple reasons for discarding a packet, the ordering of discard class reporting MUST be defined.
-10. If Diffserv {{RFC2475}} is not used, no_buffer discards SHOULD be reported as class0.
+10. If Diffserv {{RFC2475}} is not used, no-buffer discards SHOULD be reported as class0.
 11. Traffic to the device control plane has its own class, however, traffic from the device control plane SHOULD be accounted for in the same way as other egress traffic.  
 
 
@@ -333,32 +333,42 @@ A received unicast IPv6 packet discarded due to Hop Limit expiry would increment
 
 - interface/ingress/discards/l3/v6/unicast/packets  
 - interface/ingress/discards/l3/v6/unicast/bytes  
-- interface/ingress/discards/l3/rx/ttl_expired/packets  
+- interface/ingress/discards/l3/rx/ttl-expired/packets  
 
 An IPv4 packet discarded on egress due to no buffers would increment:
 
 - interface/egress/discards/l3/v4/unicast/packets  
 - interface/egress/discards/l3/v4/unicast/bytes  
-- interface/egress/discards/no_buffer/class_0/packets  
-- interface/egress/discards/no_buffer/class_0/bytes
+- interface/egress/discards/no-buffer/class_0/packets  
+- interface/egress/discards/no-buffer/class_0/bytes
 
 Example Signal-Cause-Mitigation Mapping {#mapping}
 =======================================
 {{ex-table}} gives an example discard signal-to-cause-to-mitigation action mapping.  Mappings for a specific network will be dependent on the definition of unintended packet loss for that network.
 
-|Discard class|	Cause|	Discard Rate|Discard Duration|Unintended?|Possible Actions|
-|:------------|:----| ----------- |:--------------|:---------:|:--------------|
-| ingress/discards/errors/l2/rx             | Upstream device or link error     | >Baseline  | O(1min)  | Y           | Take upstream link or device out-of-service|
-| ingress/discards/errors/l3/rx/ttl_expired | Tracert             | <=Baseline |          | N           | no action             |
-| ingress/discards/errors/l3/rx/ttl_expired | Convergence         | >Baseline  | O(1s)    | Y           | no action             |
-| ingress/discards/errors/l3/rx/ttl_expired | Routing loop        | >Baseline  | O(1min)  | Y           | Roll-back change      |
+~~~~~~~~~~
++-------------------------------------------+---------------------+------------+----------+-------------+-----------------------+
+| Discard class                             | Cause               | Discard    | Discard  | Unintended? | Possible actions      |
+|                                           |                     | rate       | duration |             |                       |
++-------------------------------------------+---------------------+------------+----------+-------------+-----------------------+
+| ingress/discards/errors/l2/rx             | Upstream device     | >Baseline  | O(1min)  | Y           | Take upstream link or |
+|                                           | or link error       |            |          |             | device out-of-service |
+| ingress/discards/errors/l3/rx/ttl-expired | Tracert             | <=Baseline |          | N           | no action             |
+| ingress/discards/errors/l3/rx/ttl-expired | Convergence         | >Baseline  | O(1s)    | Y           | no action             |
+| ingress/discards/errors/l3/rx/ttl-expired | Routing loop        | >Baseline  | O(1min)  | Y           | Roll-back change      |
 | .*/policy/.*                              | Policy              |            |          | N           | no action             |
-| ingress/discards/errors/l3/no_route       | Convergence         | >Baseline  | O(1s)    | Y           | no action             |
-| ingress/discards/errors/l3/no_route       | Config error        | >Baseline  | O(1min)  | Y           | Roll-back change      |
-| ingress/discards/errors/l3/no_route       | Invalid destination | >Baseline  | O(10min) | N           | Escalate to operator  |
-| ingress/discards/errors/local             | Device errors       | >Baseline  | O(1min)  | Y           | Take device/out-of-service|
-| egress/discards/no_buffer                 | Congestion          | <=Baseline |          | N           | no action             |
-| egress/discards/no_buffer                 | Congestion          | >Baseline  | O(1min)  | Y           | Bring capacity back into service or move traffic |
+| ingress/discards/errors/l3/no-route       | Convergence         | >Baseline  | O(1s)    | Y           | no action             |
+| ingress/discards/errors/l3/no-route       | Config error        | >Baseline  | O(1min)  | Y           | Roll-back change      |
+| ingress/discards/errors/l3/no-route       | Invalid destination | >Baseline  | O(10min) | N           | Escalate to operator  |
+| ingress/discards/errors/local             | Device errors       | >Baseline  | O(1min)  | Y           | Take device           |
+|                                           |                     |            |          |             | out-of-service        |
+| egress/discards/no-buffer                 | Congestion          | <=Baseline |          | N           | no action             |
+| egress/discards/no-buffer                 | Congestion          | >Baseline  | O(1min)  | Y           | Bring capacity back   |
+|                                           |                     |            |          |             | into service or move  |
+|                                           |                     |            |          |             | traffic               |
++-------------------------------------------+---------------------+------------+----------+-------------+-----------------------+
+
+~~~~~~~~~~
 {: #ex-table title="Example Signal-Cause-Mitigation Mapping"}
 
 The 'Baseline' in the 'Discard Rate' column is both discard class and network dependent.
@@ -1073,12 +1083,12 @@ Where do packets get dropped?
   Intended                               policy/acl                  policy/acl
   Discards:                              policy/policer              policy/policer
                                          policy/urpf
-                                         policy/null_route
+                                         policy/null-route
 
-Unintended                 error/rx/l2   error/l3/rx   no_buffer     error/l3/tx
+Unintended                 error/rx/l2   error/l3/rx   no-buffer     error/l3/tx
   Discards:                              error/local
-                                         error/l3/no_route
-                                         error/l3/rx/ttl_expired
+                                         error/l3/no-route
+                                         error/l3/rx/ttl-expired
 
 ~~~~~~~~~~
 {: #ex-drop title="Example of where packets get dropped"}
@@ -1095,16 +1105,16 @@ discards/error/l2/rx/:
 discards/error/l3/rx/:  
 : These are discards which occur due to errors in the received packet, indicating an upstream problem rather than an issue with the device dropping the errored packets. There are multiple sub-classes, including header checksum errors, MTU exceeded, and invalid packet, i.e. due to incorrect version, incorrect header length, or invalid options.
 
-discards/error/l3/rx/ttl_expired:  
+discards/error/l3/rx/ttl-expired:  
 : There can be multiple causes for TTL-expired (or Hop limit exceeded) discards: i) trace-route; ii) TTL (Hop limit) set too low by the end-system; iii) routing loops. 
 
-discards/error/l3/no_route/:  
+discards/error/l3/no-route/:  
 : Discards occur due to a packet not matching any route.
 
 discards/error/local/:  
 : A device may discard packets within its switching pipeline due to internal errors, such as parity errors. Any errored discards not explicitly assigned to the above classes are also accounted for here.
 
-discards/no_buffer/:  
+discards/no-buffer/:  
 : Discards occur due to no available buffer to enqueue the packet. These can be tail-drop discards or due to an active queue management algorithm, such as RED {{RED93}} or CODEL {{RFC8289}}.
 
 
@@ -1116,7 +1126,7 @@ This appendix captures the authors' experience gained from implementing and appl
 2. There are many possible ways to define the discard classification tree.  For example, we could have used a multi-rooted tree, rooted in each protocol.  Instead, we opted to define a tree where protocol discards and causal discards are accounted for orthogonally.  This decision reduces the number of combinations of classes and has proven sufficient for determining mitigation actions.
 3. NoBuffer discards can be realized differently with different memory architectures. Whether a NoBuffer discard is attributed to ingress or egress can differ accordingly.  For successful auto-mitigation, discards due to egress interface congestion should be reported on egress, while discards due to device-level congestion (e.g. due to exceeding the device forwarding rate) should be reported on ingress.
 4. Platforms often account for the number of packets discarded where the TTL has expired (or Hop Limit exceeded), and the device CPU has returned an ICMP Time Exceeded message.  There is typically a policer applied to limit the number of packets sent to the device CPU, however, which implicitly limits the rate of TTL discards that are processed.  One method to account for all packet discards due to TTL expired, even those that are dropped by a policer when being forwarded to the CPU, is to use accounting of all ingress packets received with TTL=1.
-5. Where no route discards are implemented with a default null route, separate discard accounting is required for any explicit null routes configured, in order to differentiate between interface/ingress/discards/policy/null_route/packets and interface/ingress/discards/errors/no_route/packets.
+5. Where no route discards are implemented with a default null route, separate discard accounting is required for any explicit null routes configured, in order to differentiate between interface/ingress/discards/policy/null-route/packets and interface/ingress/discards/errors/no-route/packets.
 6. It is useful to account separately for transit packets discarded by ACLs or policers, and packets discarded by ACLs or policers which limit the number of packets to the device control plane.
 7. It is not possible to identify a configuration error - e.g., when intended discards are unintended - with device packet loss metrics alone.  For example, additional context is needed to determine if ACL discards are intended or due to a misconfigured ACL, i.e., with configuration validation before deployment or by detecting a significant change in ACL discards after a configuration change compared to before.
 8. Where traffic byte counters need to be 64-bit, packet and discard counters that increase at a lower rate may be encoded in fewer bits, e.g., 32-bit.
