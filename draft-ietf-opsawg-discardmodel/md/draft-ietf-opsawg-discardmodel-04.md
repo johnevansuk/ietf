@@ -346,13 +346,9 @@ Example Signal-Cause-Mitigation Mapping {#mapping}
 =======================================
 {{ex-table}} gives an example discard signal-to-cause-to-mitigation action mapping.  Mappings for a specific network will be dependent on the definition of unintended packet loss for that network.
 
-~~~~~~~~~~
-+-------------------------------------------+---------------------+------------+----------+-------------+-----------------------+
-| Discard class                             | Cause               | Discard    | Discard  | Unintended? | Possible actions      |
-|                                           |                     | rate       | duration |             |                       |
-+-------------------------------------------+---------------------+------------+----------+-------------+-----------------------+
-| ingress/discards/errors/l2/rx             | Upstream device     | >Baseline  | O(1min)  | Y           | Take upstream link or |
-|                                           | or link error       |            |          |             | device out-of-service |
+|Discard class|	Cause|	Discard Rate|Discard Duration|Unintended?|Possible Actions|
+|:------------|:----| ----------- |:--------------|:---------:|:--------------|
+| ingress/discards/errors/l2/rx             | Upstream device or link error     | >Baseline  | O(1min)  | Y           | Take upstream link or device out-of-service|
 | ingress/discards/errors/l3/rx/ttl_expired | Tracert             | <=Baseline |          | N           | no action             |
 | ingress/discards/errors/l3/rx/ttl_expired | Convergence         | >Baseline  | O(1s)    | Y           | no action             |
 | ingress/discards/errors/l3/rx/ttl_expired | Routing loop        | >Baseline  | O(1min)  | Y           | Roll-back change      |
@@ -360,15 +356,9 @@ Example Signal-Cause-Mitigation Mapping {#mapping}
 | ingress/discards/errors/l3/no_route       | Convergence         | >Baseline  | O(1s)    | Y           | no action             |
 | ingress/discards/errors/l3/no_route       | Config error        | >Baseline  | O(1min)  | Y           | Roll-back change      |
 | ingress/discards/errors/l3/no_route       | Invalid destination | >Baseline  | O(10min) | N           | Escalate to operator  |
-| ingress/discards/errors/local             | Device errors       | >Baseline  | O(1min)  | Y           | Take device           |
-|                                           |                     |            |          |             | out-of-service        |
+| ingress/discards/errors/local             | Device errors       | >Baseline  | O(1min)  | Y           | Take device/out-of-service|
 | egress/discards/no_buffer                 | Congestion          | <=Baseline |          | N           | no action             |
-| egress/discards/no_buffer                 | Congestion          | >Baseline  | O(1min)  | Y           | Bring capacity back   |
-|                                           |                     |            |          |             | into service or move  |
-|                                           |                     |            |          |             | traffic               |
-+-------------------------------------------+---------------------+------------+----------+-------------+-----------------------+
-
-~~~~~~~~~~
+| egress/discards/no_buffer                 | Congestion          | >Baseline  | O(1min)  | Y           | Bring capacity back into service or move traffic |
 {: #ex-table title="Example Signal-Cause-Mitigation Mapping"}
 
 The 'Baseline' in the 'Discard Rate' column is both discard class and network dependent.
