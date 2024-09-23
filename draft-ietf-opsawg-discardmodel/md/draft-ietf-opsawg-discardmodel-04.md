@@ -91,7 +91,7 @@ Hence, this document defines an information model for packet loss reporting, aim
 
 The specific implementations of this information model (i.e., protocols and associated data models) are outside the scope of this document.  The scope of this document is limited to reporting packet loss at Layer 3 and frames discarded at Layer 2, although the information model might be extended in future to cover segments dropped at Layer 4. This document considers only the signals that may trigger automated mitigation plans and not how they are defined or executed.
 
-{{problem}} describes the problem to be solved. {{model}} describes the information model and requirements with a set of examples.  {{mapping}} provides examples of discard signal-to-cause-to-auto-mitigation action mapping.  {{module}} presents the information model as an abstract data structure in YANG, in accordance with {{!RFC8791}}.  {{#wheredropped}} provides an example of where packets may be discarded in a device.  {{#experience}}  details the authors' experience from implementing this model.
+{{problem}} describes the problem to be solved. {{model}} describes the information model and requirements with a set of examples.  {{mapping}} provides examples of discard signal-to-cause-to-auto-mitigation action mapping.  {{module}} presents the information model as an abstract data structure in YANG, in accordance with {{!RFC8791}}.  Appendix A provides an example of where packets may be discarded in a device.  Appendix B details the authors' experience from implementing this model.
 
 Terminology {#terminology}
 ===========
