@@ -99,7 +99,13 @@ Terminology {#terminology}
 
 {::boilerplate bcp14-tagged}
 
-A packet discard is considered to be any packet dropped by a device, which may be intentional (i.e. due to a configured policy, e.g. such as an Access Control List (ACL)) or unintentional (i.e. packets dropped in error).
+A packet discard is any packet dropped by a device, whether intentionally or unintentionally.
+
+Intended packet loss refers to packet discards that occur due to deliberate network policies or configurations—such as Access Control Lists (ACLs) or policing mechanisms—designed to enforce security or quality of service.
+
+Unintended packet loss refers to packet discards resulting from network errors, misconfigurations, hardware failures, or other anomalies not aligned with the network operator's intended behavior. These losses negatively impact network performance and service delivery.
+
+For example, intended packet loss occurs when packets are dropped because they match a security policy denying certain traffic types. Unintended packet loss might happen due to a faulty interface causing corrupted packets, leading to their discard.
 
 The meanings of the symbols in the YANG tree diagrams are defined in {{?RFC8340}}.
 
