@@ -108,8 +108,6 @@ For example, intended packet loss occurs when packets are dropped because they m
 
 The meanings of the symbols in the YANG tree diagrams are defined in {{?RFC8340}}.
 
-Symbol "&#124;" is used to denote "or".
-
 Problem Statement   {#problem}
 =================
 At the highest-level, unintended packet loss is the discarding of packets that the network operator otherwise intends to deliver, i.e. which indicates an error state.  There are many possible reasons for unintended packet loss, including: erroring links may corrupt packets in transit; incorrect routing tables may result in packets being dropped because they do not match a valid route; configuration errors may result in a valid packet incorrectly matching an Access Control List (ACL) and being dropped.  While the specific definition of unintended packet loss is network-dependent, for any network there are a small set of potential actions that can be taken to minimise customer impact by automatically mitigating unintended packet loss:
@@ -150,9 +148,7 @@ This document uses YANG to represent the information model for three main reason
 
 Structure {#structure}
 ---------
-The classification scheme is structured as a hierarchical tree that follows the structure: component/direction/type/layer/sub-type/sub-sub-type/.../metric.
-
-The elements of the tree are defined as follows:
+The classification scheme is structured as a hierarchical tree that follows the structure: component/direction/type/layer/sub-type/sub-sub-type/.../metric.  The elements of the tree are defined as follows:
 
 - Component: Specifies where in the device the discard is accounted. It can be:
   - interface: Discards associated with a specific network interface.
@@ -173,7 +169,7 @@ The elements of the tree are defined as follows:
 
 - Sub-Type:
   - For discards:
-    - errors: Discards due to errors in processing packets (e.g., checksum errors).
+    - errors: Discards due to errors in processing packets or frames (e.g., checksum errors).
     - policy: Discards due to policy enforcement (e.g., ACL drops).
     - no-buffer: Discards due to lack of buffer space (e.g., congestion-related drops).
 
