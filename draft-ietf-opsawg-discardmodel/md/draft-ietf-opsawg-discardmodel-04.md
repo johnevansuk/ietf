@@ -150,13 +150,34 @@ This document uses YANG to represent the information model for three main reason
 
 Structure {#structure}
 ---------
+The classification scheme is structured as a hierarchical tree that follows the structure: component/direction/type/layer/sub-type/sub-sub-type/.../metric.
 
-The classification scheme is defined as a tree that follows the structure: component/direction/type/layer/sub-type/sub-sub-type/.../metric, where:
+The elements of the tree are defined as follows:
 
-a. Component can be interface&#124;device&#124;control-plane&#124;flow  
-b. Direction can be ingress&#124;egress  
-c. Type can be traffic&#124;discards, where traffic accounts for packets successfully received or transmitted, and discards accounts for packet drops  
-d. Layer can be l2&#124;l3
+- Component: Specifies where in the device the discard is accounted. It can be:
+  - interface: Discards associated with a specific network interface.
+  - control-plane: Discards related to the device's control plane.
+  - flow: Discards associated with a specific traffic flow.
+
+- Direction:
+  - ingress: Discards occurring on incoming packets or frames.
+  - egress: Discards occurring on outgoing packets or frames.
+
+- Type:
+  - traffic: Counters for successfully received or transmitted packets or frames.
+  - discards: Counters for packets or frames that were dropped.
+
+- Layer:
+  - l2: Layer 2 discards, such as frames with CRC errors.
+  - l3: Layer 3 discards, such as IP packets with invalid headers.
+
+- Sub-Type:
+  - For discards:
+    - errors: Discards due to errors in processing packets (e.g., checksum errors).
+    - policy: Discards due to policy enforcement (e.g., ACL drops).
+    - no-buffer: Discards due to lack of buffer space (e.g., congestion-related drops).
+
+Each sub-type may further contain specific reasons for discards, providing more detailed insight into the cause of packet loss.
 
 ~~~~~~~~~~
   structure packet-discard-reporting:
@@ -316,7 +337,7 @@ Requirements 1-10 relate to packets forwarded by the device, while requirement 1
 3. An individual frame MUST only be accounted for by either the Layer 2 traffic class or the Layer 2 discard classes within a single direction, i.e., ingress or egress.
 4. An individual packet MUST only be accounted for by either the Layer 3 traffic class or the Layer 3 discard classes within a single direction, i.e., ingress or egress.
 5. A frame accounted for at Layer 2 SHOULD NOT be accounted for at Layer 3 and vice versa.  An implementation MUST indicate which layers a discard is counted against.
-6. The aggregate Layer 2 and Layer 3 traffic and discard classes SHOULD account for all underlying packets received, transmitted, and discarded across all other classes.
+6. The aggregate Layer 2 and Layer 3 traffic and discard classes SHOULD account for all underlying frames or packets received, transmitted, and discarded across all other classes.
 7. The aggregate Quality of Service (QoS) traffic and no buffer discard classes MUST account for all underlying packets received, transmitted, and discarded across all other classes.
 8. In addition to the Layer 2 and Layer 3 aggregate classes, an individual discarded packet MUST only account against a single error, policy, or no-buffer discard subclass.
 9. When there are multiple reasons for discarding a packet, the ordering of discard class reporting MUST be defined.
