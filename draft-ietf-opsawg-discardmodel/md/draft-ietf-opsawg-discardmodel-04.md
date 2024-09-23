@@ -710,12 +710,12 @@ module ietf-packet-discard-reporting {
     leaf invalid-sid {
       type uint32;
       description
-        "Specifies the number of packets with an invalid SID.";
+        "Specifies the number of packets with an invalid Segment Routing (SR) SID.";
     }
     leaf invalid-label {
       type uint32;
       description
-        "Specifies the number of packets with an invalid label.";
+        "Specifies the number of packets with an invalid MPLS label.";
     }
   }
 
