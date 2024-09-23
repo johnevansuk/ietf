@@ -108,8 +108,6 @@ For example, intended packet loss occurs when packets are dropped because they m
 
 The meanings of the symbols in the YANG tree diagrams are defined in {{?RFC8340}}.
 
-Symbol "&#124;" is used to denote "or".
-
 Problem Statement   {#problem}
 =================
 At the highest-level, unintended packet loss is the discarding of packets that the network operator otherwise intends to deliver, i.e. which indicates an error state.  There are many possible reasons for unintended packet loss, including: erroring links may corrupt packets in transit; incorrect routing tables may result in packets being dropped because they do not match a valid route; configuration errors may result in a valid packet incorrectly matching an Access Control List (ACL) and being dropped.  While the specific definition of unintended packet loss is network-dependent, for any network there are a small set of potential actions that can be taken to minimise customer impact by automatically mitigating unintended packet loss:
@@ -453,7 +451,7 @@ module ietf-packet-discard-reporting {
 
   grouping basic-packets-64 {
     description
-      "Basic grouping with 64-bit packets";
+      "Basic grouping with 64-bit packet counters.";
     leaf packets {
       type uint64;
       description
@@ -463,7 +461,7 @@ module ietf-packet-discard-reporting {
 
   grouping basic-packets-bytes-64 {
     description
-      "Basic grouping with 64-bit packets and bytes";
+      "Basic grouping with 64-bit packet and byte counters.";
     uses basic-packets-64;
     leaf bytes {
       type uint64;
@@ -474,7 +472,7 @@ module ietf-packet-discard-reporting {
 
   grouping basic-frames-64 {
     description
-      "Basic grouping with 64-bit frames";
+      "Basic grouping with 64-bit frame counters.";
     leaf frames {
       type uint64;
       description
@@ -484,7 +482,7 @@ module ietf-packet-discard-reporting {
 
   grouping basic-frames-bytes-64 {
     description
-      "Basic grouping with 64-bit packets and bytes";
+      "Basic grouping with 64-bit frame and byte counters.";
     uses basic-frames-64;
     leaf bytes {
       type uint64;
@@ -495,7 +493,7 @@ module ietf-packet-discard-reporting {
 
   grouping basic-packets-32 {
     description
-      "Basic grouping with 32-bit packets";
+      "Basic grouping with 32-bit packet counters.";
     leaf packets {
       type uint32;
       description
@@ -505,7 +503,7 @@ module ietf-packet-discard-reporting {
 
   grouping basic-packets-bytes-32 {
     description
-      "Basic grouping with 32-bit packets and bytes";
+      "Basic grouping with 32-bit packet and byte counters.";
     uses basic-packets-32;
     leaf bytes {
       type uint32;
@@ -516,7 +514,7 @@ module ietf-packet-discard-reporting {
 
   grouping basic-frames-32 {
     description
-      "Basic grouping with 32-bit frames";
+      "Basic grouping with 32-bit frame counters.";
     leaf frames {
       type uint32;
       description
@@ -526,7 +524,7 @@ module ietf-packet-discard-reporting {
 
   grouping basic-frames-bytes-32 {
     description
-      "Basic grouping with 32-bit packets and bytes";
+      "Basic grouping with 32-bit frame and byte counters.";
     uses basic-frames-32;
     leaf bytes {
       type uint32;
@@ -994,7 +992,7 @@ module ietf-packet-discard-reporting {
   }
 
   /*
-   * Main Structure
+   * Main structure definition
    */
 
   sx:structure packet-discard-reporting {
@@ -1014,6 +1012,8 @@ module ietf-packet-discard-reporting {
     }
   }
 }
+
+
 <CODE ENDS>
 ~~~~~~~~~~
 
