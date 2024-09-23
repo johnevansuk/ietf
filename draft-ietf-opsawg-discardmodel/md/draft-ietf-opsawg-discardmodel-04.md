@@ -85,7 +85,7 @@ Introduction        {#introduction}
 ============
 To effectively automate network operations, a network operator must be able to detect anomalous packet loss, determine its root cause, and then apply appropriate actions to mitigate any customer-impacting issues.  Some packet loss is normal or intended in IP/MPLS networks, however.  Therefore, precise classification of packet loss signals is crucial both to ensure that anomalous packet loss is easily detected and that the right action or sequence of actions is taken to mitigate the impact, as taking the wrong action can make problems worse.
 
-Existing metrics for reporting packet loss, such as ifInDiscards, ifOutDiscards, ifInErrors, and ifOutErrors defined in {{?RFC1213}}, are insufficient for several reasons. First, they lack precision; for instance, ifInDiscards aggregates all discarded inbound packets without specifying the cause, making it challenging to distinguish between intended and unintended discards. Second, these definitions are ambiguous, leading to inconsistent vendor implementations. In some implementations, ifInErrors accounts only for errored packets that are dropped, while in others, it includes all errored packets, whether they are dropped or not. Many implementations support more discard metrics than these; however, they have been inconsistently implemented due to the lack of a standardized classification scheme and clear semantics for packet loss reporting. For example, {{?RFC7270}} provides support for reporting discards per flow in IPFIX using forwardingStatus; however, the defined drop reason codes also lack sufficient clarity (e.g., the "For us" reason code) to support automated root cause analysis and impact mitigation.
+Existing metrics for reporting packet loss, such as ifInDiscards, ifOutDiscards, ifInErrors, and ifOutErrors defined in {{?RFC1213}}, are insufficient for several reasons. First, they lack precision; for instance, ifInDiscards aggregates all discarded inbound packets without specifying the cause, making it challenging to distinguish between intended and unintended discards. Second, these definitions are ambiguous, leading to inconsistent vendor implementations. In some implementations, ifInErrors accounts only for errored packets that are dropped, while in others, it includes all errored packets, whether they are dropped or not. Many implementations support more discard metrics than these; however, they have been inconsistently implemented due to the lack of a standardised classification scheme and clear semantics for packet loss reporting. For example, {{?RFC7270}} provides support for reporting discards per flow in IPFIX using forwardingStatus; however, the defined drop reason codes also lack sufficient clarity (e.g., the "For us" reason code) to support automated root cause analysis and impact mitigation.
 
 Hence, this document defines an information model for packet loss reporting, aiming to address these issues by presenting a packet loss classification scheme that can enable automated mitigation of unintended packet loss.  In line with {{?RFC3444}}, this information model remains independent of specific implementations or transport protocols.
 
@@ -148,13 +148,32 @@ This document uses YANG to represent the information model for three main reason
 
 Structure {#structure}
 ---------
+The classification scheme is structured as a hierarchical tree that follows the structure: component/direction/type/layer/sub-type/sub-sub-type/.../metric.  The elements of the tree are defined as follows:
 
-The classification scheme is defined as a tree that follows the structure: component/direction/type/layer/sub-type/sub-sub-type/.../metric, where:
+- Component: Specifies where in the device the discard is accounted. It can be:
+  - interface: Discards associated with a specific network interface.
+  - control-plane: Discards related to the device's control plane.
+  - flow: Discards associated with a specific traffic flow.
 
-a. Component can be interface&#124;device&#124;control-plane&#124;flow  
-b. Direction can be ingress&#124;egress  
-c. Type can be traffic&#124;discards, where traffic accounts for packets successfully received or transmitted, and discards accounts for packet drops  
-d. Layer can be l2&#124;l3
+- Direction:
+  - ingress: Discards occurring on incoming packets or frames.
+  - egress: Discards occurring on outgoing packets or frames.
+
+- Type:
+  - traffic: Counters for successfully received or transmitted packets or frames.
+  - discards: Counters for packets or frames that were dropped.
+
+- Layer:
+  - l2: Layer 2 discards, such as frames with CRC errors.
+  - l3: Layer 3 discards, such as IP packets with invalid headers.
+
+- Sub-Type:
+  - For discards:
+    - errors: Discards due to errors in processing packets or frames (e.g., checksum errors).
+    - policy: Discards due to policy enforcement (e.g., ACL drops).
+    - no-buffer: Discards due to lack of buffer space (e.g., congestion-related drops).
+
+Each sub-type may further contain specific reasons for discards, providing more detailed insight into the cause of packet loss.
 
 ~~~~~~~~~~
   structure packet-discard-reporting:
@@ -314,7 +333,7 @@ Requirements 1-10 relate to packets forwarded by the device, while requirement 1
 3. An individual frame MUST only be accounted for by either the Layer 2 traffic class or the Layer 2 discard classes within a single direction, i.e., ingress or egress.
 4. An individual packet MUST only be accounted for by either the Layer 3 traffic class or the Layer 3 discard classes within a single direction, i.e., ingress or egress.
 5. A frame accounted for at Layer 2 SHOULD NOT be accounted for at Layer 3 and vice versa.  An implementation MUST indicate which layers a discard is counted against.
-6. The aggregate Layer 2 and Layer 3 traffic and discard classes SHOULD account for all underlying packets received, transmitted, and discarded across all other classes.
+6. The aggregate Layer 2 and Layer 3 traffic and discard classes SHOULD account for all underlying frames or packets received, transmitted, and discarded across all other classes.
 7. The aggregate Quality of Service (QoS) traffic and no buffer discard classes MUST account for all underlying packets received, transmitted, and discarded across all other classes.
 8. In addition to the Layer 2 and Layer 3 aggregate classes, an individual discarded packet MUST only account against a single error, policy, or no-buffer discard subclass.
 9. When there are multiple reasons for discarding a packet, the ordering of discard class reporting MUST be defined.
@@ -1098,7 +1117,7 @@ Unintended                 error/rx/l2   error/l3/rx   no-buffer     error/l3/tx
 ~~~~~~~~~~
 {: #ex-drop title="Example of where packets get dropped"}
 
-Discard Class Descriptions {#class_descriptions}
+Discard Class Descriptions
 --------------------------
 
 discards/policy/:  
@@ -1123,7 +1142,7 @@ discards/no-buffer/:
 : Discards occur due to no available buffer to enqueue the packet. These can be tail-drop discards or due to an active queue management algorithm, such as RED {{RED93}} or CODEL {{RFC8289}}.
 
 
-Implementation Experience {#experience}
+Implementation Experience
 =========================
 This appendix captures the authors' experience gained from implementing and applying this information model across multiple vendors' platforms, as guidance for future implementers.
 
