@@ -1119,7 +1119,7 @@ Unintended                 error/rx/l2   error/l3/rx   no-buffer     error/l3/tx
 ~~~~~~~~~~
 {: #ex-drop title="Example of where packets get dropped"}
 
-Discard Class Descriptions {#class_descriptions}
+Discard Class Descriptions
 --------------------------
 
 discards/policy/:  
@@ -1144,7 +1144,7 @@ discards/no-buffer/:
 : Discards occur due to no available buffer to enqueue the packet. These can be tail-drop discards or due to an active queue management algorithm, such as RED {{RED93}} or CODEL {{RFC8289}}.
 
 
-Implementation Experience {#experience}
+Implementation Experience
 =========================
 This appendix captures the authors' experience gained from implementing and applying this information model across multiple vendors' platforms, as guidance for future implementers.
 
