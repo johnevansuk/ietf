@@ -77,7 +77,7 @@ informative:
      
 --- abstract
 
-The primary function of a network is to transport packets and deliver them according to service level objectives.  Understanding both where and why packet loss occurs within a network is essential for effective network operation.  Device-reported packet loss provides the most direct signal for network operations to identify the customer impact resulting from unintended packet loss.  This document defines an information model for packet loss reporting, which classifies these signals to enable automated network mitigation of unintended packet loss.
+The primary function of a network is to transport and deliver packets according to service level objectives.  Understanding both where and why packet loss occurs within a network is essential for effective network operation.  Device-reported packet loss provides the most direct signal for network operations to identify the customer impact resulting from unintended packet loss.  This document defines an information model for packet loss reporting, which classifies these signals to enable automated network mitigation of unintended packet loss.
 
 --- middle
 
