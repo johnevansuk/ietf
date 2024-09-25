@@ -1,8 +1,8 @@
 ---
 title: An Information Model for Packet Discard Reporting
 abbrev: IM for Packet Discard Reporting
-docname: draft-ietf-opsawg-discardmodel-03
-date: 2024-08-08
+docname: draft-ietf-opsawg-discardmodel-04
+date: 2024-09-19
 category: std
 
 ipr: trust200902
@@ -77,43 +77,46 @@ informative:
      
 --- abstract
 
-The primary function of a network is to transport packets and deliver them according to a service level objective.  Understanding both where and why packet loss occurs within a network is essential for effective network operation.  Device-reported packet loss is the most direct signal for network operations to identify customer impact resulting from unintended packet loss.  This document defines an information model for packet loss reporting, which classifies these signals to enable automated network mitigation of unintended packet loss.
+The primary function of a network is to transport and deliver packets according to service level objectives.  Understanding both where and why packet loss occurs within a network is essential for effective network operation.  Device-reported packet loss provides the most direct signal for network operations to identify the customer impact resulting from unintended packet loss.  This document defines an information model for packet loss reporting, which classifies these signals to enable automated network mitigation of unintended packet loss.
 
 --- middle
 
 Introduction        {#introduction}
 ============
+To effectively automate network operations, a network operator must be able to detect anomalous packet loss, determine its root cause, and then apply appropriate actions to mitigate any customer-impacting issues.  Some packet loss is normal or intended in IP/MPLS networks, however.  Therefore, precise classification of packet loss signals is crucial both to ensure that anomalous packet loss is easily detected and that the right action or sequence of actions is taken to mitigate the impact, as taking the wrong action can make problems worse.
 
-In automating network operations, a network operator needs to be able to detect anomalous packet loss, diagnose or root cause the loss, and then apply one of a set of possible actions to mitigate customer-impacting packet loss.  Some packet loss is normal or intended in IP/MPLS networks, however. Hence, precise classification of packet loss signals is crucial both to ensure that anomalous packet loss is easily detected and that the right action or sequence of actions are taken to mitigate the impact, as taking the wrong action can make problems worse.
+Existing metrics for reporting packet loss, such as ifInDiscards, ifOutDiscards, ifInErrors, and ifOutErrors defined in {{?RFC1213}}, are insufficient for several reasons. First, they lack precision; for instance, ifInDiscards aggregates all discarded inbound packets without specifying the cause, making it challenging to distinguish between intended and unintended discards. Second, these definitions are ambiguous, leading to inconsistent vendor implementations. For example, in some implementations ifInErrors accounts only for errored packets that are dropped, while in others, it includes all errored packets, whether they are dropped or not. Many implementations support more discard metrics than these, however, they have been inconsistently implemented due to the lack of a standardised classification scheme and clear semantics for packet loss reporting. For example, {{?RFC7270}} provides support for reporting discards per flow in IPFIX using forwardingStatus, however, the defined drop reason codes also lack sufficient clarity (e.g., the "For us" reason code) to support automated root cause analysis and impact mitigation.
 
-The existing metrics for reporting packet loss, as defined in {{?RFC1213}} (namely ifInDiscards, ifOutDiscards, ifInErrors, and ifOutErrors) or {{?RFC9343}} (mainl in-discards and out-discards), do not provide sufficient precision to automatically identify the cause of the loss and mitigate the impact.  From a network operator's perspective, ifInDiscards can represent both intended packet loss (e.g., packets discarded due to policy) and unintended packet loss (e.g., packets dropped in error). Furthermore, these definitions are ambiguous, as vendors can and have implemented them differently.  In some implementations, ifInErrors accounts only for errored packets that are dropped, while in others, it accounts for all errored packets, whether they are dropped or not.  Many implementations support more discard metrics than these; where they do, they have been inconsistently implemented due to the lack of a standardised classification scheme and clear semantics for packet loss reporting. {{?RFC7270}} provides support for reporting discards per flow in IPFIX using forwardingStatus, however, the defined drop reason codes also lack sufficient clarity (e.g., "For us" Reason Code) to support automated root cause analysis and mitigation of impact.
+Hence, this document presents an information model for packet loss reporting, introducing a classification scheme to facilitate automated mitigation of unintended packet loss. The model addresses the aforementioned issues while remaining protocol-agnostic and implementation-independent, in accordance with {{?RFC3444}}.
 
-Hence, this document defines an information model for packet loss reporting, aiming to address these issues by presenting a packet loss classification scheme that can enable automated mitigation of unintended packet loss.  Consistent with {{?RFC3444}}, this information model is independent of any specific implementations or protocols used to transport the data.  There are multiple ways that this information model could be implemented (i.e., protocols and associated data models), including SNMP {{?RFC1157}}, NETCONF {{?RFC6241}}, RESTCONF {{?RFC8040}}, and IPFIX {{?RFC7011}}. However, these mechanisms are out of the scope of this document.  The scope of this document is limited to reporting packet loss at Layer 3 and frames discarded at Layer 2, although the information model might be extended in future to cover segments dropped at Layer 4. 
+The specific implementations of this information model (i.e., protocols and associated data models) are outside the scope of this document.  The scope of this document is limited to reporting packet loss at Layer 3 and frames discarded at Layer 2, although the information model might be extended in future to cover segments dropped at Layer 4. This document considers only the signals that may trigger automated mitigation plans and not how they are defined or executed.
 
-{{problem}} describes the problem to be solved. Section 4 describes the information model and requirements with a set of examples.  Section 5 provides examples of discard signal-to-cause-to-auto-mitigation action mapping.  Section 6 presents the information model as an abstract data structure in YANG, in accordance with {{!RFC8791}}.  Appendix A provides an example of where packets may be discarded in a device.  Appendix B details the authors' experience from implementing this model.
-
-This document considers only the signals that may trigger automated mitigation plans and not how they are defined or executed.
+{{problem}} describes the problem to be solved. {{model}} describes the information model and requirements with a set of examples.  {{mapping}} provides examples of discard signal-to-cause-to-auto-mitigation action mapping.  {{module}} presents the information model as an abstract data structure in YANG, in accordance with {{!RFC8791}}.  Appendix A provides an example of where packets may be discarded in a device.  Appendix B details the authors' experience from implementing this model.
 
 Terminology {#terminology}
 ===========
 
 {::boilerplate bcp14-tagged}
 
-A packet discard is considered to be any packet dropped by a device, which may be intentional (i.e. due to a configured policy, e.g. such as an Access Control List (ACL)) or unintentional (i.e. packets dropped in error).
+A packet discard is any packet dropped by a device, whether intentionally or unintentionally.
+
+Intended packet loss refers to packet discards that occur due to deliberate network policies or configurations—such as Access Control Lists (ACLs) or policing mechanisms—designed to enforce security or quality of service.
+
+Unintended packet loss refers to packet discards resulting from network errors, misconfigurations, hardware failures, or other anomalies not aligned with the network operator's intended behaviour. These losses negatively impact network performance and service delivery.
+
+For example, intended packet loss occurs when packets are dropped because they match a security policy denying certain traffic types. Unintended packet loss might happen due to a faulty interface causing corrupted packets, leading to their discard.
 
 The meanings of the symbols in the YANG tree diagrams are defined in {{?RFC8340}}.
 
-Symbol "&#124;" is used to denote "or".
-
 Problem Statement   {#problem}
 =================
-At the highest-level, unintended packet loss is the discarding of packets that the network operator otherwise intends to deliver, i.e. which indicates an error state.  There are many possible reasons for unintended packet loss, including: erroring links may corrupt packets in transit; incorrect routing tables may result in packets being dropped because they do not match a valid route; configuration errors may result in a valid packet incorrectly matching an Access Control List (ACL) and being dropped.  Whilst the specific definition of unintended packet loss is network dependent, for any network there are a small set of potential actions that can be taken to minimise customer impact by auto-mitigating unintended packet loss:
+At the highest-level, unintended packet loss is the discarding of packets that the network operator otherwise intends to deliver, i.e. which indicates an error state.  There are many possible reasons for unintended packet loss, including: erroring links may corrupt packets in transit; incorrect routing tables may result in packets being dropped because they do not match a valid route; configuration errors may result in a valid packet incorrectly matching an Access Control List (ACL) and being dropped.  While the specific definition of unintended packet loss is network-dependent, for any network there are a small set of potential actions that can be taken to minimise customer impact by automatically mitigating unintended packet loss:
 
 1. Take a device, link, or set of devices and/or links out of service.
 2. Return a device, link, or set of devices and/or links back into service.
 3. Move traffic to other links or devices.
 4. Roll back a recent change to a device that might have caused the problem.
-5. Escalate to a human (e.g., network operator) as a last resort.
+5. Escalate to a network operator as a last resort.
 
 A precise signal of impact is crucial, as taking the wrong action can be worse than taking no action. For example, taking a congested device out of service can make congestion worse by moving the traffic to other links or devices, which are already congested.
 
@@ -137,15 +140,42 @@ FEATURE-LOSS-RATE, FEATURE-LOSS-DURATION, and FEATURE-LOSS-LOCATION are already 
 Information Model   {#model}
 =================
 
-The classification scheme is defined as a tree, which follows the structure component/direction/type/layer/sub-type/sub-sub-type/.../metric, where:
+Design Rationale {#rationale}
+----------------
 
-a. Component can be interface&#124;device&#124;control-plane&#124;flow  
-b. Direction can be ingress&#124;egress  
-c. Type can be traffic&#124;discards, where traffic accounts for packets successfully received or transmitted, and discards accounts for packet drops  
-d. Layer can be l2&#124;l3
+This document uses YANG {{?RFC6020}} to represent the information model for three main reasons. First, YANG, along with its data structure extensions {{!RFC8791}}, allows designers to define the model in an abstract way, decoupled from specific implementations. This abstraction ensures consistency and provides flexibility for diverse potential implementations, with the structure and groupings easily adaptable to data models such as those specific to SNMP {{?RFC1157}}, NETCONF {{?RFC6241}}, RESTCONF {{?RFC8040}}, or IPFIX {{?RFC7011}}.  Second, this approach ensures a lossless translation from the information model to a YANG data model, preserving both semantics and structure. Lastly, YANG capitalises on the community’s broad familiarity with its syntax and use, facilitating easier adoption and evolution.
+
+Structure {#structure}
+---------
+The classification scheme is structured as a hierarchical tree that follows the structure: component/direction/type/layer/sub-type/sub-sub-type/.../metric.  The elements of the tree are defined as follows:
+
+- Component: Specifies where in the device the discard is accounted. It can be:
+  - interface: Discards associated with a specific network interface.
+  - control-plane: Discards related to the device's control plane.
+  - flow: Discards associated with a specific traffic flow.
+
+- Direction:
+  - ingress: Discards occurring on incoming packets or frames.
+  - egress: Discards occurring on outgoing packets or frames.
+
+- Type:
+  - traffic: Counters for successfully received or transmitted packets or frames.
+  - discards: Counters for packets or frames that were dropped.
+
+- Layer:
+  - l2: Layer 2 discards, such as frames with CRC errors.
+  - l3: Layer 3 discards, such as IP packets with invalid headers.
+
+- Sub-Type:
+  - For discards:
+    - errors: Discards due to errors in processing packets or frames (e.g., checksum errors).
+    - policy: Discards due to policy enforcement (e.g., ACL drops).
+    - no-buffer: Discards due to lack of buffer space (e.g., congestion-related drops).
+
+Each sub-type may further contain specific reasons for discards, providing more detailed insight into the cause of packet loss.
 
 ~~~~~~~~~~
-structure packet-discard-reporting:
+  structure packet-discard-reporting:
     +-- interface* [name]
        +-- name             string
        +-- ingress
@@ -154,18 +184,10 @@ structure packet-discard-reporting:
        |  |  |  +-- frames?   uint64
        |  |  |  +-- bytes?    uint64
        |  |  +-- l3
-       |  |  |  +-- v4
-       |  |  |  |  +-- packets?     uint64
-       |  |  |  |  +-- bytes?       uint64
-       |  |  |  |  +-- unicast
-       |  |  |  |  |  +-- packets?   uint64
-       |  |  |  |  |  +-- bytes?     uint64
-       |  |  |  |  +-- multicast
-       |  |  |  |     +-- packets?   uint64
-       |  |  |  |     +-- bytes?     uint64
-       |  |  |  +-- v6
-       |  |  |     +-- packets?     uint64
-       |  |  |     +-- bytes?       uint64
+       |  |  |  +-- address-family-stat* [address-family]
+       |  |  |     +-- address-family    iana-rt-types:address-family
+       |  |  |     +-- packets?          uint64
+       |  |  |     +-- bytes?            uint64
        |  |  |     +-- unicast
        |  |  |     |  +-- packets?   uint64
        |  |  |     |  +-- bytes?     uint64
@@ -182,18 +204,10 @@ structure packet-discard-reporting:
        |     |  +-- frames?   uint64
        |     |  +-- bytes?    uint64
        |     +-- l3
-       |     |  +-- v4
-       |     |  |  +-- packets?     uint64
-       |     |  |  +-- bytes?       uint64
-       |     |  |  +-- unicast
-       |     |  |  |  +-- packets?   uint64
-       |     |  |  |  +-- bytes?     uint64
-       |     |  |  +-- multicast
-       |     |  |     +-- packets?   uint64
-       |     |  |     +-- bytes?     uint64
-       |     |  +-- v6
-       |     |     +-- packets?     uint64
-       |     |     +-- bytes?       uint64
+       |     |  +-- address-family-stat* [address-family]
+       |     |     +-- address-family    iana-rt-types:address-family
+       |     |     +-- packets?          uint64
+       |     |     +-- bytes?            uint64
        |     |     +-- unicast
        |     |     |  +-- packets?   uint64
        |     |     |  +-- bytes?     uint64
@@ -245,18 +259,10 @@ structure packet-discard-reporting:
        |  |  |  +-- frames?   uint64
        |  |  |  +-- bytes?    uint64
        |  |  +-- l3
-       |  |  |  +-- v4
-       |  |  |  |  +-- packets?     uint64
-       |  |  |  |  +-- bytes?       uint64
-       |  |  |  |  +-- unicast
-       |  |  |  |  |  +-- packets?   uint64
-       |  |  |  |  |  +-- bytes?     uint64
-       |  |  |  |  +-- multicast
-       |  |  |  |     +-- packets?   uint64
-       |  |  |  |     +-- bytes?     uint64
-       |  |  |  +-- v6
-       |  |  |     +-- packets?     uint64
-       |  |  |     +-- bytes?       uint64
+       |  |  |  +-- address-family-stat* [address-family]
+       |  |  |     +-- address-family    iana-rt-types:address-family
+       |  |  |     +-- packets?          uint64
+       |  |  |     +-- bytes?            uint64
        |  |  |     +-- unicast
        |  |  |     |  +-- packets?   uint64
        |  |  |     |  +-- bytes?     uint64
@@ -273,18 +279,10 @@ structure packet-discard-reporting:
        |     |  +-- frames?   uint64
        |     |  +-- bytes?    uint64
        |     +-- l3
-       |     |  +-- v4
-       |     |  |  +-- packets?     uint64
-       |     |  |  +-- bytes?       uint64
-       |     |  |  +-- unicast
-       |     |  |  |  +-- packets?   uint64
-       |     |  |  |  +-- bytes?     uint64
-       |     |  |  +-- multicast
-       |     |  |     +-- packets?   uint64
-       |     |  |     +-- bytes?     uint64
-       |     |  +-- v6
-       |     |     +-- packets?     uint64
-       |     |     +-- bytes?       uint64
+       |     |  +-- address-family-stat* [address-family]
+       |     |     +-- address-family    iana-rt-types:address-family
+       |     |     +-- packets?          uint64
+       |     |     +-- bytes?            uint64
        |     |     +-- unicast
        |     |     |  +-- packets?   uint64
        |     |     |  +-- bytes?     uint64
@@ -327,18 +325,18 @@ For additional context, Appendix A provides an example of where packets may be d
 
 Requirements {#requirements}
 ------------
-Requirements 1-10 relate to packets forwarded by the device; requirement 11 relates to packets destined to or from the device:
+Requirements 1-10 relate to packets forwarded by the device, while requirement 11 relates to packets destined for or originating from the device:
 
 1. All instances of frame or packet receipt, transmission, and discards MUST be reported.
 2. All instances of frame or packet receipt, transmission, and discards SHOULD be attributed to the physical or logical interface of the device where they occur.
-3. An individual frame MUST only be accounted for by either the L2 traffic class or the L2 discard classes within a single direction, i.e., ingress or egress.
-4. An individual packet MUST only be accounted for by either the L3 traffic class or the L3 discard classes within a single direction, i.e., ingress or egress.
-5. A frame accounted for at L2 SHOULD NOT be accounted for at L3 and vice versa.  An implementation MUST expose which layers a discard is counted against.
-6. The aggregate L2 and L3 traffic and discard classes SHOULD account for all underlying packets received, transmitted, and discarded across all other classes.
+3. An individual frame MUST only be accounted for by either the Layer 2 traffic class or the Layer 2 discard classes within a single direction, i.e., ingress or egress.
+4. An individual packet MUST only be accounted for by either the Layer 3 traffic class or the Layer 3 discard classes within a single direction, i.e., ingress or egress.
+5. A frame accounted for at Layer 2 SHOULD NOT be accounted for at Layer 3 and vice versa.  An implementation MUST indicate which layers a discard is counted against.
+6. The aggregate Layer 2 and Layer 3 traffic and discard classes SHOULD account for all underlying frames or packets received, transmitted, and discarded across all other classes.
 7. The aggregate Quality of Service (QoS) traffic and no buffer discard classes MUST account for all underlying packets received, transmitted, and discarded across all other classes.
-8. In addition to the L2 and L3 aggregate classes, an individual discarded packet MUST only account against a single error, policy, or no_buffer discard subclass.
+8. In addition to the Layer 2 and Layer 3 aggregate classes, an individual discarded packet MUST only account against a single error, policy, or no-buffer discard subclass.
 9. When there are multiple reasons for discarding a packet, the ordering of discard class reporting MUST be defined.
-10. If Diffserv {{RFC2475}} is not used, no_buffer discards SHOULD be reported as class0.
+10. If Diffserv {{RFC2475}} is not used, no-buffer discards SHOULD be reported as class0.
 11. Traffic to the device control plane has its own class, however, traffic from the device control plane SHOULD be accounted for in the same way as other egress traffic.  
 
 
@@ -356,14 +354,14 @@ A received unicast IPv6 packet discarded due to Hop Limit expiry would increment
 
 - interface/ingress/discards/l3/v6/unicast/packets  
 - interface/ingress/discards/l3/v6/unicast/bytes  
-- interface/ingress/discards/l3/rx/ttl_expired/packets  
+- interface/ingress/discards/l3/rx/ttl-expired/packets  
 
 An IPv4 packet discarded on egress due to no buffers would increment:
 
 - interface/egress/discards/l3/v4/unicast/packets  
 - interface/egress/discards/l3/v4/unicast/bytes  
-- interface/egress/discards/no_buffer/class_0/packets  
-- interface/egress/discards/no_buffer/class_0/bytes
+- interface/egress/discards/no-buffer/class_0/packets  
+- interface/egress/discards/no-buffer/class_0/bytes
 
 Example Signal-Cause-Mitigation Mapping {#mapping}
 =======================================
@@ -375,18 +373,18 @@ Example Signal-Cause-Mitigation Mapping {#mapping}
 |                                           |                     | rate       | duration |             |                       |
 +-------------------------------------------+---------------------+------------+----------+-------------+-----------------------+
 | ingress/discards/errors/l2/rx             | Upstream device     | >Baseline  | O(1min)  | Y           | Take upstream link or |
-|                                           | or link errror      |            |          |             | device out-of-service |
-| ingress/discards/errors/l3/rx/ttl_expired | Tracert             | <=Baseline |          | N           | no action             |
-| ingress/discards/errors/l3/rx/ttl_expired | Convergence         | >Baseline  | O(1s)    | Y           | no action             |
-| ingress/discards/errors/l3/rx/ttl_expired | Routing loop        | >Baseline  | O(1min)  | Y           | Roll-back change      |
+|                                           | or link error       |            |          |             | device out-of-service |
+| ingress/discards/errors/l3/rx/ttl-expired | Tracert             | <=Baseline |          | N           | no action             |
+| ingress/discards/errors/l3/rx/ttl-expired | Convergence         | >Baseline  | O(1s)    | Y           | no action             |
+| ingress/discards/errors/l3/rx/ttl-expired | Routing loop        | >Baseline  | O(1min)  | Y           | Roll-back change      |
 | .*/policy/.*                              | Policy              |            |          | N           | no action             |
-| ingress/discards/errors/l3/no_route       | Convergence         | >Baseline  | O(1s)    | Y           | no action             |
-| ingress/discards/errors/l3/no_route       | Config error        | >Baseline  | O(1min)  | Y           | Roll-back change      |
-| ingress/discards/errors/l3/no_route       | Invalid destination | >Baseline  | O(10min) | N           | Escalate to operator  |
+| ingress/discards/errors/l3/no-route       | Convergence         | >Baseline  | O(1s)    | Y           | no action             |
+| ingress/discards/errors/l3/no-route       | Config error        | >Baseline  | O(1min)  | Y           | Roll-back change      |
+| ingress/discards/errors/l3/no-route       | Invalid destination | >Baseline  | O(10min) | N           | Escalate to operator  |
 | ingress/discards/errors/local             | Device errors       | >Baseline  | O(1min)  | Y           | Take device           |
 |                                           |                     |            |          |             | out-of-service        |
-| egress/discards/no_buffer                 | Congestion          | <=Baseline |          | N           | no action             |
-| egress/discards/no_buffer                 | Congestion          | >Baseline  | O(1min)  | Y           | Bring capacity back   |
+| egress/discards/no-buffer                 | Congestion          | <=Baseline |          | N           | no action             |
+| egress/discards/no-buffer                 | Congestion          | >Baseline  | O(1min)  | Y           | Bring capacity back   |
 |                                           |                     |            |          |             | into service or move  |
 |                                           |                     |            |          |             | traffic               |
 +-------------------------------------------+---------------------+------------+----------+-------------+-----------------------+
@@ -394,7 +392,7 @@ Example Signal-Cause-Mitigation Mapping {#mapping}
 ~~~~~~~~~~
 {: #ex-table title="Example Signal-Cause-Mitigation Mapping"}
 
-The 'Baseline' in the 'Discard Rate' column is network dependent.
+The 'Baseline' in the 'Discard Rate' column is both discard class and network dependent.
 
 YANG Module {#module}
 ===========
@@ -402,12 +400,18 @@ YANG Module {#module}
 The "ietf-packet-discard-reporting" uses the "sx" structure defined in {{!RFC8791}}.
 
 ~~~~~~~~~~
-  <CODE BEGINS> file "ietf-packet-discard-reporting@2024-07-04.yang"
+  <CODE BEGINS>
 module ietf-packet-discard-reporting {
   yang-version 1.1;
   namespace
     "urn:ietf:params:xml:ns:yang:ietf-packet-discard-reporting";
   prefix plr;
+
+  import iana-routing-types {
+    prefix "iana-rt-types";
+    reference
+      "RFC 8294: Common YANG Data Types for the Routing Area";
+  }
 
   import ietf-yang-structure-ext {
     prefix sx;
@@ -465,137 +469,139 @@ module ietf-packet-discard-reporting {
 
   grouping basic-packets-64 {
     description
-      "Basic grouping with 64-bit packets";
+      "Grouping for 64-bit Layer 3 packet counters.";
     leaf packets {
       type uint64;
       description
-        "Number of L3 packets";
+        "Number of Layer 3 packets.";
     }
   }
 
   grouping basic-packets-bytes-64 {
     description
-      "Basic grouping with 64-bit packets and bytes";
+      "Grouping for 64-bit packet and byte counters.";
     uses basic-packets-64;
     leaf bytes {
       type uint64;
       description
-        "Number of L3 bytes";
+        "Number of Layer 3 bytes.";
     }
   }
 
   grouping basic-frames-64 {
     description
-      "Basic grouping with 64-bit frames";
+      "Grouping for 64-bit frame counters.";
     leaf frames {
       type uint64;
       description
-        "Number of L2 frames";
+        "Number of Layer 2 frames.";
     }
   }
 
   grouping basic-frames-bytes-64 {
     description
-      "Basic grouping with 64-bit packets and bytes";
+      "Grouping for 64-bit Layer 2 frame and byte counters.";
     uses basic-frames-64;
     leaf bytes {
       type uint64;
       description
-        "Number of L2 bytes";
+        "Number of Layer 2 bytes.";
     }
   }
 
   grouping basic-packets-32 {
     description
-      "Basic grouping with 32-bit packets";
+      "Grouping for 32-bit Layer 3 packet counters.";
     leaf packets {
       type uint32;
       description
-        "Number of L3 packets";
+        "Number of Layer 3 packets.";
     }
   }
 
   grouping basic-packets-bytes-32 {
     description
-      "Basic grouping with 32-bit packets and bytes";
+      "Grouping for 32-bit Layer 3 packet and byte counters.";
     uses basic-packets-32;
     leaf bytes {
       type uint32;
       description
-        "Number of L3 bytes";
+        "Number of Layer 3 bytes.";
     }
   }
 
   grouping basic-frames-32 {
     description
-      "Basic grouping with 32-bit frames";
+      "Grouping for 32-bit Layer 2 frame counters.";
     leaf frames {
       type uint32;
       description
-        "Number of L2 frames";
+        "Number of Layer 2 frames.";
     }
   }
 
   grouping basic-frames-bytes-32 {
     description
-      "Basic grouping with 32-bit packets and bytes";
+      "Grouping for 32-bit Layer 2 frame and byte counters.";
     uses basic-frames-32;
     leaf bytes {
       type uint32;
       description
-        "Number of L2 bytes";
+        "Number of Layer 2 bytes.";
     }
   }
 
   grouping l2-traffic {
     description
-      "Layer 2 traffic counters";
+      "Layer 2 traffic counters.";
     uses basic-frames-bytes-64;
   }
 
   grouping ip {
     description
-      "IP traffic counters";
-    uses basic-packets-bytes-64;
-    container unicast {
+      "Layer 3 traffic counters per address family.";
+    list address-family-stat {
+      key "address-family";
       description
-        "Unicast traffic counters";
+        "Per address family traffic counters.";
+      leaf address-family {
+        type iana-rt-types:address-family;
+        description
+          "Specifies the address family.";
+      }
       uses basic-packets-bytes-64;
-    }
-    container multicast {
-      description
-        "Multicast traffic counters";
-      uses basic-packets-bytes-64;
+      container unicast {
+        description
+          "Unicast traffic counters.";
+        uses basic-packets-bytes-64;
+      }
+      container multicast {
+        description
+          "Multicast traffic counters.";
+        uses basic-packets-bytes-64;
+      }
     }
   }
 
   grouping l3-traffic {
     description
-      "Layer 3 traffic counters";
-    container v4 {
-      description
-        "IPv4 traffic counters";
+      "Layer 3 traffic counters.";
       uses ip;
-    }
-    container v6 {
-      description
-        "IPv6 traffic counters";
-      uses ip;
-    }
   }
 
   grouping qos {
     description
-      "Quality of Service (QoS) traffic counters";
+      "Quality of Service (QoS) traffic
+       counters.";
     list class {
       key "id";
       min-elements 1;
       description
-        "QoS class traffic counters";
+        "QoS class traffic counters.";
       leaf id {
         type string;
         description
-          "QoS class identifier";
+          "QoS class identifier.";
       }
       uses basic-packets-bytes-64;
     }
@@ -603,42 +609,43 @@ module ietf-packet-discard-reporting {
 
   grouping traffic {
     description
-      "Traffic counters";
+      "Overall traffic counters.";
     container l2 {
       description
-        "Layer 2 traffic counters";
+        "Layer 2 traffic counters.";
       uses l2-traffic;
     }
     container l3 {
       description
-        "Layer 3 traffic counters";
+        "Layer 3 traffic counters.";
       uses l3-traffic;
     }
     container qos {
       description
-        "Quality of Service (QoS) traffic counters";
+        "QoS traffic counters.";
       uses qos;
     }
   }
 
   grouping control-plane {
     description
-      "Control plane packet counters";
+      "Control plane packet counters.";
     container ingress {
       description
-        "Control plane ingress counters";
+        "Control plane ingress counters.";
       container traffic {
         description
-          "Control plane ingress traffic counters";
+          "Control plane ingress packets received.";
         uses basic-packets-bytes-32;
       }
       container discards {
         description
-          "Control plane ingress packet discard counters";
+          "Control plane ingress packet discard counters.";
         uses basic-packets-bytes-32;
         container policy {
           description
-            "Number of control plane packets discarded due to policy";
+            "Number of control plane packets discarded
+             due to policy.";
           uses basic-packets-32;
         }
       }
@@ -647,362 +654,386 @@ module ietf-packet-discard-reporting {
 
   grouping errors-l2-rx {
     description
-      "Layer 2 ingress frame errors";
+      "Layer 2 ingress frame error discard counters.";
     container rx {
       description
-        "Layer 2 ingress frame error counters";
+        "Layer 2 ingress frame receive error discard counters.";
       leaf frames {
         type uint32;
         description
-          "Number of errored L2 frames";
+          "The number of frames discarded due to errors with the received frame.";
       }
       leaf crc-error {
         type uint32;
         description
-          "Number of frames received with CRC error";
+          "The number of frames discarded due to CRC error.";
       }
       leaf invalid-mac {
         type uint32;
         description
-          "Number of frames received with invalid MAC address";
+          "The number of frames discarded due to an invalid
+           MAC address.";
       }
       leaf invalid-vlan {
         type uint32;
         description
-          "Number of frames received with invalid VLAN tag";
+          "The number of frames discarded due to an invalid
+           VLAN tag.";
       }
       leaf invalid-frame {
         type uint32;
         description
-          "Number of invalid frames received";
+          "The number of invalid frames discarded due to other reasons.";
       }
     }
   }
 
   grouping errors-l3-rx {
     description
-      "Layer 3 ingress packet error counters";
+      "Layer 3 ingress packet error discard counters.";
     container rx {
       description
-        "Layer 3 ingress packet receive error counters";
+        "Layer 3 ingress packet receive error discard counters.";
       leaf packets {
         type uint32;
         description
-          "Number of errored L3 packets";
+          "The number of Layer 3 packets discarded due to errors in the received packet.";
       }
       leaf checksum-error {
         type uint32;
         description
-          "Number of packets received with checksum error";
+          "The number of received packets discarded due to a checksum
+           error.";
       }
       leaf mtu-exceeded {
         type uint32;
         description
-          "Number of packets received exceeding MTU";
+          "The number of received packets discarded due to MTU
+           exceeded.";
       }
       leaf invalid-packet {
         type uint32;
         description
-          "Number of invalid packets received";
+          "The number of invalid packets discarded due to other reasons.";
       }
       leaf ttl-expired {
         type uint32;
         description
-          "Number of packets received with expired TTL";
+          "The number of received packets discarded due to expired
+           TTL.";
       }
     }
     leaf no-route {
       type uint32;
       description
-        "Number of packets with no route";
+        "The number of packets discarded due to no route.";
     }
     leaf invalid-sid {
       type uint32;
       description
-        "Number of packets with invalid SID";
+        "The number of packets discarded due to an invalid Segment Routing (SR) SID.";
     }
     leaf invalid-label {
       type uint32;
       description
-        "Number of packets with invalid label";
+        "The number of packets discarded due to an invalid MPLS label.";
     }
   }
 
   grouping errors-l3-hw {
     description
-      "Hardware error counters";
+      "Hardware error discard counters.";
     leaf packets {
       type uint32;
       description
-        "Number of local errored packets";
+        "The number of packets discarded due to hardware errors.";
     }
     leaf parity-error {
       type uint32;
       description
-        "Number of packets with parity error";
+        "The number of packets discarded due to parity errors.";
     }
   }
 
   grouping errors-rx {
     description
-      "Ingress error counters";
+      "Ingress error discard counters.";
     container l2 {
       description
-        "Layer 2 received frame error counters";
+        "Layer 2 received frame error discard counters.";
       uses errors-l2-rx;
     }
     container l3 {
       description
-        "Layer 3 received packet error counters";
+        "Layer 3 received packet error discard counters.";
       uses errors-l3-rx;
     }
     container hardware {
       description
-        "Hardware error counters";
+        "Hardware error discard counters.";
       uses errors-l3-hw;
     }
   }
 
   grouping errors-l2-tx {
     description
-      "Layer 2 transmit error counters";
+      "Layer 2 transmit error discard counters.";
     container tx {
       description
-        "Layer 2 transmit frame error counters";
+        "Layer 2 transmit frame error discard counters.";
       leaf frames {
         type uint32;
         description
-          "Number of errored L2 frames during transmission";
+          "The number of Layer 2 frames discarded due to errors when
+           transmitting.";
       }
     }
   }
 
   grouping errors-l3-tx {
     description
-      "Layer 3 transmit error counters";
+      "Layer 3 transmit error discard counters.";
     container tx {
       description
-        "Layer 3 transmit packet error counters";
+        "Layer 3 transmit packet error discard counters.";
       leaf packets {
         type uint32;
         description
-          "Number of errored L3 packets during transmission";
+          "The number of Layer 3 packets discarded due to errors when
+           transmitting.";
       }
     }
   }
 
   grouping errors-tx {
     description
-      "Egress error counters";
+      "Egress error discard counters.";
     container l2 {
       description
-        "Layer 2 transmit frame error counters";
+        "Layer 2 transmit frame error discard counters.";
       uses errors-l2-tx;
     }
     container l3 {
       description
-        "Layer 3 transmit packet error counters";
+        "Layer 3 transmit packet error discard counters.";
       uses errors-l3-tx;
     }
   }
 
   grouping policy-l2-rx {
     description
-      "Layer 2 policy ingress packet discard counters";
+      "Layer 2 policy ingress packet discard
+       counters.";
     leaf frames {
       type uint32;
       description
-        "Number of L2 frames discarded due to policy";
+        "The number of Layer 2 frames discarded due
+         to policy.";
     }
     leaf acl {
       type uint32;
       description
-        "Number of frames discarded due to L2 ACL";
+        "The number of frames discarded due to
+         Layer 2 ACL.";
     }
   }
 
   grouping policy-l3-rx {
     description
-      "Layer 3 policy ingress packet discard counters";
+      "Layer 3 policy ingress packet discard
+       counters.";
     leaf packets {
       type uint32;
       description
-        "Number of L3 packets discarded due to policy";
+        "The number of Layer 3 packets discarded due
+         to policy.";
     }
     leaf acl {
       type uint32;
       description
-        "Number of packets discarded due to L3 ACL";
+        "The number of packets discarded due to
+         Layer 3 ACL.";
     }
-    container policer {
+    leaf policer {
+      type uint32;
       description
-        "Policer ingress packet discard counters";
-      uses basic-packets-bytes-32;
+        "The number of packets discarded due to violating a
+         policer.";
     }
     leaf null-route {
       type uint32;
       description
-        "Number of packets discarded due to null route";
+        "The number of packets discarded due to matching a
+         null route.";
     }
     leaf rpf {
       type uint32;
       description
-        "Number of packets discarded due to RPF check failure";
+        "The number of packets discarded due to failing Reverse
+         Path Forwarding (RPF) check failure.";
     }
     leaf ddos {
       type uint32;
       description
-        "Number of packets discarded due to DDoS protection";
+        "The number of packets discarded due to DDoS
+         protection.";
     }
   }
 
   grouping policy-rx {
     description
-      "Policy-related ingress packet discard counters";
+      "Policy-related ingress packet
+       discard counters.";
     container l2 {
       description
-        "Layer 2 policy ingress packet discard counters";
+        "Layer 2 policy ingress packet discard counters.";
       uses policy-l2-rx;
     }
     container l3 {
       description
-        "Layer 3 policy ingress packet discard counters";
+        "Layer 3 policy ingress packet discard counters.";
       uses policy-l3-rx;
     }
   }
 
   grouping policy-l3-tx {
     description
-      "Layer 3 policy egress packet discard counters";
+      "Layer 3 policy egress packet discard counters.";
     leaf acl {
       type uint32;
       description
-        "Number of packets discarded due to L3 egress ACL";
+        "The number of packets discarded due to Layer 3
+         egress ACL.";
     }
-    container policer {
+    leaf policer {
+      type uint32;
       description
-        "Policer egress packet discard counters";
-      uses basic-packets-bytes-32;
+        "The number of packets discarded due to violating a
+         policer.";
     }
   }
 
   grouping policy-tx {
     description
-      "Policy-related egress packet discard counters";
+      "Policy egress packet discard counters.";
     container l3 {
       description
-        "Layer 3 policy egress packet discard counters";
+        "Layer 3 policy egress packet discard counters.";
       uses policy-l3-tx;
     }
   }
 
   grouping interface {
     description
-      "Interface-level packet loss counters";
+      "Interface-level packet traffic and discard counters.";
     container ingress {
       description
-        "Ingress counters";
+        "Ingress counters.";
       container traffic {
         description
-          "Ingress traffic counters";
+          "Ingress traffic counters.";
         uses traffic;
       }
       container discards {
         description
-          "Ingress packet discard counters";
+          "Ingress discard counters.";
         container l2 {
           description
-            "Layer 2 ingress discards traffic counters";
+            "Ingress Layer 2 frame discard counters.";
           uses l2-traffic;
         }
         container l3 {
           description
-            "Layer 3 ingress discards traffic counters";
+            "Ingress Layer 3 packet discard counters.";
           uses l3-traffic;
         }
         container errors {
           description
-            "Ingress packet error counters";
+            "Ingress packet error discard counters.";
           uses errors-rx;
         }
         container policy {
           description
-            "Policy-related ingress packet discard counters";
+            "Policy-related ingress packet discard counters.";
           uses policy-rx;
         }
         container no-buffer {
           description
-            "Ingress packet discard counters due to buffer unavailability";
+            "Ingress packet discard counters due to buffer
+             unavailability.";
           uses qos;
         }
       }
     }
     container egress {
       description
-        "Egress counters";
+        "Egress counters.";
       container traffic {
         description
-          "Egress traffic counters";
+          "Egress traffic counters.";
         uses traffic;
       }
       container discards {
         description
-          "Egress packet discard counters";
+          "Egress packet and frame discard counters.";
         container l2 {
           description
-            "Layer 2 egress packet discard counters";
+            "Layer 2 egress frame discard counters.";
           uses l2-traffic;
         }
         container l3 {
           description
-            "Layer 3 egress packet discard counters";
+            "Layer 3 egress packet discard counters.";
           uses l3-traffic;
         }
         container errors {
           description
-            "Egress packet error counters";
+            "Egress packet error discard counters.";
           uses errors-tx;
         }
         container policy {
           description
-            "Policy-related egress packet discard counters";
+            "Policy-related egress packet discard counters.";
           uses policy-tx;
         }
         container no-buffer {
           description
-            "Egress packet discard counters due to buffer unavailability";
+            "Egress packet discard counters due to buffer
+             unavailability.";
           uses qos;
         }
       }
     }
     container control-plane {
       description
-        "Control plane packet counters";
+        "Control plane packet counters.";
       uses control-plane;
     }
   }
 
   /*
-   * Main Structure
+   * Main structure definition
    */
 
   sx:structure packet-discard-reporting {
     description
-      "Container for packet discard reporting data.";
+      "Specifies the abstract structure of packet discard reporting data.";
     list interface {
       key "name";
       description
-        "List of interfaces for which packet discard reporting
+        "Indicates a list of interfaces for which packet discard reporting
          data is provided.";
       leaf name {
         type string;
         description
-          "Name of the interface.";
+          "Indicates the name of the interface.";
       }
       uses interface;
     }
   }
 }
+
+
 <CODE ENDS>
 ~~~~~~~~~~
 
@@ -1049,13 +1080,13 @@ Contributors {#contributors}
 
 Acknowledgments {#acknowledgements}
 ===============
-The content of this draft has benefitted from feedback from JR Rivers, Ronan Waide, Chris DeBruin, and Marcoz Sanz.
+The content of this document has benefitted from feedback from JR Rivers, Ronan Waide, Chris DeBruin, and Marcoz Sanz.
 
 --- back
 
-Where do packets get dropped? 
+Where do packets get dropped? {#wheredropped}
 =============================
-{{ex-drop}} depicts an example of where and why packets may be discarded in a typical single ASIC, shared buffered type device, where packets ingress on the left and egress on the right.
+{{ex-drop}} depicts an example of where and why packets may be discarded in a typical single-ASIC, shared-buffered type device. Packets ingress on the left and egress on the right.
 
 ~~~~~~~~~~
                                                       +----------+
@@ -1077,17 +1108,17 @@ Where do packets get dropped?
   Intended                               policy/acl                  policy/acl
   Discards:                              policy/policer              policy/policer
                                          policy/urpf
-                                         policy/null_route
+                                         policy/null-route
 
-Unintended                 error/rx/l2   error/l3/rx   no_buffer     error/l3/tx
+Unintended                 error/rx/l2   error/l3/rx   no-buffer     error/l3/tx
   Discards:                              error/local
-                                         error/l3/no_route
-                                         error/l3/rx/ttl_expired
+                                         error/l3/no-route
+                                         error/l3/rx/ttl-expired
 
 ~~~~~~~~~~
 {: #ex-drop title="Example of where packets get dropped"}
 
-Discard Class Descriptions {#class_descriptions}
+Discard Class Descriptions
 --------------------------
 
 discards/policy/:  
@@ -1099,32 +1130,32 @@ discards/error/l2/rx/:
 discards/error/l3/rx/:  
 : These are discards which occur due to errors in the received packet, indicating an upstream problem rather than an issue with the device dropping the errored packets. There are multiple sub-classes, including header checksum errors, MTU exceeded, and invalid packet, i.e. due to incorrect version, incorrect header length, or invalid options.
 
-discards/error/l3/rx/ttl_expired:  
+discards/error/l3/rx/ttl-expired:  
 : There can be multiple causes for TTL-expired (or Hop limit exceeded) discards: i) trace-route; ii) TTL (Hop limit) set too low by the end-system; iii) routing loops. 
 
-discards/error/l3/no_route/:  
+discards/error/l3/no-route/:  
 : Discards occur due to a packet not matching any route.
 
 discards/error/local/:  
 : A device may discard packets within its switching pipeline due to internal errors, such as parity errors. Any errored discards not explicitly assigned to the above classes are also accounted for here.
 
-discards/no_buffer/:  
+discards/no-buffer/:  
 : Discards occur due to no available buffer to enqueue the packet. These can be tail-drop discards or due to an active queue management algorithm, such as RED {{RED93}} or CODEL {{RFC8289}}.
 
 
-Implementation Experience {#experience}
+Implementation Experience
 =========================
 This appendix captures the authors' experience gained from implementing and applying this information model across multiple vendors' platforms, as guidance for future implementers.
 
-1. The number and granularity of classes described in Section 3 represent a compromise.  It aims to offer sufficient detail to enable appropriate automated actions while avoiding excessive detail, which may hinder quick problem identification.  Additionally, it helps constrain the quantity of data produced per interface to constrain data volume and device CPU impacts.  Although further granularity is possible, the scheme described has generally proven to be sufficient for the task of auto-mitigating unintended packet loss.
+1. The number and granularity of classes described in Section 3 represent a compromise.  It aims to offer sufficient detail to enable appropriate automated actions while avoiding excessive detail, which may hinder quick problem identification.  Additionally, it helps limit the quantity of data produced per interface, thus constraining the data volume and device CPU impacts.  Although further granularity is possible, the scheme described has generally proven to be sufficient for the task of auto-mitigating unintended packet loss.
 2. There are many possible ways to define the discard classification tree.  For example, we could have used a multi-rooted tree, rooted in each protocol.  Instead, we opted to define a tree where protocol discards and causal discards are accounted for orthogonally.  This decision reduces the number of combinations of classes and has proven sufficient for determining mitigation actions.
 3. NoBuffer discards can be realized differently with different memory architectures. Whether a NoBuffer discard is attributed to ingress or egress can differ accordingly.  For successful auto-mitigation, discards due to egress interface congestion should be reported on egress, while discards due to device-level congestion (e.g. due to exceeding the device forwarding rate) should be reported on ingress.
 4. Platforms often account for the number of packets discarded where the TTL has expired (or Hop Limit exceeded), and the device CPU has returned an ICMP Time Exceeded message.  There is typically a policer applied to limit the number of packets sent to the device CPU, however, which implicitly limits the rate of TTL discards that are processed.  One method to account for all packet discards due to TTL expired, even those that are dropped by a policer when being forwarded to the CPU, is to use accounting of all ingress packets received with TTL=1.
-5. Where no route discards are implemented with a default null route, separate discard accounting is required for any explicit null routes configured, in order to differentiate between interface/ingress/discards/policy/null_route/packets and interface/ingress/discards/errors/no_route/packets.
+5. Where no route discards are implemented with a default null route, separate discard accounting is required for any explicit null routes configured, in order to differentiate between interface/ingress/discards/policy/null-route/packets and interface/ingress/discards/errors/no-route/packets.
 6. It is useful to account separately for transit packets discarded by ACLs or policers, and packets discarded by ACLs or policers which limit the number of packets to the device control plane.
 7. It is not possible to identify a configuration error - e.g., when intended discards are unintended - with device packet loss metrics alone.  For example, additional context is needed to determine if ACL discards are intended or due to a misconfigured ACL, i.e., with configuration validation before deployment or by detecting a significant change in ACL discards after a configuration change compared to before.
-8. Where traffic byte counters need to be 64-bit, packet and discard counters that increase at a lower rate may be encoded in fewer bits, e.g., 48-bit.
+8. Where traffic byte counters need to be 64-bit, packet and discard counters that increase at a lower rate may be encoded in fewer bits, e.g., 32-bit.
 9. Aggregate counters need to be able to deal with the possibility of discontinuities in the underlying counters.
-10. In cases where the reporting device is the source or destination of a tunnel, the ingress protocol for a packet may differ from the egress protocol; if IPv4 is tunneled over IPv6 for example.  Some implementations may attribute egress discards to the ingress protocol.
+10. In cases where the reporting device is the source or destination of a tunnel, the ingress protocol for a packet may differ from the egress protocol; if IPv4 is tunnelled over IPv6 for example.  Some implementations may attribute egress discards to the ingress protocol.
 11. While the classification tree is seven layers deep, a minimal implementation may only implement the top six layers.
 

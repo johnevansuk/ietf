@@ -12,9 +12,9 @@
 ]>
 
 
-<rfc ipr="trust200902" docName="draft-ietf-opsawg-discardmodel-02" category="info" tocInclude="true" sortRefs="true" symRefs="true">
+<rfc ipr="trust200902" docName="draft-ietf-opsawg-discardmodel-04" category="std" consensus="true" tocInclude="true" sortRefs="true" symRefs="true">
   <front>
-    <title abbrev="Info. Model for Pkt Discard Reporting">An Information Model for Packet Discard Reporting</title>
+    <title abbrev="IM for Packet Discard Reporting">An Information Model for Packet Discard Reporting</title>
 
     <author initials="J." surname="Evans" fullname="John Evans">
       <organization>Amazon</organization>
@@ -77,7 +77,7 @@
       </address>
     </author>
 
-    <date year="2024" month="July" day="08"/>
+    <date year="2024" month="September" day="19"/>
 
     <area>Operations and Management Area</area>
     <workgroup>OPSAWG</workgroup>
@@ -86,7 +86,7 @@
     <abstract>
 
 
-<t>The primary function of a network is to transport packets and deliver them according to a service level objective.  Understanding both where and why packet loss occurs within a network is essential for effective network operation.  Device-reported packet loss is the most direct signal for network operations to identify customer impact resulting from unintended packet loss.  This document defines an information model for packet loss reporting, which classifies these signals to enable automated network mitigation of unintended packet loss.</t>
+<t>The primary function of a network is to transport packets and deliver them according to service level objectives.  Understanding both where and why packet loss occurs within a network is essential for effective network operation.  Device-reported packet loss provides the most direct signal for network operations to identify the customer impact resulting from unintended packet loss.  This document defines an information model for packet loss reporting, which classifies these signals to enable automated network mitigation of unintended packet loss.</t>
 
 
 
@@ -101,15 +101,15 @@
 
 <section anchor="introduction"><name>Introduction</name>
 
-<t>In automating network operations, a network operator needs to be able to detect anomalous packet loss, diagnose or root cause the loss, and then apply one of a set of possible actions to mitigate customer-impacting packet loss.  Some packet loss is normal or intended in IP/MPLS networks, however. Hence, precise classification of packet loss signals is crucial both to ensure that anomalous packet loss is easily detected and that the right action or sequence of actions are taken to mitigate the impact, as taking the wrong action can make problems worse.</t>
+<t>In automating network operations, a network operator needs to be able to detect anomalous packet loss, diagnose or determine the root cause of the loss, and then apply one of a set of possible actions to mitigate customer-impacting packet loss.  Some packet loss is normal or intended in IP/MPLS networks, however. Hence, precise classification of packet loss signals is crucial both to ensure that anomalous packet loss is easily detected and that the right action or sequence of actions is taken to mitigate the impact, as taking the wrong action can make problems worse.</t>
 
-<t>The existing metrics for reporting packet loss, as defined in <xref target="RFC1213"/> - namely ifInDiscards, ifOutDiscards, ifInErrors, ifOutErrors - do not provide sufficient precision to automatically identify the cause of the loss and mitigate the impact.  From a network operator's perspective, ifInDiscards can represent both intended packet loss (e.g., packets discarded due to policy) and unintended packet loss (e.g., packets dropped in error). Furthermore, these definitions are ambiguous, as vendors can and have implemented them differently.  In some implementations, ifInErrors accounts only for errored packets that are dropped, while in others, it accounts for all errored packets, whether they are dropped or not.  Many implementations support more discard metrics than these; where they do, they have been inconsistently implemented due to the lack of a standardised classification scheme and clear semantics for packet loss reporting.  <xref target="RFC7270"/> provides support for reporting discards per flow in IPFIX using forwardingStatus, however, the defined drop reason codes also lack sufficient clarity to support automated root cause analysis and mitigation of impact.</t>
+<t>The existing metrics for reporting packet loss, as defined in <xref target="RFC1213"/> (namely ifInDiscards, ifOutDiscards, ifInErrors, and ifOutErrors), do not provide sufficient precision to automatically identify the cause of the loss and mitigate the impact.  From a network operator's perspective, ifInDiscards can represent both intended packet loss (e.g., packets discarded due to policy) and unintended packet loss (e.g., packets dropped in error). Furthermore, these definitions are ambiguous, as vendors can and have implemented them differently.  In some implementations, ifInErrors accounts only for errored packets that are dropped, while in others, it accounts for all errored packets, whether they are dropped or not.  Many implementations support more discard metrics than these; where they do, they have been inconsistently implemented due to the lack of a standardised classification scheme and clear semantics for packet loss reporting. <xref target="RFC7270"/> provides support for reporting discards per flow in IPFIX using forwardingStatus, however, the defined drop reason codes also lack sufficient clarity (e.g., "For us" Reason Code) to support automated root cause analysis and impact mitigation.</t>
 
-<t>Hence, this document defines an information model for packet loss reporting, aiming to address these issues by presenting a packet loss classification scheme that can enable automated mitigation of unintended packet loss.  Consistent with <xref target="RFC3444"/>, this information model is independent of any specific implementations or protocols used to transport the data.  There are multiple ways that this information model could be implemented (i.e., data models), including SNMP <xref target="RFC1157"/>, NETCONF <xref target="RFC6241"/> / YANG <xref target="RFC7950"/>, RESTCONF <xref target="RFC8040"/>, and IPFIX <xref target="RFC5153"/>. However, these mechanisms are out of the scope of this document.  The scope of this document is limited to reporting packet loss at Layer 3 and frames discarded at Layer 2, although the information model might be extended in future to cover segments dropped at Layer 4.</t>
+<t>Hence, this document defines an information model for packet loss reporting, aiming to address these issues by presenting a packet loss classification scheme that can enable automated mitigation of unintended packet loss.  In line with <xref target="RFC3444"/>, this information model remains independent of specific implementations or transport protocols.</t>
+
+<t>The specific implementations of this information model (i.e., protocols and associated data models) are outside the scope of this document.  The scope of this document is limited to reporting packet loss at Layer 3 and frames discarded at Layer 2, although the information model might be extended in future to cover segments dropped at Layer 4. This document considers only the signals that may trigger automated mitigation plans and not how they are defined or executed.</t>
 
 <t><xref target="problem"/> describes the problem to be solved. Section 4 describes the information model and requirements with a set of examples.  Section 5 provides examples of discard signal-to-cause-to-auto-mitigation action mapping.  Section 6 presents the information model as an abstract data structure in YANG, in accordance with <xref target="RFC8791"/>.  Appendix A provides an example of where packets may be discarded in a device.  Appendix B details the authors' experience from implementing this model.</t>
-
-<t>This document considers only the signals that may trigger automated mitigation plans and not how they are defined or executed.</t>
 
 </section>
 <section anchor="terminology"><name>Terminology</name>
@@ -128,14 +128,14 @@ appear in all capitals, as shown here.</t>
 
 </section>
 <section anchor="problem"><name>Problem Statement</name>
-<t>At the highest-level, unintended packet loss is the discarding of packets that the network operator otherwise intends to deliver, i.e. which indicates an error state.  There are many possible reasons for unintended packet loss, including: erroring links may corrupt packets in transit; incorrect routing tables may result in packets being dropped because they do not match a valid route; configuration errors may result in a valid packet incorrectly matching an access control list (ACL) and being dropped.  Whilst the specific definition of unintended packet loss is network dependent, for any network there are a small set of potential actions that can be taken to minimise customer impact by auto-mitigating unintended packet loss:</t>
+<t>At the highest-level, unintended packet loss is the discarding of packets that the network operator otherwise intends to deliver, i.e. which indicates an error state.  There are many possible reasons for unintended packet loss, including: erroring links may corrupt packets in transit; incorrect routing tables may result in packets being dropped because they do not match a valid route; configuration errors may result in a valid packet incorrectly matching an Access Control List (ACL) and being dropped.  While the specific definition of unintended packet loss is network-dependent, for any network there are a small set of potential actions that can be taken to minimise customer impact by automatically mitigating unintended packet loss:</t>
 
 <t><list style="numbers">
   <t>Take a device, link, or set of devices and/or links out of service.</t>
   <t>Return a device, link, or set of devices and/or links back into service.</t>
   <t>Move traffic to other links or devices.</t>
   <t>Roll back a recent change to a device that might have caused the problem.</t>
-  <t>Escalate to a human (e.g., network operator) as a last resort.</t>
+  <t>Escalate to a network operator as a last resort.</t>
 </list></t>
 
 <t>A precise signal of impact is crucial, as taking the wrong action can be worse than taking no action. For example, taking a congested device out of service can make congestion worse by moving the traffic to other links or devices, which are already congested.</t>
@@ -161,14 +161,21 @@ appear in all capitals, as shown here.</t>
   </dd>
 </dl>
 
-<t>Features FEATURE-LOSS-RATE, FEATURE-LOSS-DURATION, and FEATURE-LOSS-LOCATION are already addressed with passive monitoring statistics, for example, obtained with SNMP <xref target="RFC1157"/> / MIB-II <xref target="RFC1213"/> or NETCONF <xref target="RFC6241"/> / YANG <xref target="RFC7950"/>. Feature FEATURE-LOSS-CAUSE, however, is dependent on the classification scheme used for packet loss reporting. The next section defines a new classification scheme to address this problem.</t>
+<t>FEATURE-LOSS-RATE, FEATURE-LOSS-DURATION, and FEATURE-LOSS-LOCATION are already addressed with passive monitoring statistics, for example, obtained with SNMP <xref target="RFC1157"/> / MIB-II <xref target="RFC1213"/> or NETCONF <xref target="RFC6241"/>. FEATURE-LOSS-CAUSE, however, is dependent on the classification scheme used for packet loss reporting. The next section defines a new classification scheme to address this problem.</t>
 
 </section>
 <section anchor="model"><name>Information Model</name>
 
-<t>The classification scheme is defined as a tree, which follows the structure component/direction/type/layer/sub-type/sub-sub-type/.../metric, where:</t>
+<section anchor="rationale"><name>Design Rationale</name>
 
-<t>a. Component can be interface|device|control_plane|flow<br />
+<t>This document uses YANG to represent the information model for three main reasons. First, YANG, along with its data structure extensions <xref target="RFC8791"/>, allows designers to define the model in an abstract way, decoupled from specific implementations. This abstraction ensures consistency and provides flexibility for diverse potential implementations, with the structure and groupings easily adaptable to data models such as those specific to SNMP <xref target="RFC1157"/>, NETCONF <xref target="RFC6241"/>, RESTCONF <xref target="RFC8040"/>, or IPFIX <xref target="RFC7011"/>.  Second, this approach ensures a lossless translation from the information model to a YANG data model, preserving both semantics and structure. Lastly, YANG capitalises on the community’s broad familiarity with its syntax and use, facilitating easier adoption and evolution.</t>
+
+</section>
+<section anchor="structure"><name>Structure</name>
+
+<t>The classification scheme is defined as a tree that follows the structure: component/direction/type/layer/sub-type/sub-sub-type/.../metric, where:</t>
+
+<t>a. Component can be interface|device|control-plane|flow<br />
 b. Direction can be ingress|egress<br />
 c. Type can be traffic|discards, where traffic accounts for packets successfully received or transmitted, and discards accounts for packet drops<br />
 d. Layer can be l2|l3</t>
@@ -183,18 +190,10 @@ d. Layer can be l2|l3</t>
        |  |  |  +-- frames?   uint64
        |  |  |  +-- bytes?    uint64
        |  |  +-- l3
-       |  |  |  +-- v4
-       |  |  |  |  +-- packets?     uint64
-       |  |  |  |  +-- bytes?       uint64
-       |  |  |  |  +-- unicast
-       |  |  |  |  |  +-- packets?   uint64
-       |  |  |  |  |  +-- bytes?     uint64
-       |  |  |  |  +-- multicast
-       |  |  |  |     +-- packets?   uint64
-       |  |  |  |     +-- bytes?     uint64
-       |  |  |  +-- v6
-       |  |  |     +-- packets?     uint64
-       |  |  |     +-- bytes?       uint64
+       |  |  |  +-- address-family-stats* [address-family]
+       |  |  |     +-- address-family    iana-rt-types:address-family
+       |  |  |     +-- packets?          uint64
+       |  |  |     +-- bytes?            uint64
        |  |  |     +-- unicast
        |  |  |     |  +-- packets?   uint64
        |  |  |     |  +-- bytes?     uint64
@@ -211,18 +210,10 @@ d. Layer can be l2|l3</t>
        |     |  +-- frames?   uint64
        |     |  +-- bytes?    uint64
        |     +-- l3
-       |     |  +-- v4
-       |     |  |  +-- packets?     uint64
-       |     |  |  +-- bytes?       uint64
-       |     |  |  +-- unicast
-       |     |  |  |  +-- packets?   uint64
-       |     |  |  |  +-- bytes?     uint64
-       |     |  |  +-- multicast
-       |     |  |     +-- packets?   uint64
-       |     |  |     +-- bytes?     uint64
-       |     |  +-- v6
-       |     |     +-- packets?     uint64
-       |     |     +-- bytes?       uint64
+       |     |  +-- address-family-stats* [address-family]
+       |     |     +-- address-family    iana-rt-types:address-family
+       |     |     +-- packets?          uint64
+       |     |     +-- bytes?            uint64
        |     |     +-- unicast
        |     |     |  +-- packets?   uint64
        |     |     |  +-- bytes?     uint64
@@ -232,37 +223,37 @@ d. Layer can be l2|l3</t>
        |     +-- errors
        |     |  +-- l2
        |     |  |  +-- rx
-       |     |  |     +-- frames?          uint48
-       |     |  |     +-- crc-error?       uint48
-       |     |  |     +-- invalid-mac?     uint48
-       |     |  |     +-- invalid-vlan?    uint48
-       |     |  |     +-- invalid-frame?   uint48
+       |     |  |     +-- frames?          uint32
+       |     |  |     +-- crc-error?       uint32
+       |     |  |     +-- invalid-mac?     uint32
+       |     |  |     +-- invalid-vlan?    uint32
+       |     |  |     +-- invalid-frame?   uint32
        |     |  +-- l3
        |     |  |  +-- rx
-       |     |  |  |  +-- packets?          uint48
-       |     |  |  |  +-- checksum-error?   uint48
-       |     |  |  |  +-- mtu-exceeded?     uint48
-       |     |  |  |  +-- invalid-packet?   uint48
-       |     |  |  |  +-- ttl-expired?      uint48
-       |     |  |  +-- no-route?        uint48
-       |     |  |  +-- invalid-sid?     uint48
-       |     |  |  +-- invalid-label?   uint48
+       |     |  |  |  +-- packets?          uint32
+       |     |  |  |  +-- checksum-error?   uint32
+       |     |  |  |  +-- mtu-exceeded?     uint32
+       |     |  |  |  +-- invalid-packet?   uint32
+       |     |  |  |  +-- ttl-expired?      uint32
+       |     |  |  +-- no-route?        uint32
+       |     |  |  +-- invalid-sid?     uint32
+       |     |  |  +-- invalid-label?   uint32
        |     |  +-- hardware
-       |     |     +-- packets?        uint48
-       |     |     +-- parity-error?   uint48
+       |     |     +-- packets?        uint32
+       |     |     +-- parity-error?   uint32
        |     +-- policy
        |     |  +-- l2
-       |     |  |  +-- frames?   uint48
-       |     |  |  +-- acl?      uint48
+       |     |  |  +-- frames?   uint32
+       |     |  |  +-- acl?      uint32
        |     |  +-- l3
-       |     |     +-- packets?      uint48
-       |     |     +-- acl?          uint48
+       |     |     +-- packets?      uint32
+       |     |     +-- acl?          uint32
        |     |     +-- policer
-       |     |     |  +-- packets?   uint48
-       |     |     |  +-- bytes?     uint48
-       |     |     +-- null-route?   uint48
-       |     |     +-- rpf?          uint48
-       |     |     +-- ddos?         uint48
+       |     |     |  +-- packets?   uint32
+       |     |     |  +-- bytes?     uint32
+       |     |     +-- null-route?   uint32
+       |     |     +-- rpf?          uint32
+       |     |     +-- ddos?         uint32
        |     +-- no-buffer
        |        +-- class* [id]
        |           +-- id         string
@@ -274,18 +265,10 @@ d. Layer can be l2|l3</t>
        |  |  |  +-- frames?   uint64
        |  |  |  +-- bytes?    uint64
        |  |  +-- l3
-       |  |  |  +-- v4
-       |  |  |  |  +-- packets?     uint64
-       |  |  |  |  +-- bytes?       uint64
-       |  |  |  |  +-- unicast
-       |  |  |  |  |  +-- packets?   uint64
-       |  |  |  |  |  +-- bytes?     uint64
-       |  |  |  |  +-- multicast
-       |  |  |  |     +-- packets?   uint64
-       |  |  |  |     +-- bytes?     uint64
-       |  |  |  +-- v6
-       |  |  |     +-- packets?     uint64
-       |  |  |     +-- bytes?       uint64
+       |  |  |  +-- address-family-stats* [address-family]
+       |  |  |     +-- address-family    iana-rt-types:address-family
+       |  |  |     +-- packets?          uint64
+       |  |  |     +-- bytes?            uint64
        |  |  |     +-- unicast
        |  |  |     |  +-- packets?   uint64
        |  |  |     |  +-- bytes?     uint64
@@ -302,18 +285,10 @@ d. Layer can be l2|l3</t>
        |     |  +-- frames?   uint64
        |     |  +-- bytes?    uint64
        |     +-- l3
-       |     |  +-- v4
-       |     |  |  +-- packets?     uint64
-       |     |  |  +-- bytes?       uint64
-       |     |  |  +-- unicast
-       |     |  |  |  +-- packets?   uint64
-       |     |  |  |  +-- bytes?     uint64
-       |     |  |  +-- multicast
-       |     |  |     +-- packets?   uint64
-       |     |  |     +-- bytes?     uint64
-       |     |  +-- v6
-       |     |     +-- packets?     uint64
-       |     |     +-- bytes?       uint64
+       |     |  +-- address-family-stats* [address-family]
+       |     |     +-- address-family    iana-rt-types:address-family
+       |     |     +-- packets?          uint64
+       |     |     +-- bytes?            uint64
        |     |     +-- unicast
        |     |     |  +-- packets?   uint64
        |     |     |  +-- bytes?     uint64
@@ -323,16 +298,16 @@ d. Layer can be l2|l3</t>
        |     +-- errors
        |     |  +-- l2
        |     |  |  +-- tx
-       |     |  |     +-- frames?   uint48
+       |     |  |     +-- frames?   uint32
        |     |  +-- l3
        |     |     +-- tx
-       |     |        +-- packets?   uint48
+       |     |        +-- packets?   uint32
        |     +-- policy
        |     |  +-- l3
-       |     |     +-- acl?       uint48
+       |     |     +-- acl?       uint32
        |     |     +-- policer
-       |     |        +-- packets?   uint48
-       |     |        +-- bytes?     uint48
+       |     |        +-- packets?   uint32
+       |     |        +-- bytes?     uint32
        |     +-- no-buffer
        |        +-- class* [id]
        |           +-- id         string
@@ -341,30 +316,31 @@ d. Layer can be l2|l3</t>
        +-- control-plane
           +-- ingress
              +-- traffic
-             |  +-- packets?   uint48
-             |  +-- bytes?     uint48
+             |  +-- packets?   uint32
+             |  +-- bytes?     uint32
              +-- discards
-                +-- packets?   uint48
-                +-- bytes?     uint48
+                +-- packets?   uint32
+                +-- bytes?     uint32
                 +-- policy
-                   +-- packets?   uint48
+                   +-- packets?   uint32
 
 ]]></artwork></figure>
 
 <t>For additional context, Appendix A provides an example of where packets may be discarded in a device.</t>
 
+</section>
 <section anchor="requirements"><name>Requirements</name>
-<t>Requirements 1-10 relate to packets forwarded by the device; requirement 11 relates to packets destined to or from the device:</t>
+<t>Requirements 1-10 relate to packets forwarded by the device, while requirement 11 relates to packets destined for or originating from the device:</t>
 
 <t><list style="numbers">
   <t>All instances of frame or packet receipt, transmission, and discards <bcp14>MUST</bcp14> be reported.</t>
   <t>All instances of frame or packet receipt, transmission, and discards <bcp14>SHOULD</bcp14> be attributed to the physical or logical interface of the device where they occur.</t>
-  <t>An individual frame <bcp14>MUST</bcp14> only be accounted for by either the L2 traffic class or the L2 discard classes within a single direction, i.e., ingress or egress.</t>
-  <t>An individual packet <bcp14>MUST</bcp14> only be accounted for by either the L3 traffic class or the L3 discard classes within a single direction, i.e., ingress or egress.</t>
-  <t>A frame accounted for at L2 <bcp14>SHOULD NOT</bcp14> be accounted for at L3 and vice versa.  An implementation <bcp14>MUST</bcp14> expose which layers a discard is counted against.</t>
-  <t>The aggregate L2 and L3 traffic and discard classes <bcp14>SHOULD</bcp14> account for all underlying packets received, transmitted, and discarded across all other classes.</t>
+  <t>An individual frame <bcp14>MUST</bcp14> only be accounted for by either the Layer 2 traffic class or the Layer 2 discard classes within a single direction, i.e., ingress or egress.</t>
+  <t>An individual packet <bcp14>MUST</bcp14> only be accounted for by either the Layer 3 traffic class or the Layer 3 discard classes within a single direction, i.e., ingress or egress.</t>
+  <t>A frame accounted for at Layer 2 <bcp14>SHOULD NOT</bcp14> be accounted for at Layer 3 and vice versa.  An implementation <bcp14>MUST</bcp14> indicate which layers a discard is counted against.</t>
+  <t>The aggregate Layer 2 and Layer 3 traffic and discard classes <bcp14>SHOULD</bcp14> account for all underlying packets received, transmitted, and discarded across all other classes.</t>
   <t>The aggregate Quality of Service (QoS) traffic and no buffer discard classes <bcp14>MUST</bcp14> account for all underlying packets received, transmitted, and discarded across all other classes.</t>
-  <t>In addition to the L2 and L3 aggregate classes, an individual discarded packet <bcp14>MUST</bcp14> only account against a single error, policy, or no_buffer discard subclass.</t>
+  <t>In addition to the Layer 2 and Layer 3 aggregate classes, an individual discarded packet <bcp14>MUST</bcp14> only account against a single error, policy, or no_buffer discard subclass.</t>
   <t>When there are multiple reasons for discarding a packet, the ordering of discard class reporting <bcp14>MUST</bcp14> be defined.</t>
   <t>If Diffserv <xref target="RFC2475"/> is not used, no_buffer discards <bcp14>SHOULD</bcp14> be reported as class0.</t>
   <t>Traffic to the device control plane has its own class, however, traffic from the device control plane <bcp14>SHOULD</bcp14> be accounted for in the same way as other egress traffic.</t>
@@ -410,7 +386,7 @@ d. Layer can be l2|l3</t>
 |                                           |                     | rate       | duration |             |                       |
 +-------------------------------------------+---------------------+------------+----------+-------------+-----------------------+
 | ingress/discards/errors/l2/rx             | Upstream device     | >Baseline  | O(1min)  | Y           | Take upstream link or |
-|                                           | or link errror      |            |          |             | device out-of-service |
+|                                           | or link error       |            |          |             | device out-of-service |
 | ingress/discards/errors/l3/rx/ttl_expired | Tracert             | <=Baseline |          | N           | no action             |
 | ingress/discards/errors/l3/rx/ttl_expired | Convergence         | >Baseline  | O(1s)    | Y           | no action             |
 | ingress/discards/errors/l3/rx/ttl_expired | Routing loop        | >Baseline  | O(1min)  | Y           | Roll-back change      |
@@ -428,7 +404,7 @@ d. Layer can be l2|l3</t>
 
 ]]></artwork></figure>
 
-<t>The 'Baseline' in the 'Discard Rate' column is network dependent.</t>
+<t>The 'Baseline' in the 'Discard Rate' column is both discard class and network dependent.</t>
 
 </section>
 <section anchor="module"><name>YANG Module</name>
@@ -436,12 +412,18 @@ d. Layer can be l2|l3</t>
 <t>The "ietf-packet-discard-reporting" uses the "sx" structure defined in <xref target="RFC8791"/>.</t>
 
 <figure><artwork><![CDATA[
-<CODE BEGINS> file "ietf-packet-discard-reporting@2024-07-04.yang"
+  <CODE BEGINS>
 module ietf-packet-discard-reporting {
   yang-version 1.1;
   namespace
     "urn:ietf:params:xml:ns:yang:ietf-packet-discard-reporting";
   prefix plr;
+
+  import iana-routing-types {
+    prefix "iana-rt-types";
+    reference
+      "RFC 8294: Common YANG Data Types for the Routing Area";
+  }
 
   import ietf-yang-structure-ext {
     prefix sx;
@@ -493,27 +475,6 @@ module ietf-packet-discard-reporting {
       "RFC XXXX: An Information Model for Packet Discard Reporting";
   }
 
-  typedef uint48 {
-    type uint64 {
-      range "0..281474976710655";
-    }
-    description
-      "48-bit unsigned integer type";
-  }
-
-  typedef uint48-or-64 {
-    type union {
-      type uint48;
-      type uint64;
-    }
-    description
-      "Union type representing either a 48-bit or 64-bit unsigned
-       integer. 48-bit counters are used for packet and discard
-       counters that increase at a lower rate, while 64-bit counters
-       are used for traffic byte counters that may increase more
-       rapidly.";
-  }
-
   /*
    * Groupings
    */
@@ -560,43 +521,43 @@ module ietf-packet-discard-reporting {
     }
   }
 
-  grouping basic-packets-48 {
+  grouping basic-packets-32 {
     description
-      "Basic grouping with 48-bit packets";
+      "Basic grouping with 32-bit packets";
     leaf packets {
-      type uint48;
+      type uint32;
       description
         "Number of L3 packets";
     }
   }
 
-  grouping basic-packets-bytes-48 {
+  grouping basic-packets-bytes-32 {
     description
-      "Basic grouping with 48-bit packets and bytes";
-    uses basic-packets-48;
+      "Basic grouping with 32-bit packets and bytes";
+    uses basic-packets-32;
     leaf bytes {
-      type uint48;
+      type uint32;
       description
         "Number of L3 bytes";
     }
   }
 
-  grouping basic-frames-48 {
+  grouping basic-frames-32 {
     description
-      "Basic grouping with 48-bit frames";
+      "Basic grouping with 32-bit frames";
     leaf frames {
-      type uint48;
+      type uint32;
       description
         "Number of L2 frames";
     }
   }
 
-  grouping basic-frames-bytes-48 {
+  grouping basic-frames-bytes-32 {
     description
-      "Basic grouping with 48-bit packets and bytes";
-    uses basic-frames-48;
+      "Basic grouping with 32-bit packets and bytes";
+    uses basic-frames-32;
     leaf bytes {
-      type uint48;
+      type uint32;
       description
         "Number of L2 bytes";
     }
@@ -610,33 +571,34 @@ module ietf-packet-discard-reporting {
 
   grouping ip {
     description
-      "IP traffic counters";
-    uses basic-packets-bytes-64;
-    container unicast {
+      "Traffic counters";
+    list address-family-stats {
+      key "address-family";
       description
-        "Unicast traffic counters";
+        "Per address family traffic counters";
+      leaf address-family {
+        type iana-rt-types:address-family;
+        description
+          "Address-family";
+      }
       uses basic-packets-bytes-64;
-    }
-    container multicast {
-      description
-        "Multicast traffic counters";
-      uses basic-packets-bytes-64;
+      container unicast {
+        description
+          "Unicast traffic counters";
+        uses basic-packets-bytes-64;
+      }
+      container multicast {
+        description
+          "Multicast traffic counters";
+        uses basic-packets-bytes-64;
+      }
     }
   }
 
   grouping l3-traffic {
     description
       "Layer 3 traffic counters";
-    container v4 {
-      description
-        "IPv4 traffic counters";
       uses ip;
-    }
-    container v6 {
-      description
-        "IPv6 traffic counters";
-      uses ip;
-    }
   }
 
   grouping qos {
@@ -685,16 +647,16 @@ module ietf-packet-discard-reporting {
       container traffic {
         description
           "Control plane ingress traffic counters";
-        uses basic-packets-bytes-48;
+        uses basic-packets-bytes-32;
       }
       container discards {
         description
           "Control plane ingress packet discard counters";
-        uses basic-packets-bytes-48;
+        uses basic-packets-bytes-32;
         container policy {
           description
             "Number of control plane packets discarded due to policy";
-          uses basic-packets-48;
+          uses basic-packets-32;
         }
       }
     }
@@ -707,27 +669,27 @@ module ietf-packet-discard-reporting {
       description
         "Layer 2 ingress frame error counters";
       leaf frames {
-        type uint48;
+        type uint32;
         description
           "Number of errored L2 frames";
       }
       leaf crc-error {
-        type uint48;
+        type uint32;
         description
           "Number of frames received with CRC error";
       }
       leaf invalid-mac {
-        type uint48;
+        type uint32;
         description
           "Number of frames received with invalid MAC address";
       }
       leaf invalid-vlan {
-        type uint48;
+        type uint32;
         description
           "Number of frames received with invalid VLAN tag";
       }
       leaf invalid-frame {
-        type uint48;
+        type uint32;
         description
           "Number of invalid frames received";
       }
@@ -741,43 +703,43 @@ module ietf-packet-discard-reporting {
       description
         "Layer 3 ingress packet receive error counters";
       leaf packets {
-        type uint48;
+        type uint32;
         description
           "Number of errored L3 packets";
       }
       leaf checksum-error {
-        type uint48;
+        type uint32;
         description
           "Number of packets received with checksum error";
       }
       leaf mtu-exceeded {
-        type uint48;
+        type uint32;
         description
           "Number of packets received exceeding MTU";
       }
       leaf invalid-packet {
-        type uint48;
+        type uint32;
         description
           "Number of invalid packets received";
       }
       leaf ttl-expired {
-        type uint48;
+        type uint32;
         description
           "Number of packets received with expired TTL";
       }
     }
     leaf no-route {
-      type uint48;
+      type uint32;
       description
         "Number of packets with no route";
     }
     leaf invalid-sid {
-      type uint48;
+      type uint32;
       description
         "Number of packets with invalid SID";
     }
     leaf invalid-label {
-      type uint48;
+      type uint32;
       description
         "Number of packets with invalid label";
     }
@@ -787,12 +749,12 @@ module ietf-packet-discard-reporting {
     description
       "Hardware error counters";
     leaf packets {
-      type uint48;
+      type uint32;
       description
         "Number of local errored packets";
     }
     leaf parity-error {
-      type uint48;
+      type uint32;
       description
         "Number of packets with parity error";
     }
@@ -825,7 +787,7 @@ module ietf-packet-discard-reporting {
       description
         "Layer 2 transmit frame error counters";
       leaf frames {
-        type uint48;
+        type uint32;
         description
           "Number of errored L2 frames during transmission";
       }
@@ -839,7 +801,7 @@ module ietf-packet-discard-reporting {
       description
         "Layer 3 transmit packet error counters";
       leaf packets {
-        type uint48;
+        type uint32;
         description
           "Number of errored L3 packets during transmission";
       }
@@ -865,12 +827,12 @@ module ietf-packet-discard-reporting {
     description
       "Layer 2 policy ingress packet discard counters";
     leaf frames {
-      type uint48;
+      type uint32;
       description
         "Number of L2 frames discarded due to policy";
     }
     leaf acl {
-      type uint48;
+      type uint32;
       description
         "Number of frames discarded due to L2 ACL";
     }
@@ -880,32 +842,32 @@ module ietf-packet-discard-reporting {
     description
       "Layer 3 policy ingress packet discard counters";
     leaf packets {
-      type uint48;
+      type uint32;
       description
         "Number of L3 packets discarded due to policy";
     }
     leaf acl {
-      type uint48;
+      type uint32;
       description
         "Number of packets discarded due to L3 ACL";
     }
     container policer {
       description
         "Policer ingress packet discard counters";
-      uses basic-packets-bytes-48;
+      uses basic-packets-bytes-32;
     }
     leaf null-route {
-      type uint48;
+      type uint32;
       description
         "Number of packets discarded due to null route";
     }
     leaf rpf {
-      type uint48;
+      type uint32;
       description
         "Number of packets discarded due to RPF check failure";
     }
     leaf ddos {
-      type uint48;
+      type uint32;
       description
         "Number of packets discarded due to DDoS protection";
     }
@@ -930,14 +892,14 @@ module ietf-packet-discard-reporting {
     description
       "Layer 3 policy egress packet discard counters";
     leaf acl {
-      type uint48;
+      type uint32;
       description
         "Number of packets discarded due to L3 egress ACL";
     }
     container policer {
       description
         "Policer egress packet discard counters";
-      uses basic-packets-bytes-48;
+      uses basic-packets-bytes-32;
     }
   }
 
@@ -1040,7 +1002,6 @@ module ietf-packet-discard-reporting {
   /*
    * Main Structure
    */
-
   sx:structure packet-discard-reporting {
     description
       "Container for packet discard reporting data.";
@@ -1105,7 +1066,7 @@ Email: nchachmo@cisco.com
 
 </section>
 <section anchor="acknowledgements"><name>Acknowledgments</name>
-<t>The content of this draft has benefitted from feedback from JR Rivers, Ronan Waide, Chris DeBruin, and Marcoz Sanz.</t>
+<t>The content of this document has benefitted from feedback from JR Rivers, Ronan Waide, Chris DeBruin, and Marcoz Sanz.</t>
 
 </section>
 
@@ -1198,68 +1159,6 @@ Email: nchachmo@cisco.com
 
 
 
-<reference anchor='RFC1213'>
-  <front>
-    <title>Management Information Base for Network Management of TCP/IP-based internets: MIB-II</title>
-    <author fullname='K. McCloghrie' initials='K.' surname='McCloghrie'/>
-    <author fullname='M. Rose' initials='M.' surname='Rose'/>
-    <date month='March' year='1991'/>
-    <abstract>
-      <t>This memo defines the second version of the Management Information Base (MIB-II) for use with network management protocols in TCP/IP-based internets. [STANDARDS-TRACK]</t>
-    </abstract>
-  </front>
-  <seriesInfo name='STD' value='17'/>
-  <seriesInfo name='RFC' value='1213'/>
-  <seriesInfo name='DOI' value='10.17487/RFC1213'/>
-</reference>
-
-<reference anchor='RFC1157'>
-  <front>
-    <title>Simple Network Management Protocol (SNMP)</title>
-    <author fullname='J.D. Case' initials='J.D.' surname='Case'/>
-    <author fullname='M. Fedor' initials='M.' surname='Fedor'/>
-    <author fullname='M.L. Schoffstall' initials='M.L.' surname='Schoffstall'/>
-    <author fullname='J. Davin' initials='J.' surname='Davin'/>
-    <date month='May' year='1990'/>
-    <abstract>
-      <t>This RFC is a re-release of RFC 1098, with a changed "Status of this Memo" section plus a few minor typographical corrections. This memo defines a simple protocol by which management information for a network element may be inspected or altered by logically remote users. [STANDARDS-TRACK]</t>
-    </abstract>
-  </front>
-  <seriesInfo name='RFC' value='1157'/>
-  <seriesInfo name='DOI' value='10.17487/RFC1157'/>
-</reference>
-
-<reference anchor='RFC3444'>
-  <front>
-    <title>On the Difference between Information Models and Data Models</title>
-    <author fullname='A. Pras' initials='A.' surname='Pras'/>
-    <author fullname='J. Schoenwaelder' initials='J.' surname='Schoenwaelder'/>
-    <date month='January' year='2003'/>
-    <abstract>
-      <t>There has been ongoing confusion about the differences between Information Models and Data Models for defining managed objects in network management. This document explains the differences between these terms by analyzing how existing network management model specifications (from the IETF and other bodies such as the International Telecommunication Union (ITU) or the Distributed Management Task Force (DMTF)) fit into the universe of Information Models and Data Models. This memo documents the main results of the 8th workshop of the Network Management Research Group (NMRG) of the Internet Research Task Force (IRTF) hosted by the University of Texas at Austin. This memo provides information for the Internet community.</t>
-    </abstract>
-  </front>
-  <seriesInfo name='RFC' value='3444'/>
-  <seriesInfo name='DOI' value='10.17487/RFC3444'/>
-</reference>
-
-<reference anchor='RFC5153'>
-  <front>
-    <title>IP Flow Information Export (IPFIX) Implementation Guidelines</title>
-    <author fullname='E. Boschi' initials='E.' surname='Boschi'/>
-    <author fullname='L. Mark' initials='L.' surname='Mark'/>
-    <author fullname='J. Quittek' initials='J.' surname='Quittek'/>
-    <author fullname='M. Stiemerling' initials='M.' surname='Stiemerling'/>
-    <author fullname='P. Aitken' initials='P.' surname='Aitken'/>
-    <date month='April' year='2008'/>
-    <abstract>
-      <t>The IP Flow Information Export (IPFIX) protocol defines how IP Flow information can be exported from routers, measurement probes, or other devices. This document provides guidelines for the implementation and use of the IPFIX protocol. Several sets of guidelines address Template management, transport-specific issues, implementation of Exporting and Collecting Processes, and IPFIX implementation on middleboxes (such as firewalls, network address translators, tunnel endpoints, packet classifiers, etc.). This memo provides information for the Internet community.</t>
-    </abstract>
-  </front>
-  <seriesInfo name='RFC' value='5153'/>
-  <seriesInfo name='DOI' value='10.17487/RFC5153'/>
-</reference>
-
 <reference anchor='RFC6241'>
   <front>
     <title>Network Configuration Protocol (NETCONF)</title>
@@ -1274,19 +1173,6 @@ Email: nchachmo@cisco.com
   </front>
   <seriesInfo name='RFC' value='6241'/>
   <seriesInfo name='DOI' value='10.17487/RFC6241'/>
-</reference>
-
-<reference anchor='RFC7950'>
-  <front>
-    <title>The YANG 1.1 Data Modeling Language</title>
-    <author fullname='M. Bjorklund' initials='M.' role='editor' surname='Bjorklund'/>
-    <date month='August' year='2016'/>
-    <abstract>
-      <t>YANG is a data modeling language used to model configuration data, state data, Remote Procedure Calls, and notifications for network management protocols. This document describes the syntax and semantics of version 1.1 of the YANG language. YANG version 1.1 is a maintenance release of the YANG language, addressing ambiguities and defects in the original specification. There are a small number of backward incompatibilities from YANG version 1. This document also specifies the YANG mappings to the Network Configuration Protocol (NETCONF).</t>
-    </abstract>
-  </front>
-  <seriesInfo name='RFC' value='7950'/>
-  <seriesInfo name='DOI' value='10.17487/RFC7950'/>
 </reference>
 
 
@@ -1335,6 +1221,21 @@ Email: nchachmo@cisco.com
   <seriesInfo name='DOI' value='10.17487/RFC8289'/>
 </reference>
 
+<reference anchor='RFC1213'>
+  <front>
+    <title>Management Information Base for Network Management of TCP/IP-based internets: MIB-II</title>
+    <author fullname='K. McCloghrie' initials='K.' surname='McCloghrie'/>
+    <author fullname='M. Rose' initials='M.' surname='Rose'/>
+    <date month='March' year='1991'/>
+    <abstract>
+      <t>This memo defines the second version of the Management Information Base (MIB-II) for use with network management protocols in TCP/IP-based internets. [STANDARDS-TRACK]</t>
+    </abstract>
+  </front>
+  <seriesInfo name='STD' value='17'/>
+  <seriesInfo name='RFC' value='1213'/>
+  <seriesInfo name='DOI' value='10.17487/RFC1213'/>
+</reference>
+
 <reference anchor='RFC7270'>
   <front>
     <title>Cisco-Specific Information Elements Reused in IP Flow Information Export (IPFIX)</title>
@@ -1350,19 +1251,18 @@ Email: nchachmo@cisco.com
   <seriesInfo name='DOI' value='10.17487/RFC7270'/>
 </reference>
 
-<reference anchor='RFC8040'>
+<reference anchor='RFC3444'>
   <front>
-    <title>RESTCONF Protocol</title>
-    <author fullname='A. Bierman' initials='A.' surname='Bierman'/>
-    <author fullname='M. Bjorklund' initials='M.' surname='Bjorklund'/>
-    <author fullname='K. Watsen' initials='K.' surname='Watsen'/>
-    <date month='January' year='2017'/>
+    <title>On the Difference between Information Models and Data Models</title>
+    <author fullname='A. Pras' initials='A.' surname='Pras'/>
+    <author fullname='J. Schoenwaelder' initials='J.' surname='Schoenwaelder'/>
+    <date month='January' year='2003'/>
     <abstract>
-      <t>This document describes an HTTP-based protocol that provides a programmatic interface for accessing data defined in YANG, using the datastore concepts defined in the Network Configuration Protocol (NETCONF).</t>
+      <t>There has been ongoing confusion about the differences between Information Models and Data Models for defining managed objects in network management. This document explains the differences between these terms by analyzing how existing network management model specifications (from the IETF and other bodies such as the International Telecommunication Union (ITU) or the Distributed Management Task Force (DMTF)) fit into the universe of Information Models and Data Models. This memo documents the main results of the 8th workshop of the Network Management Research Group (NMRG) of the Internet Research Task Force (IRTF) hosted by the University of Texas at Austin. This memo provides information for the Internet community.</t>
     </abstract>
   </front>
-  <seriesInfo name='RFC' value='8040'/>
-  <seriesInfo name='DOI' value='10.17487/RFC8040'/>
+  <seriesInfo name='RFC' value='3444'/>
+  <seriesInfo name='DOI' value='10.17487/RFC3444'/>
 </reference>
 
 <reference anchor='RFC8340'>
@@ -1380,6 +1280,53 @@ Email: nchachmo@cisco.com
   <seriesInfo name='DOI' value='10.17487/RFC8340'/>
 </reference>
 
+<reference anchor='RFC1157'>
+  <front>
+    <title>Simple Network Management Protocol (SNMP)</title>
+    <author fullname='J.D. Case' initials='J.D.' surname='Case'/>
+    <author fullname='M. Fedor' initials='M.' surname='Fedor'/>
+    <author fullname='M.L. Schoffstall' initials='M.L.' surname='Schoffstall'/>
+    <author fullname='J. Davin' initials='J.' surname='Davin'/>
+    <date month='May' year='1990'/>
+    <abstract>
+      <t>This RFC is a re-release of RFC 1098, with a changed "Status of this Memo" section plus a few minor typographical corrections. This memo defines a simple protocol by which management information for a network element may be inspected or altered by logically remote users. [STANDARDS-TRACK]</t>
+    </abstract>
+  </front>
+  <seriesInfo name='RFC' value='1157'/>
+  <seriesInfo name='DOI' value='10.17487/RFC1157'/>
+</reference>
+
+<reference anchor='RFC8040'>
+  <front>
+    <title>RESTCONF Protocol</title>
+    <author fullname='A. Bierman' initials='A.' surname='Bierman'/>
+    <author fullname='M. Bjorklund' initials='M.' surname='Bjorklund'/>
+    <author fullname='K. Watsen' initials='K.' surname='Watsen'/>
+    <date month='January' year='2017'/>
+    <abstract>
+      <t>This document describes an HTTP-based protocol that provides a programmatic interface for accessing data defined in YANG, using the datastore concepts defined in the Network Configuration Protocol (NETCONF).</t>
+    </abstract>
+  </front>
+  <seriesInfo name='RFC' value='8040'/>
+  <seriesInfo name='DOI' value='10.17487/RFC8040'/>
+</reference>
+
+<reference anchor='RFC7011'>
+  <front>
+    <title>Specification of the IP Flow Information Export (IPFIX) Protocol for the Exchange of Flow Information</title>
+    <author fullname='B. Claise' initials='B.' role='editor' surname='Claise'/>
+    <author fullname='B. Trammell' initials='B.' role='editor' surname='Trammell'/>
+    <author fullname='P. Aitken' initials='P.' surname='Aitken'/>
+    <date month='September' year='2013'/>
+    <abstract>
+      <t>This document specifies the IP Flow Information Export (IPFIX) protocol, which serves as a means for transmitting Traffic Flow information over the network. In order to transmit Traffic Flow information from an Exporting Process to a Collecting Process, a common representation of flow data and a standard means of communicating them are required. This document describes how the IPFIX Data and Template Records are carried over a number of transport protocols from an IPFIX Exporting Process to an IPFIX Collecting Process. This document obsoletes RFC 5101.</t>
+    </abstract>
+  </front>
+  <seriesInfo name='STD' value='77'/>
+  <seriesInfo name='RFC' value='7011'/>
+  <seriesInfo name='DOI' value='10.17487/RFC7011'/>
+</reference>
+
 
 <reference anchor='I-D.ietf-netmod-rfc8407bis'>
    <front>
@@ -1393,7 +1340,7 @@ Email: nchachmo@cisco.com
       <author fullname='Qin Wu' initials='Q.' surname='Wu'>
          <organization>Huawei</organization>
       </author>
-      <date day='5' month='July' year='2024'/>
+      <date day='10' month='September' year='2024'/>
       <abstract>
 	 <t>   This memo provides guidelines for authors and reviewers of
    specifications containing YANG modules, including IANA-maintained
@@ -1411,7 +1358,7 @@ Email: nchachmo@cisco.com
 	 </t>
       </abstract>
    </front>
-   <seriesInfo name='Internet-Draft' value='draft-ietf-netmod-rfc8407bis-14'/>
+   <seriesInfo name='Internet-Draft' value='draft-ietf-netmod-rfc8407bis-15'/>
    
 </reference>
 
@@ -1422,7 +1369,7 @@ Email: nchachmo@cisco.com
 
 
 <section anchor="where-do-packets-get-dropped"><name>Where do packets get dropped?</name>
-<t><xref target="ex-drop"/> depicts an example of where and why packets may be discarded in a typical single ASIC, shared buffered type device, where packets ingress on the left and egress on the right.</t>
+<t><xref target="ex-drop"/> depicts an example of where and why packets may be discarded in a typical single-ASIC, shared-buffered type device. Packets ingress on the left and egress on the right.</t>
 
 <figure title="Example of where packets get dropped" anchor="ex-drop"><artwork><![CDATA[
                                                       +----------+
@@ -1492,16 +1439,16 @@ Unintended                 error/rx/l2   error/l3/rx   no_buffer     error/l3/tx
 <t>This appendix captures the authors' experience gained from implementing and applying this information model across multiple vendors' platforms, as guidance for future implementers.</t>
 
 <t><list style="numbers">
-  <t>The number and granularity of classes described in Section 3 represent a compromise.  It aims to offer sufficient detail to enable appropriate automated actions while avoiding excessive detail, which may hinder quick problem identification.  Additionally, it helps constrain the quantity of data produced per interface to constrain data volume and device CPU impacts.  Although further granularity is possible, the scheme described has generally proven to be sufficient for the task of auto-mitigating unintended packet loss.</t>
+  <t>The number and granularity of classes described in Section 3 represent a compromise.  It aims to offer sufficient detail to enable appropriate automated actions while avoiding excessive detail, which may hinder quick problem identification.  Additionally, it helps limit the quantity of data produced per interface, thus constraining the data volume and device CPU impacts.  Although further granularity is possible, the scheme described has generally proven to be sufficient for the task of auto-mitigating unintended packet loss.</t>
   <t>There are many possible ways to define the discard classification tree.  For example, we could have used a multi-rooted tree, rooted in each protocol.  Instead, we opted to define a tree where protocol discards and causal discards are accounted for orthogonally.  This decision reduces the number of combinations of classes and has proven sufficient for determining mitigation actions.</t>
   <t>NoBuffer discards can be realized differently with different memory architectures. Whether a NoBuffer discard is attributed to ingress or egress can differ accordingly.  For successful auto-mitigation, discards due to egress interface congestion should be reported on egress, while discards due to device-level congestion (e.g. due to exceeding the device forwarding rate) should be reported on ingress.</t>
   <t>Platforms often account for the number of packets discarded where the TTL has expired (or Hop Limit exceeded), and the device CPU has returned an ICMP Time Exceeded message.  There is typically a policer applied to limit the number of packets sent to the device CPU, however, which implicitly limits the rate of TTL discards that are processed.  One method to account for all packet discards due to TTL expired, even those that are dropped by a policer when being forwarded to the CPU, is to use accounting of all ingress packets received with TTL=1.</t>
   <t>Where no route discards are implemented with a default null route, separate discard accounting is required for any explicit null routes configured, in order to differentiate between interface/ingress/discards/policy/null_route/packets and interface/ingress/discards/errors/no_route/packets.</t>
   <t>It is useful to account separately for transit packets discarded by ACLs or policers, and packets discarded by ACLs or policers which limit the number of packets to the device control plane.</t>
   <t>It is not possible to identify a configuration error - e.g., when intended discards are unintended - with device packet loss metrics alone.  For example, additional context is needed to determine if ACL discards are intended or due to a misconfigured ACL, i.e., with configuration validation before deployment or by detecting a significant change in ACL discards after a configuration change compared to before.</t>
-  <t>Where traffic byte counters need to be 64-bit, packet and discard counters that increase at a lower rate may be encoded in fewer bits, e.g., 48-bit.</t>
+  <t>Where traffic byte counters need to be 64-bit, packet and discard counters that increase at a lower rate may be encoded in fewer bits, e.g., 32-bit.</t>
   <t>Aggregate counters need to be able to deal with the possibility of discontinuities in the underlying counters.</t>
-  <t>In cases where the reporting device is the source or destination of a tunnel, the ingress protocol for a packet may differ from the egress protocol; if IPv4 is tunneled over IPv6 for example.  Some implementations may attribute egress discards to the ingress protocol.</t>
+  <t>In cases where the reporting device is the source or destination of a tunnel, the ingress protocol for a packet may differ from the egress protocol; if IPv4 is tunnelled over IPv6 for example.  Some implementations may attribute egress discards to the ingress protocol.</t>
   <t>While the classification tree is seven layers deep, a minimal implementation may only implement the top six layers.</t>
 </list></t>
 
@@ -1511,242 +1458,244 @@ Unintended                 error/rx/l2   error/l3/rx   no_buffer     error/l3/tx
   </back>
 
 <!-- ##markdown-source:
-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
-9QQGhAwERlz/AzG0cxglrQAA
+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
 
 -->
 
