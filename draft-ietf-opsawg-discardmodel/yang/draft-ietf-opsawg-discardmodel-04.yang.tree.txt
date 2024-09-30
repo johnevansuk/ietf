@@ -9,8 +9,8 @@ module: ietf-packet-discard-reporting
        |  |  |  +-- frames?   uint64
        |  |  |  +-- bytes?    uint64
        |  |  +-- l3
-       |  |  |  +-- address-family-stats* [address-family]
-       |  |  |     +-- address-family    iana-rt-types:address-family
+       |  |  |  +-- address-family-stat* [address-family]
+       |  |  |     +-- address-family    identityref
        |  |  |     +-- packets?          uint64
        |  |  |     +-- bytes?            uint64
        |  |  |     +-- unicast
@@ -29,8 +29,8 @@ module: ietf-packet-discard-reporting
        |     |  +-- frames?   uint64
        |     |  +-- bytes?    uint64
        |     +-- l3
-       |     |  +-- address-family-stats* [address-family]
-       |     |     +-- address-family    iana-rt-types:address-family
+       |     |  +-- address-family-stat* [address-family]
+       |     |     +-- address-family    identityref
        |     |     +-- packets?          uint64
        |     |     +-- bytes?            uint64
        |     |     +-- unicast
@@ -84,8 +84,8 @@ module: ietf-packet-discard-reporting
        |  |  |  +-- frames?   uint64
        |  |  |  +-- bytes?    uint64
        |  |  +-- l3
-       |  |  |  +-- address-family-stats* [address-family]
-       |  |  |     +-- address-family    iana-rt-types:address-family
+       |  |  |  +-- address-family-stat* [address-family]
+       |  |  |     +-- address-family    identityref
        |  |  |     +-- packets?          uint64
        |  |  |     +-- bytes?            uint64
        |  |  |     +-- unicast
@@ -104,8 +104,8 @@ module: ietf-packet-discard-reporting
        |     |  +-- frames?   uint64
        |     |  +-- bytes?    uint64
        |     +-- l3
-       |     |  +-- address-family-stats* [address-family]
-       |     |     +-- address-family    iana-rt-types:address-family
+       |     |  +-- address-family-stat* [address-family]
+       |     |     +-- address-family    identityref
        |     |     +-- packets?          uint64
        |     |     +-- bytes?            uint64
        |     |     +-- unicast
