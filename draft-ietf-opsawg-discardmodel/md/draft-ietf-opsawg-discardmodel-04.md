@@ -185,7 +185,7 @@ Each sub-type may further contain specific reasons for discards, providing more 
        |  |  |  +-- bytes?    uint64
        |  |  +-- l3
        |  |  |  +-- address-family-stat* [address-family]
-       |  |  |     +-- address-family    iana-rt-types:address-family
+       |  |  |     +-- address-family    identityref
        |  |  |     +-- packets?          uint64
        |  |  |     +-- bytes?            uint64
        |  |  |     +-- unicast
@@ -205,7 +205,7 @@ Each sub-type may further contain specific reasons for discards, providing more 
        |     |  +-- bytes?    uint64
        |     +-- l3
        |     |  +-- address-family-stat* [address-family]
-       |     |     +-- address-family    iana-rt-types:address-family
+       |     |     +-- address-family    identityref
        |     |     +-- packets?          uint64
        |     |     +-- bytes?            uint64
        |     |     +-- unicast
@@ -260,7 +260,7 @@ Each sub-type may further contain specific reasons for discards, providing more 
        |  |  |  +-- bytes?    uint64
        |  |  +-- l3
        |  |  |  +-- address-family-stat* [address-family]
-       |  |  |     +-- address-family    iana-rt-types:address-family
+       |  |  |     +-- address-family    identityref
        |  |  |     +-- packets?          uint64
        |  |  |     +-- bytes?            uint64
        |  |  |     +-- unicast
@@ -280,7 +280,7 @@ Each sub-type may further contain specific reasons for discards, providing more 
        |     |  +-- bytes?    uint64
        |     +-- l3
        |     |  +-- address-family-stat* [address-family]
-       |     |     +-- address-family    iana-rt-types:address-family
+       |     |     +-- address-family    identityref
        |     |     +-- packets?          uint64
        |     |     +-- bytes?            uint64
        |     |     +-- unicast
@@ -406,12 +406,6 @@ module ietf-packet-discard-reporting {
   namespace
     "urn:ietf:params:xml:ns:yang:ietf-packet-discard-reporting";
   prefix plr;
-
-  import iana-routing-types {
-    prefix "iana-rt-types";
-    reference
-      "RFC 8294: Common YANG Data Types for the Routing Area";
-  }
 
   import ietf-yang-structure-ext {
     prefix sx;
@@ -557,27 +551,52 @@ module ietf-packet-discard-reporting {
     uses basic-frames-bytes-64;
   }
 
+  identity address-family {
+    description
+      "Defines a type for the address family.";
+  }
+
+  identity ipv4 {
+    base address-family;
+    description
+      "Identity for an IPv4 address family.";
+  }
+
+  identity ipv6 {
+    base address-family;
+    description
+      "Identity for an IPv6 address family.";
+  }
+
+  identity all {
+    base address-family;
+    description
+      "Identity for all address families.";
+  }
+
   grouping ip {
     description
       "Layer 3 traffic counters per address family.";
     list address-family-stat {
       key "address-family";
       description
-        "Per address family traffic counters.";
+        "Reports per address family traffic counters.";
       leaf address-family {
-        type iana-rt-types:address-family;
+        type identityref {
+          base address-family;
+        }
         description
-          "Specifies the address family.";
+          "Specifies an address family.";
       }
       uses basic-packets-bytes-64;
       container unicast {
         description
-          "Unicast traffic counters.";
+          "Reports unicast traffic counters.";
         uses basic-packets-bytes-64;
       }
       container multicast {
         description
-          "Multicast traffic counters.";
+          "Reports multicast traffic counters.";
         uses basic-packets-bytes-64;
       }
     }
@@ -854,11 +873,10 @@ module ietf-packet-discard-reporting {
         "The number of packets discarded due to
          Layer 3 ACL.";
     }
-    leaf policer {
-      type uint32;
+    container policer {
       description
-        "The number of packets discarded due to violating a
-         policer.";
+        "Ingress policer violations discard counters.";
+      uses basic-packets-bytes-32;
     }
     leaf null-route {
       type uint32;
@@ -905,11 +923,10 @@ module ietf-packet-discard-reporting {
         "The number of packets discarded due to Layer 3
          egress ACL.";
     }
-    leaf policer {
-      type uint32;
+    container policer {
       description
-        "The number of packets discarded due to violating a
-         policer.";
+        "Egress policer violations discard counters.";
+      uses basic-packets-bytes-32;
     }
   }
 
