@@ -380,12 +380,7 @@ Example Signal-Cause-Mitigation Mapping {#mapping}
 | ingress/discards/errors/l3/no-route       | Invalid destination | >Baseline  | O(10min) | N           | Escalate to operator  |
 | ingress/discards/errors/local             | Device errors       | >Baseline  | O(1min)  | Y           | Take device/out-of-service|
 | egress/discards/no-buffer                 | Congestion          | <=Baseline |          | N           | no action             |
-| egress/discards/no-buffer                 | Congestion          | >Baseline  | O(1min)  | Y           | Bring capacity back   |
-|                                           |                     |            |          |             | into service or move  |
-|                                           |                     |            |          |             | traffic               |
-+-------------------------------------------+---------------------+------------+----------+-------------+-----------------------+
-
-~~~~~~~~~~
+| egress/discards/no_buffer                 | Congestion          | >Baseline  | O(1min)  | Y           | Bring capacity back into service or move traffic |
 {: #ex-table title="Example Signal-Cause-Mitigation Mapping"}
 
 The 'Baseline' in the 'Discard Rate' column is both discard class and network dependent.
