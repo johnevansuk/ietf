@@ -171,9 +171,9 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
 
 
    Intended packet loss refers to packet discards that occur due to
-   deliberate network policies or configurations—such as Access Control
-   Lists (ACLs) or policing mechanisms—designed to enforce security or
-   quality of service.
+   deliberate network policies or configurations - such as Access
+   Control Lists (ACLs) or policing mechanisms - designed to enforce
+   security or quality of service.
 
    Unintended packet loss refers to packet discards resulting from
    network errors, misconfigurations, hardware failures, or other
@@ -265,7 +265,7 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
    NETCONF [RFC6241], RESTCONF [RFC8040], or IPFIX [RFC7011].  Second,
    this approach ensures a lossless translation from the information
    model to a YANG data model, preserving both semantics and structure.
-   Lastly, YANG capitalises on the community’s broad familiarity with
+   Lastly, YANG capitalises on the community's broad familiarity with
    its syntax and use, facilitating easier adoption and evolution.
 
 4.2.  Structure
@@ -338,6 +338,8 @@ Evans, et al.             Expires 23 March 2025                 [Page 6]
 Internet-Draft       IM for Packet Discard Reporting      September 2024
 
 
+   module: ietf-packet-discard-reporting
+
      structure packet-discard-reporting:
        +-- interface* [name]
           +-- name             string
@@ -384,8 +386,6 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
           |     |  |     +-- crc-error?       uint32
           |     |  |     +-- invalid-mac?     uint32
           |     |  |     +-- invalid-vlan?    uint32
-          |     |  |     +-- invalid-frame?   uint32
-          |     |  +-- l3
 
 
 
@@ -394,6 +394,8 @@ Evans, et al.             Expires 23 March 2025                 [Page 7]
 Internet-Draft       IM for Packet Discard Reporting      September 2024
 
 
+          |     |  |     +-- invalid-frame?   uint32
+          |     |  +-- l3
           |     |  |  +-- rx
           |     |  |  |  +-- packets?          uint32
           |     |  |  |  +-- checksum-error?   uint32
@@ -440,8 +442,6 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
           |  |  |     +-- multicast
           |  |  |        +-- packets?   uint64
           |  |  |        +-- bytes?     uint64
-          |  |  +-- qos
-          |  |     +-- class* [id]
 
 
 
@@ -450,6 +450,8 @@ Evans, et al.             Expires 23 March 2025                 [Page 8]
 Internet-Draft       IM for Packet Discard Reporting      September 2024
 
 
+          |  |  +-- qos
+          |  |     +-- class* [id]
           |  |        +-- id         string
           |  |        +-- packets?   uint64
           |  |        +-- bytes?     uint64
@@ -496,8 +498,6 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
                    +-- bytes?     uint32
                    +-- policy
                       +-- packets?   uint32
-
-
 
 
 
@@ -682,7 +682,7 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
    The "ietf-packet-discard-reporting" uses the "sx" structure defined
    in [RFC8791].
 
-   <CODE BEGINS>
+   <CODE BEGINS> file "ietf-packet-discard-reporting@2024-06-04.yang"
    module ietf-packet-discard-reporting {
      yang-version 1.1;
      namespace
