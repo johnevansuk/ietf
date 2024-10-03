@@ -100,7 +100,7 @@ Terminology {#terminology}
 
 A packet discard is any packet dropped by a device, whether intentionally or unintentionally.
 
-Intended packet loss refers to packet discards that occur due to deliberate network policies or configurations—such as Access Control Lists (ACLs) or policing mechanisms—designed to enforce security or quality of service.
+Intended packet loss refers to packet discards that occur due to deliberate network policies or configurations - such as Access Control Lists (ACLs) or policing mechanisms - designed to enforce security or quality of service.
 
 Unintended packet loss refers to packet discards resulting from network errors, misconfigurations, hardware failures, or other anomalies not aligned with the network operator's intended behaviour. These losses negatively impact network performance and service delivery.
 
@@ -143,7 +143,7 @@ Information Model   {#model}
 Design Rationale {#rationale}
 ----------------
 
-This document uses YANG {{?RFC6020}} to represent the information model for three main reasons. First, YANG, along with its data structure extensions {{!RFC8791}}, allows designers to define the model in an abstract way, decoupled from specific implementations. This abstraction ensures consistency and provides flexibility for diverse potential implementations, with the structure and groupings easily adaptable to data models such as those specific to SNMP {{?RFC1157}}, NETCONF {{?RFC6241}}, RESTCONF {{?RFC8040}}, or IPFIX {{?RFC7011}}.  Second, this approach ensures a lossless translation from the information model to a YANG data model, preserving both semantics and structure. Lastly, YANG capitalises on the community’s broad familiarity with its syntax and use, facilitating easier adoption and evolution.
+This document uses YANG {{?RFC6020}} to represent the information model for three main reasons. First, YANG, along with its data structure extensions {{!RFC8791}}, allows designers to define the model in an abstract way, decoupled from specific implementations. This abstraction ensures consistency and provides flexibility for diverse potential implementations, with the structure and groupings easily adaptable to data models such as those specific to SNMP {{?RFC1157}}, NETCONF {{?RFC6241}}, RESTCONF {{?RFC8040}}, or IPFIX {{?RFC7011}}.  Second, this approach ensures a lossless translation from the information model to a YANG data model, preserving both semantics and structure. Lastly, YANG capitalises on the community's broad familiarity with its syntax and use, facilitating easier adoption and evolution.
 
 Structure {#structure}
 ---------
