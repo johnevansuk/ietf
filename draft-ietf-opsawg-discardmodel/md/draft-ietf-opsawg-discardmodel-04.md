@@ -149,10 +149,11 @@ Structure {#structure}
 ---------
 The classification scheme is structured as a hierarchical tree that follows the structure: component/direction/type/layer/sub-type/sub-sub-type/.../metric.  The elements of the tree are defined as follows:
 
-- Component: Specifies where in the device the discard is accounted. It can be:
-  - interface: Discards associated with a specific network interface.
-  - control-plane: Discards related to the device's control plane.
-  - flow: Discards associated with a specific traffic flow.
+- Component: Specifies where in the device the discards are accounted. It can be:
+  - interface: Discards of traffic to or from a specific network interface.
+  - device: Discards of traffic transiting the device.
+  - control-plane: Discards of traffic to or from the device's control plane.
+  - flow: Discards of traffic associated with a specific traffic flow.
 
 - Direction:
   - ingress: Discards occurring on incoming packets or frames.
