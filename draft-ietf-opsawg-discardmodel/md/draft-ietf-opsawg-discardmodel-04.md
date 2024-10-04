@@ -342,7 +342,7 @@ discards/policy/:
 : These are intended discards, meaning packets dropped by a device due to a configured policy. There are multiple sub-classes.
 
 discards/error/l2/rx/:  
-: Frames discarded due to errors in the received L2 frame. There are multiple sub-classes, such as those resulting from failing CRC, invalid header, invalid MAC address, or invalid VLAN.
+: Frames discarded due to errors in the received Layer 2 frame. There are multiple sub-classes, such as those resulting from failing CRC, invalid header, invalid MAC address, or invalid VLAN.
 
 discards/error/l3/rx/:  
 : These are discards which occur due to errors in the received packet, indicating an upstream problem rather than an issue with the device dropping the errored packets. There are multiple sub-classes, including header checksum errors, MTU exceeded, and invalid packet, i.e. due to incorrect version, incorrect header length, or invalid options.
