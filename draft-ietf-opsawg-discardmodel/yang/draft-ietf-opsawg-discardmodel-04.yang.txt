@@ -332,12 +332,12 @@ module ietf-packet-discard-reporting {
         description
           "The number of invalid packets discarded due to other reasons.";
       }
-      leaf ttl-expired {
-        type uint32;
-        description
-          "The number of received packets discarded due to expired
-           TTL.";
-      }
+    }
+    leaf ttl-expired {
+      type uint32;
+      description
+        "The number of received packets discarded due to expired
+         TTL.";
     }
     leaf no-route {
       type uint32;
