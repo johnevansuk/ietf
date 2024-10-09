@@ -70,7 +70,7 @@ module ietf-packet-discard-reporting {
 
   grouping basic-packets-bytes-64 {
     description
-      "Grouping for 64-bit packet and byte counters.";
+      "Grouping for 64-bit Layer 3 packet and byte counters.";
     uses basic-packets-64;
     leaf bytes {
       type uint64;
@@ -81,7 +81,7 @@ module ietf-packet-discard-reporting {
 
   grouping basic-frames-64 {
     description
-      "Grouping for 64-bit frame counters.";
+      "Grouping for 64-bit Layer 2 frame counters.";
     leaf frames {
       type uint64;
       description
@@ -188,12 +188,12 @@ module ietf-packet-discard-reporting {
       uses basic-packets-bytes-64;
       container unicast {
         description
-          "Reports unicast traffic counters.";
+          "Unicast traffic counters.";
         uses basic-packets-bytes-64;
       }
       container multicast {
         description
-          "Reports multicast traffic counters.";
+          "Multicast traffic counters.";
         uses basic-packets-bytes-64;
       }
     }
@@ -225,7 +225,7 @@ module ietf-packet-discard-reporting {
 
   grouping traffic {
     description
-      "Overall traffic counters.";
+      "All traffic counters.";
     container l2 {
       description
         "Layer 2 traffic counters.";
@@ -299,7 +299,7 @@ module ietf-packet-discard-reporting {
       leaf invalid-frame {
         type uint32;
         description
-          "The number of invalid frames discarded due to other reasons.";
+          "The number of invalid frames discarded due to other reasons, not limited to: malformed frames, frame-size violations.";
       }
     }
   }
@@ -330,7 +330,7 @@ module ietf-packet-discard-reporting {
       leaf invalid-packet {
         type uint32;
         description
-          "The number of invalid packets discarded due to other reasons.";
+          "The number of invalid packets discarded due to other reasons, not limited to: invalid packet length, invalid header fields, invalid options, invalid protocol version, invalid flags or control bits, malformed packets.";
       }
     }
     leaf ttl-expired {
@@ -342,7 +342,7 @@ module ietf-packet-discard-reporting {
     leaf no-route {
       type uint32;
       description
-        "The number of packets discarded due to no route.";
+        "The number of packets discarded due to not matching a valid route.";
     }
     leaf invalid-sid {
       type uint32;
@@ -450,7 +450,7 @@ module ietf-packet-discard-reporting {
       type uint32;
       description
         "The number of frames discarded due to
-         Layer 2 ACL.";
+         Layer 2 ACLs.";
     }
   }
 
@@ -468,7 +468,7 @@ module ietf-packet-discard-reporting {
       type uint32;
       description
         "The number of packets discarded due to
-         Layer 3 ACL.";
+         Layer 3 ACLs.";
     }
     container policer {
       description
@@ -485,13 +485,13 @@ module ietf-packet-discard-reporting {
       type uint32;
       description
         "The number of packets discarded due to failing Reverse
-         Path Forwarding (RPF) check failure.";
+         Path Forwarding (RPF) check.";
     }
     leaf ddos {
       type uint32;
       description
         "The number of packets discarded due to DDoS
-         protection.";
+         protection policies.";
     }
   }
 
@@ -518,7 +518,7 @@ module ietf-packet-discard-reporting {
       type uint32;
       description
         "The number of packets discarded due to Layer 3
-         egress ACL.";
+         egress ACLs.";
     }
     container policer {
       description
@@ -539,7 +539,7 @@ module ietf-packet-discard-reporting {
 
   grouping interface {
     description
-      "Interface-level packet traffic and discard counters.";
+      "Interface-level traffic and discard counters.";
     container ingress {
       description
         "Ingress counters.";
@@ -563,17 +563,17 @@ module ietf-packet-discard-reporting {
         }
         container errors {
           description
-            "Ingress packet error discard counters.";
+            "Ingress error discard counters.";
           uses errors-rx;
         }
         container policy {
           description
-            "Policy-related ingress packet discard counters.";
+            "Ingress policy-related discard counters.";
           uses policy-rx;
         }
         container no-buffer {
           description
-            "Ingress packet discard counters due to buffer
+            "Ingress discard counters due to buffer
              unavailability.";
           uses qos;
         }
@@ -607,7 +607,7 @@ module ietf-packet-discard-reporting {
         }
         container policy {
           description
-            "Policy-related egress packet discard counters.";
+            "Egress policy-related packet discard counters.";
           uses policy-tx;
         }
         container no-buffer {
