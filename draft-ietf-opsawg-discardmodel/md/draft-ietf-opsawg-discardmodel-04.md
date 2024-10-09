@@ -150,18 +150,18 @@ Structure {#structure}
 The classification scheme is structured as a hierarchical tree that follows the structure: component/direction/type/layer/sub-type/sub-sub-type/.../metric.  The elements of the tree are defined as follows:
 
 - Component: Specifies where in the device the discards are accounted. It can be:
-  - interface: Discards of traffic to or from a specific network interface.
-  - device: Discards of traffic transiting the device.
-  - control-plane: Discards of traffic to or from the device's control plane.
-  - flow: Discards of traffic associated with a specific traffic flow.
+  - interface: discards of traffic to or from a specific network interface.
+  - device: discards of traffic transiting the device.
+  - control-plane: discards of traffic to or from the device's control plane.
+  - flow: discards of traffic associated with a specific traffic flow.
 
 - Direction:
   - ingress: counters for incoming packets or frames.
   - egress: counters for outgoing packets or frames.
 
 - Type:
-  - traffic: Counters for successfully received or transmitted packets or frames.
-  - discards: Counters for packets or frames that were dropped.
+  - traffic: counters for successfully received or transmitted packets or frames.
+  - discards: counters for packets or frames that were dropped.
 
 - Layer:
   - l2: Layer 2 discards, such as frames with CRC errors.
@@ -169,9 +169,9 @@ The classification scheme is structured as a hierarchical tree that follows the 
 
 - Sub-Type:
   - For discards:
-    - errors: Discards due to errors in processing packets or frames (e.g., checksum errors).
-    - policy: Discards due to policy enforcement (e.g., ACL drops).
-    - no-buffer: Discards due to lack of buffer space (e.g., congestion-related drops).
+    - errors: discards due to errors in processing packets or frames (e.g., checksum errors).
+    - policy: discards due to policy enforcement (e.g., ACL drops).
+    - no-buffer: discards due to lack of buffer space (e.g., congestion-related drops).
 
 Each sub-type may further contain specific reasons for discards, providing more detailed insight into the cause of packet loss.
 
