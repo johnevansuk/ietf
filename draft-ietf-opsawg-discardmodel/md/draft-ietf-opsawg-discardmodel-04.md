@@ -319,7 +319,7 @@ Where do packets get dropped? {#wheredropped}
 
             +----------+  +----------+  +----------+  +----------+  +----------+  +----------+  +----------+
             |          |  |          |  |          |  |          |  |          |  |          |  |          |
- Packet rx ->  Phy     +-->  Mac     +--> Ingress  +--> Buffers  +--> Egresss  +-->  Mac     +-->  Phy     |>  Packet tx
+ Packet rx ->  Phy     +-->  Mac     +--> Ingress  +--> Buffers  +--> Egresss  +-->  Mac     +-->  Phy     +-> Packet tx
             |          |  |          |  |  Pipeline|  |          |  |  Pipeline|  |          |  |          |
             +----------+  +----------+  +----------+  +----------+  +----------+  +----------+  +----------+
 
