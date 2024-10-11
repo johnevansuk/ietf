@@ -282,28 +282,32 @@ Evans, et al.             Expires 23 March 2025                 [Page 5]
 Internet-Draft       IM for Packet Discard Reporting      September 2024
 
 
-   *  Component: Specifies where in the device the discard is accounted.
-      It can be:
+   *  Component: Specifies where in the device the discards are
+      accounted.  It can be:
 
-      -  interface: Discards associated with a specific network
+      -  interface: discards of traffic to or from a specific network
          interface.
 
-      -  control-plane: Discards related to the device's control plane.
+      -  device: discards of traffic transiting the device.
 
-      -  flow: Discards associated with a specific traffic flow.
+      -  control-plane: discards of traffic to or from the device's
+         control plane.
+
+      -  flow: discards of traffic associated with a specific traffic
+         flow.
 
    *  Direction:
 
-      -  ingress: Discards occurring on incoming packets or frames.
+      -  ingress: counters for incoming packets or frames.
 
-      -  egress: Discards occurring on outgoing packets or frames.
+      -  egress: counters for outgoing packets or frames.
 
    *  Type:
 
-      -  traffic: Counters for successfully received or transmitted
+      -  traffic: counters for successfully received or transmitted
          packets or frames.
 
-      -  discards: Counters for packets or frames that were dropped.
+      -  discards: counters for packets or frames that were dropped.
 
    *  Layer:
 
@@ -315,21 +319,17 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
 
       -  For discards:
 
-         o  errors: Discards due to errors in processing packets or
+         o  errors: discards due to errors in processing packets or
             frames (e.g., checksum errors).
 
-         o  policy: Discards due to policy enforcement (e.g., ACL
+         o  policy: discards due to policy enforcement (e.g., ACL
             drops).
 
-         o  no-buffer: Discards due to lack of buffer space (e.g.,
+         o  no-buffer: discards due to lack of buffer space (e.g.,
             congestion-related drops).
 
    Each sub-type may further contain specific reasons for discards,
    providing more detailed insight into the cause of packet loss.
-
-
-
-
 
 
 
@@ -401,11 +401,11 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
           |     |  |  |  +-- checksum-error?   uint32
           |     |  |  |  +-- mtu-exceeded?     uint32
           |     |  |  |  +-- invalid-packet?   uint32
-          |     |  |  |  +-- ttl-expired?      uint32
+          |     |  |  +-- ttl-expired?     uint32
           |     |  |  +-- no-route?        uint32
           |     |  |  +-- invalid-sid?     uint32
           |     |  |  +-- invalid-label?   uint32
-          |     |  +-- hardware
+          |     |  +-- internal
           |     |     +-- packets?        uint32
           |     |     +-- parity-error?   uint32
           |     +-- policy
@@ -524,11 +524,11 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
 
    3.   An individual frame MUST only be accounted for by either the
         Layer 2 traffic class or the Layer 2 discard classes within a
-        single direction, i.e., ingress or egress.
+        single direction or context, i.e., ingress or egress or device.
 
    4.   An individual packet MUST only be accounted for by either the
         Layer 3 traffic class or the Layer 3 discard classes within a
-        single direction, i.e., ingress or egress.
+        single direction or context, i.e., ingress or egress or device.
 
    5.   A frame accounted for at Layer 2 SHOULD NOT be accounted for at
         Layer 3 and vice versa.  An implementation MUST indicate which
@@ -763,7 +763,7 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
 
      grouping basic-packets-bytes-64 {
        description
-         "Grouping for 64-bit packet and byte counters.";
+         "Grouping for 64-bit Layer 3 packet and byte counters.";
        uses basic-packets-64;
        leaf bytes {
          type uint64;
@@ -774,7 +774,7 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
 
      grouping basic-frames-64 {
        description
-         "Grouping for 64-bit frame counters.";
+         "Grouping for 64-bit Layer 2 frame counters.";
        leaf frames {
          type uint64;
          description
@@ -905,12 +905,12 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
          uses basic-packets-bytes-64;
          container unicast {
            description
-             "Reports unicast traffic counters.";
+             "Unicast traffic counters.";
            uses basic-packets-bytes-64;
          }
          container multicast {
            description
-             "Reports multicast traffic counters.";
+             "Multicast traffic counters.";
            uses basic-packets-bytes-64;
          }
        }
@@ -942,7 +942,7 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
 
      grouping traffic {
        description
-         "Overall traffic counters.";
+         "All traffic counters.";
        container l2 {
          description
            "Layer 2 traffic counters.";
@@ -1032,7 +1032,7 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
          leaf invalid-frame {
            type uint32;
            description
-             "The number of invalid frames discarded due to other reasons.";
+             "The number of invalid frames discarded due to other reasons, not limited to: malformed frames, frame-size violations.";
          }
        }
      }
@@ -1071,19 +1071,19 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
          leaf invalid-packet {
            type uint32;
            description
-             "The number of invalid packets discarded due to other reasons.";
+             "The number of invalid packets discarded due to other reasons, not limited to: invalid packet length, invalid header fields, invalid options, invalid protocol version, invalid flags or control bits, malformed packets.";
          }
-         leaf ttl-expired {
-           type uint32;
-           description
-             "The number of received packets discarded due to expired
-              TTL.";
-         }
+       }
+       leaf ttl-expired {
+         type uint32;
+         description
+           "The number of received packets discarded due to expired
+            TTL.";
        }
        leaf no-route {
          type uint32;
          description
-           "The number of packets discarded due to no route.";
+           "The number of packets discarded due to not matching a valid route.";
        }
        leaf invalid-sid {
          type uint32;
@@ -1097,13 +1097,13 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
        }
      }
 
-     grouping errors-l3-hw {
+     grouping errors-l3-int {
        description
-         "Hardware error discard counters.";
+         "Internal error discard counters.";
        leaf packets {
          type uint32;
          description
-           "The number of packets discarded due to hardware errors.";
+           "The number of packets discarded due to internal errors.";
        }
        leaf parity-error {
          type uint32;
@@ -1133,10 +1133,10 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
            "Layer 3 received packet error discard counters.";
          uses errors-l3-rx;
        }
-       container hardware {
+       container internal {
          description
-           "Hardware error discard counters.";
-         uses errors-l3-hw;
+           "Internal error discard counters.";
+         uses errors-l3-int;
        }
      }
 
@@ -1207,7 +1207,7 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
          type uint32;
          description
            "The number of frames discarded due to
-            Layer 2 ACL.";
+            Layer 2 ACLs.";
        }
      }
 
@@ -1225,7 +1225,7 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
          type uint32;
          description
            "The number of packets discarded due to
-            Layer 3 ACL.";
+            Layer 3 ACLs.";
 
 
 
@@ -1250,13 +1250,13 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
          type uint32;
          description
            "The number of packets discarded due to failing Reverse
-            Path Forwarding (RPF) check failure.";
+            Path Forwarding (RPF) check.";
        }
        leaf ddos {
          type uint32;
          description
            "The number of packets discarded due to DDoS
-            protection.";
+            protection policies.";
        }
      }
 
@@ -1291,7 +1291,7 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
 
 
            "The number of packets discarded due to Layer 3
-            egress ACL.";
+            egress ACLs.";
        }
        container policer {
          description
@@ -1312,7 +1312,7 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
 
      grouping interface {
        description
-         "Interface-level packet traffic and discard counters.";
+         "Interface-level traffic and discard counters.";
        container ingress {
          description
            "Ingress counters.";
@@ -1336,7 +1336,7 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
            }
            container errors {
              description
-               "Ingress packet error discard counters.";
+               "Ingress error discard counters.";
              uses errors-rx;
 
 
@@ -1349,12 +1349,12 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
            }
            container policy {
              description
-               "Policy-related ingress packet discard counters.";
+               "Ingress policy-related discard counters.";
              uses policy-rx;
            }
            container no-buffer {
              description
-               "Ingress packet discard counters due to buffer
+               "Ingress discard counters due to buffer
                 unavailability.";
              uses qos;
            }
@@ -1388,7 +1388,7 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
            }
            container policy {
              description
-               "Policy-related egress packet discard counters.";
+               "Egress policy-related packet discard counters.";
              uses policy-tx;
            }
            container no-buffer {
@@ -1528,9 +1528,9 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
               Bierman, A., Boucadair, M., and Q. Wu, "Guidelines for
               Authors and Reviewers of Documents Containing YANG Data
               Models", Work in Progress, Internet-Draft, draft-ietf-
-              netmod-rfc8407bis-17, 27 September 2024,
+              netmod-rfc8407bis-18, 11 October 2024,
               <https://datatracker.ietf.org/doc/html/draft-ietf-netmod-
-              rfc8407bis-17>.
+              rfc8407bis-18>.
 
    [RED93]    Jacobson, V., "Random Early Detection gateways for
               Congestion Avoidance", n.d..
@@ -1638,7 +1638,7 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
 
             +----------+  +----------+  +----------+  +----------+  +----------+  +----------+  +----------+
             |          |  |          |  |          |  |          |  |          |  |          |  |          |
- Packet rx ->  Phy     +-->  Mac     +--> Ingress  +--> Buffers  +--> Egresss  +-->  Mac     +-->  Phy     |>  Packet tx
+ Packet rx ->  Phy     +-->  Mac     +--> Ingress  +--> Buffers  +--> Egresss  +-->  Mac     +-->  Phy     +-> Packet tx
             |          |  |          |  |  Pipeline|  |          |  |  Pipeline|  |          |  |          |
             +----------+  +----------+  +----------+  +----------+  +----------+  +----------+  +----------+
 
@@ -1661,9 +1661,9 @@ A.1.  Discard Class Descriptions
       multiple sub-classes.
 
    discards/error/l2/rx/:  Frames discarded due to errors in the
-      received L2 frame.  There are multiple sub-classes, such as those
-      resulting from failing CRC, invalid header, invalid MAC address,
-      or invalid VLAN.
+      received Layer 2 frame.  There are multiple sub-classes, such as
+      those resulting from failing CRC, invalid header, invalid MAC
+      address, or invalid VLAN.
 
    discards/error/l3/rx/:  These are discards which occur due to errors
       in the received packet, indicating an upstream problem rather than
