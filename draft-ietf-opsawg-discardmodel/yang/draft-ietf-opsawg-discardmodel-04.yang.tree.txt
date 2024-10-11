@@ -53,11 +53,11 @@ module: ietf-packet-discard-reporting
        |     |  |  |  +-- checksum-error?   uint32
        |     |  |  |  +-- mtu-exceeded?     uint32
        |     |  |  |  +-- invalid-packet?   uint32
-       |     |  |  |  +-- ttl-expired?      uint32
+       |     |  |  +-- ttl-expired?     uint32
        |     |  |  +-- no-route?        uint32
        |     |  |  +-- invalid-sid?     uint32
        |     |  |  +-- invalid-label?   uint32
-       |     |  +-- hardware
+       |     |  +-- internal
        |     |     +-- packets?        uint32
        |     |     +-- parity-error?   uint32
        |     +-- policy

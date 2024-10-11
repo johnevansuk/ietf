@@ -356,13 +356,13 @@ module ietf-packet-discard-reporting {
     }
   }
 
-  grouping errors-l3-hw {
+  grouping errors-l3-int {
     description
-      "Hardware error discard counters.";
+      "Internal error discard counters.";
     leaf packets {
       type uint32;
       description
-        "The number of packets discarded due to hardware errors.";
+        "The number of packets discarded due to internal errors.";
     }
     leaf parity-error {
       type uint32;
@@ -384,10 +384,10 @@ module ietf-packet-discard-reporting {
         "Layer 3 received packet error discard counters.";
       uses errors-l3-rx;
     }
-    container hardware {
+    container internal {
       description
-        "Hardware error discard counters.";
-      uses errors-l3-hw;
+        "Internal error discard counters.";
+      uses errors-l3-int;
     }
   }
 
