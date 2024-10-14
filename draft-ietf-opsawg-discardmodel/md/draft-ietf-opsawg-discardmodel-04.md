@@ -186,8 +186,8 @@ Requirements {#requirements}
 ------------
 Requirements 1-10 relate to packets forwarded by the device, while requirement 11 relates to packets destined for or originating from the device:
 
-1. All instances of frame or packet receipt, transmission, and discards MUST be reported.
-2. All instances of frame or packet receipt, transmission, and discards SHOULD be attributed to the physical or logical interface of the device where they occur.
+1. All instances of Layer 2 frame or Layer 3 packet receipt, transmission, and discards MUST be accounted for.
+2. All instances of Layer 2 frame or Layer 3 packet receipt, transmission, and discards SHOULD be attributed to the physical or logical interface of the device where they occur.  Where they cannot be attributed to the interface, they MUST be attributed to the device.
 3. An individual frame MUST only be accounted for by either the Layer 2 traffic class or the Layer 2 discard classes within a single direction or context, i.e., ingress or egress or device.
 4. An individual packet MUST only be accounted for by either the Layer 3 traffic class or the Layer 3 discard classes within a single direction or context, i.e., ingress or egress or device.
 5. A frame accounted for at Layer 2 SHOULD NOT be accounted for at Layer 3 and vice versa.  An implementation MUST indicate which layers a discard is counted against.
