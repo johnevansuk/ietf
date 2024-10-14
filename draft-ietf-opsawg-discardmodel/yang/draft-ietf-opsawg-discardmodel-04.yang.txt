@@ -472,7 +472,7 @@ module ietf-packet-discard-reporting {
     }
     container policer {
       description
-        "Ingress policer violations discard counters.";
+        "The number of packets discarded due ingress policer violations.";
       uses basic-packets-bytes-32;
     }
     leaf null-route {
@@ -522,7 +522,7 @@ module ietf-packet-discard-reporting {
     }
     container policer {
       description
-        "Egress policer violations discard counters.";
+        "The number of packets discarded due egress policer violations.";
       uses basic-packets-bytes-32;
     }
   }
