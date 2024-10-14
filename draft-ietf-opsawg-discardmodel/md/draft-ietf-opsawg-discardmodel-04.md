@@ -184,19 +184,18 @@ For additional context, Appendix A provides an example of where packets may be d
 
 Requirements {#requirements}
 ------------
-Requirements 1-10 relate to packets forwarded by the device, while requirement 11 relates to packets destined for or originating from the device:
+Requirements 1-9 relate to packets forwarded by the device, while requirement 10 relates to packets destined for or originating from the device:
 
-1. All instances of frame or packet receipt, transmission, and discards MUST be reported.
-2. All instances of frame or packet receipt, transmission, and discards SHOULD be attributed to the physical or logical interface of the device where they occur.
-3. An individual frame MUST only be accounted for by either the Layer 2 traffic class or the Layer 2 discard classes within a single direction or context, i.e., ingress or egress or device.
-4. An individual packet MUST only be accounted for by either the Layer 3 traffic class or the Layer 3 discard classes within a single direction or context, i.e., ingress or egress or device.
-5. A frame accounted for at Layer 2 SHOULD NOT be accounted for at Layer 3 and vice versa.  An implementation MUST indicate which layers a discard is counted against.
-6. The aggregate Layer 2 and Layer 3 traffic and discard classes SHOULD account for all underlying frames or packets received, transmitted, and discarded across all other classes.
-7. The aggregate Quality of Service (QoS) traffic and no buffer discard classes MUST account for all underlying packets received, transmitted, and discarded across all other classes.
-8. In addition to the Layer 2 and Layer 3 aggregate classes, an individual discarded packet MUST only account against a single error, policy, or no-buffer discard subclass.
-9. When there are multiple reasons for discarding a packet, the ordering of discard class reporting MUST be defined.
-10. If Diffserv {{RFC2475}} is not used, no-buffer discards SHOULD be reported as class0.
-11. Traffic to the device control plane has its own class, however, traffic from the device control plane SHOULD be accounted for in the same way as other egress traffic.  
+1. All instances of Layer 2 frame or Layer 3 packet receipt, transmission, and discards MUST be accounted for.
+2. All instances of Layer 2 frame or Layer 3 packet receipt, transmission, and discards SHOULD be attributed to the physical or logical interface of the device where they occur.  Where they cannot be attributed to the interface, they MUST be attributed to the device.
+3. An individual Layer 2 frame or Layer 3 packet MUST only be accounted for by either the corresponding traffic classes or the discard classes within a single direction or context, i.e., ingress or egress or device.
+4. A frame accounted for at Layer 2 SHOULD NOT be accounted for as a packet at Layer 3 and vice versa.  An implementation MUST indicate which layers a discard is counted against.
+5. The aggregate Layer 2 and Layer 3 traffic and discard classes SHOULD account for all underlying frames or packets received, transmitted, and discarded across all other classes.
+6. The aggregate Quality of Service (QoS) traffic and no buffer discard classes MUST account for all underlying packets received, transmitted, and discarded across all other classes.
+7. In addition to the Layer 2 and Layer 3 aggregate classes, an individual discarded packet MUST only account against a single error, policy, or no-buffer discard subclass.
+8. When there are multiple reasons for discarding a packet, the ordering of discard class reporting MUST be defined.
+9. If Diffserv {{RFC2475}} is not used, no-buffer discards SHOULD be reported as class0.
+10. Traffic to the device control plane has its own class, however, traffic from the device control plane SHOULD be accounted for in the same way as other egress traffic.  
 
 
 Examples {#examples}
