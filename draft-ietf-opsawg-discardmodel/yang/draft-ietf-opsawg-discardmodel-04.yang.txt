@@ -266,6 +266,20 @@ module ietf-packet-discard-reporting {
         }
       }
     }
+    container egress {
+      description
+        "Control plane egress counters.";
+      container traffic {
+        description
+          "Control plane packets transmitted.";
+        uses basic-packets-bytes-32;
+      }
+      container discards {
+        description
+          "Control plane egress packet discard counters.";
+        uses basic-packets-bytes-32;
+      }
+    }
   }
 
   grouping errors-l2-rx {
