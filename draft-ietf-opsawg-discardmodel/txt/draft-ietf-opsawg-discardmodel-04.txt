@@ -5,13 +5,13 @@
 OPSAWG                                                          J. Evans
 Internet-Draft                                              O. Pylypenko
 Intended status: Standards Track                                  Amazon
-Expires: 23 March 2025                                           J. Haas
+Expires: 21 April 2025                                           J. Haas
                                                         Juniper Networks
                                                                A. Kadosh
                                                      Cisco Systems, Inc.
                                                             M. Boucadair
                                                                   Orange
-                                                       19 September 2024
+                                                         18 October 2024
 
 
            An Information Model for Packet Discard Reporting
@@ -44,7 +44,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 23 March 2025.
+   This Internet-Draft will expire on 21 April 2025.
 
 Copyright Notice
 
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Evans, et al.             Expires 23 March 2025                 [Page 1]
+Evans, et al.             Expires 21 April 2025                 [Page 1]
 
-Internet-Draft       IM for Packet Discard Reporting      September 2024
+Internet-Draft       IM for Packet Discard Reporting        October 2024
 
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -77,19 +77,19 @@ Table of Contents
      4.2.  Structure . . . . . . . . . . . . . . . . . . . . . . . .   5
      4.3.  Requirements  . . . . . . . . . . . . . . . . . . . . . .  10
      4.4.  Examples  . . . . . . . . . . . . . . . . . . . . . . . .  11
-   5.  Example Signal-Cause-Mitigation Mapping . . . . . . . . . . .  11
+   5.  Example Signal-Cause-Mitigation Mapping . . . . . . . . . . .  12
    6.  YANG Module . . . . . . . . . . . . . . . . . . . . . . . . .  13
-   7.  Security Considerations . . . . . . . . . . . . . . . . . . .  26
-   8.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  26
+   7.  Security Considerations . . . . . . . . . . . . . . . . . . .  27
+   8.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  27
    9.  Contributors  . . . . . . . . . . . . . . . . . . . . . . . .  27
-   10. Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  27
-   11. References  . . . . . . . . . . . . . . . . . . . . . . . . .  27
-     11.1.  Normative References . . . . . . . . . . . . . . . . . .  27
+   10. Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  28
+   11. References  . . . . . . . . . . . . . . . . . . . . . . . . .  28
+     11.1.  Normative References . . . . . . . . . . . . . . . . . .  28
      11.2.  Informative References . . . . . . . . . . . . . . . . .  28
-   Appendix A.  Where do packets get dropped?  . . . . . . . . . . .  29
+   Appendix A.  Where do packets get dropped?  . . . . . . . . . . .  30
      A.1.  Discard Class Descriptions  . . . . . . . . . . . . . . .  30
    Appendix B.  Implementation Experience  . . . . . . . . . . . . .  31
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  32
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  33
 
 1.  Introduction
 
@@ -109,9 +109,9 @@ Table of Contents
 
 
 
-Evans, et al.             Expires 23 March 2025                 [Page 2]
+Evans, et al.             Expires 21 April 2025                 [Page 2]
 
-Internet-Draft       IM for Packet Discard Reporting      September 2024
+Internet-Draft       IM for Packet Discard Reporting        October 2024
 
 
    without specifying the cause, making it challenging to distinguish
@@ -165,9 +165,9 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
 
 
 
-Evans, et al.             Expires 23 March 2025                 [Page 3]
+Evans, et al.             Expires 21 April 2025                 [Page 3]
 
-Internet-Draft       IM for Packet Discard Reporting      September 2024
+Internet-Draft       IM for Packet Discard Reporting        October 2024
 
 
    Intended packet loss refers to packet discards that occur due to
@@ -221,9 +221,9 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
 
 
 
-Evans, et al.             Expires 23 March 2025                 [Page 4]
+Evans, et al.             Expires 21 April 2025                 [Page 4]
 
-Internet-Draft       IM for Packet Discard Reporting      September 2024
+Internet-Draft       IM for Packet Discard Reporting        October 2024
 
 
    A precise signal of impact is crucial, as taking the wrong action can
@@ -277,9 +277,9 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
 
 
 
-Evans, et al.             Expires 23 March 2025                 [Page 5]
+Evans, et al.             Expires 21 April 2025                 [Page 5]
 
-Internet-Draft       IM for Packet Discard Reporting      September 2024
+Internet-Draft       IM for Packet Discard Reporting        October 2024
 
 
    *  Component: Specifies where in the device the discards are
@@ -333,9 +333,9 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
 
 
 
-Evans, et al.             Expires 23 March 2025                 [Page 6]
+Evans, et al.             Expires 21 April 2025                 [Page 6]
 
-Internet-Draft       IM for Packet Discard Reporting      September 2024
+Internet-Draft       IM for Packet Discard Reporting        October 2024
 
 
    module: ietf-packet-discard-reporting
@@ -389,9 +389,9 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
 
 
 
-Evans, et al.             Expires 23 March 2025                 [Page 7]
+Evans, et al.             Expires 21 April 2025                 [Page 7]
 
-Internet-Draft       IM for Packet Discard Reporting      September 2024
+Internet-Draft       IM for Packet Discard Reporting        October 2024
 
 
           |     |  |     +-- invalid-frame?   uint32
@@ -445,9 +445,9 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
 
 
 
-Evans, et al.             Expires 23 March 2025                 [Page 8]
+Evans, et al.             Expires 21 April 2025                 [Page 8]
 
-Internet-Draft       IM for Packet Discard Reporting      September 2024
+Internet-Draft       IM for Packet Discard Reporting        October 2024
 
 
           |  |  +-- qos
@@ -490,21 +490,29 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
           |           +-- bytes?     uint64
           +-- control-plane
              +-- ingress
+             |  +-- traffic
+             |  |  +-- packets?   uint32
+             |  |  +-- bytes?     uint32
+             |  +-- discards
+             |     +-- packets?   uint32
+             |     +-- bytes?     uint32
+             |     +-- policy
+             |        +-- packets?   uint32
+
+
+
+Evans, et al.             Expires 21 April 2025                 [Page 9]
+
+Internet-Draft       IM for Packet Discard Reporting        October 2024
+
+
+             +-- egress
                 +-- traffic
                 |  +-- packets?   uint32
                 |  +-- bytes?     uint32
                 +-- discards
                    +-- packets?   uint32
                    +-- bytes?     uint32
-                   +-- policy
-                      +-- packets?   uint32
-
-
-
-Evans, et al.             Expires 23 March 2025                 [Page 9]
-
-Internet-Draft       IM for Packet Discard Reporting      September 2024
-
 
    For additional context, Appendix A provides an example of where
    packets may be discarded in a device.
@@ -515,12 +523,14 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
    requirement 11 relates to packets destined for or originating from
    the device:
 
-   1.   All instances of frame or packet receipt, transmission, and
-        discards MUST be reported.
+   1.   All instances of Layer 2 frame or Layer 3 packet receipt,
+        transmission, and discards MUST be accounted for.
 
-   2.   All instances of frame or packet receipt, transmission, and
-        discards SHOULD be attributed to the physical or logical
-        interface of the device where they occur.
+   2.   All instances of Layer 2 frame or Layer 3 packet receipt,
+        transmission, and discards SHOULD be attributed to the physical
+        or logical interface of the device where they occur.  Where they
+        cannot be attributed to the interface, they MUST be attributed
+        to the device.
 
    3.   An individual frame MUST only be accounted for by either the
         Layer 2 traffic class or the Layer 2 discard classes within a
@@ -542,6 +552,16 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
         discard classes MUST account for all underlying packets
         received, transmitted, and discarded across all other classes.
 
+
+
+
+
+
+Evans, et al.             Expires 21 April 2025                [Page 10]
+
+Internet-Draft       IM for Packet Discard Reporting        October 2024
+
+
    8.   In addition to the Layer 2 and Layer 3 aggregate classes, an
         individual discarded packet MUST only account against a single
         error, policy, or no-buffer discard subclass.
@@ -551,16 +571,6 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
 
    10.  If Diffserv [RFC2475] is not used, no-buffer discards SHOULD be
         reported as class0.
-
-
-
-
-
-
-Evans, et al.             Expires 23 March 2025                [Page 10]
-
-Internet-Draft       IM for Packet Discard Reporting      September 2024
-
 
    11.  Traffic to the device control plane has its own class, however,
         traffic from the device control plane SHOULD be accounted for in
@@ -598,6 +608,16 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
 
    *  interface/egress/discards/no-buffer/class_0/bytes
 
+
+
+
+
+
+Evans, et al.             Expires 21 April 2025                [Page 11]
+
+Internet-Draft       IM for Packet Discard Reporting        October 2024
+
+
 5.  Example Signal-Cause-Mitigation Mapping
 
    Table 1 gives an example discard signal-to-cause-to-mitigation action
@@ -610,14 +630,6 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
    +==============================+===========+==========+========+===========+========+
    |ingress/discards/errors/l2/rx |Upstream   |>Baseline |O(1min) |     Y     |Take    |
    |                              |device or  |          |        |           |upstream|
-
-
-
-Evans, et al.             Expires 23 March 2025                [Page 11]
-
-Internet-Draft       IM for Packet Discard Reporting      September 2024
-
-
    |                              |link error |          |        |           |link or |
    |                              |           |          |        |           |device  |
    |                              |           |          |        |           |out-of- |
@@ -654,6 +666,14 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
    +------------------------------+-----------+----------+--------+-----------+--------+
    |egress/discards/no-buffer     |Congestion |<=Baseline|        |     N     |no      |
    |                              |           |          |        |           |action  |
+
+
+
+Evans, et al.             Expires 21 April 2025                [Page 12]
+
+Internet-Draft       IM for Packet Discard Reporting        October 2024
+
+
    +------------------------------+-----------+----------+--------+-----------+--------+
    |egress/discards/no-buffer     |Congestion |>Baseline |O(1min) |     Y     |Bring   |
    |                              |           |          |        |           |capacity|
@@ -665,14 +685,6 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
    +------------------------------+-----------+----------+--------+-----------+--------+
 
               Table 1: Example Signal-Cause-Mitigation Mapping
-
-
-
-
-Evans, et al.             Expires 23 March 2025                [Page 12]
-
-Internet-Draft       IM for Packet Discard Reporting      September 2024
-
 
    The 'Baseline' in the 'Discard Rate' column is both discard class and
    network dependent.
@@ -710,6 +722,14 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
         Author:   Jeffrey Haas
                   <mailto:jhaas@juniper.net>
 
+
+
+
+Evans, et al.             Expires 21 April 2025                [Page 13]
+
+Internet-Draft       IM for Packet Discard Reporting        October 2024
+
+
         Author:   Aviran Kadosh
                   <mailto:akadosh@cisco.com>
 
@@ -721,14 +741,6 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
 
         Copyright (c) 2024 IETF Trust and the persons identified as
         authors of the code.  All rights reserved.
-
-
-
-
-Evans, et al.             Expires 23 March 2025                [Page 13]
-
-Internet-Draft       IM for Packet Discard Reporting      September 2024
-
 
         Redistribution and use in source and binary forms, with or
         without modification, is permitted pursuant to, and subject
@@ -766,6 +778,14 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
          "Grouping for 64-bit Layer 3 packet and byte counters.";
        uses basic-packets-64;
        leaf bytes {
+
+
+
+Evans, et al.             Expires 21 April 2025                [Page 14]
+
+Internet-Draft       IM for Packet Discard Reporting        October 2024
+
+
          type uint64;
          description
            "Number of Layer 3 bytes.";
@@ -778,14 +798,6 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
        leaf frames {
          type uint64;
          description
-
-
-
-Evans, et al.             Expires 23 March 2025                [Page 14]
-
-Internet-Draft       IM for Packet Discard Reporting      September 2024
-
-
            "Number of Layer 2 frames.";
        }
      }
@@ -822,6 +834,14 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
        }
      }
 
+
+
+
+Evans, et al.             Expires 21 April 2025                [Page 15]
+
+Internet-Draft       IM for Packet Discard Reporting        October 2024
+
+
      grouping basic-frames-32 {
        description
          "Grouping for 32-bit Layer 2 frame counters.";
@@ -834,14 +854,6 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
 
      grouping basic-frames-bytes-32 {
        description
-
-
-
-Evans, et al.             Expires 23 March 2025                [Page 15]
-
-Internet-Draft       IM for Packet Discard Reporting      September 2024
-
-
          "Grouping for 32-bit Layer 2 frame and byte counters.";
        uses basic-frames-32;
        leaf bytes {
@@ -878,6 +890,14 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
        base address-family;
        description
          "Identity for all address families.";
+
+
+
+Evans, et al.             Expires 21 April 2025                [Page 16]
+
+Internet-Draft       IM for Packet Discard Reporting        October 2024
+
+
      }
 
      grouping ip {
@@ -890,14 +910,6 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
          leaf address-family {
            type identityref {
              base address-family;
-
-
-
-Evans, et al.             Expires 23 March 2025                [Page 16]
-
-Internet-Draft       IM for Packet Discard Reporting      September 2024
-
-
            }
            description
              "Specifies an address family.";
@@ -934,6 +946,14 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
          leaf id {
            type string;
            description
+
+
+
+Evans, et al.             Expires 21 April 2025                [Page 17]
+
+Internet-Draft       IM for Packet Discard Reporting        October 2024
+
+
              "QoS class identifier.";
          }
          uses basic-packets-bytes-64;
@@ -946,14 +966,6 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
        container l2 {
          description
            "Layer 2 traffic counters.";
-
-
-
-Evans, et al.             Expires 23 March 2025                [Page 17]
-
-Internet-Draft       IM for Packet Discard Reporting      September 2024
-
-
          uses l2-traffic;
        }
        container l3 {
@@ -990,6 +1002,28 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
              uses basic-packets-32;
            }
          }
+
+
+
+Evans, et al.             Expires 21 April 2025                [Page 18]
+
+Internet-Draft       IM for Packet Discard Reporting        October 2024
+
+
+       }
+       container egress {
+         description
+           "Control plane egress counters.";
+         container traffic {
+           description
+             "Control plane packets transmitted.";
+           uses basic-packets-bytes-32;
+         }
+         container discards {
+           description
+             "Control plane egress packet discard counters.";
+           uses basic-packets-bytes-32;
+         }
        }
      }
 
@@ -1002,14 +1036,6 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
          leaf frames {
            type uint32;
            description
-
-
-
-Evans, et al.             Expires 23 March 2025                [Page 18]
-
-Internet-Draft       IM for Packet Discard Reporting      September 2024
-
-
              "The number of frames discarded due to errors with the received frame.";
          }
          leaf crc-error {
@@ -1032,6 +1058,14 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
          leaf invalid-frame {
            type uint32;
            description
+
+
+
+Evans, et al.             Expires 21 April 2025                [Page 19]
+
+Internet-Draft       IM for Packet Discard Reporting        October 2024
+
+
              "The number of invalid frames discarded due to other reasons, not limited to: malformed frames, frame-size violations.";
          }
        }
@@ -1058,14 +1092,6 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
            type uint32;
            description
              "The number of received packets discarded due to MTU
-
-
-
-Evans, et al.             Expires 23 March 2025                [Page 19]
-
-Internet-Draft       IM for Packet Discard Reporting      September 2024
-
-
               exceeded.";
          }
          leaf invalid-packet {
@@ -1088,6 +1114,14 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
        leaf invalid-sid {
          type uint32;
          description
+
+
+
+Evans, et al.             Expires 21 April 2025                [Page 20]
+
+Internet-Draft       IM for Packet Discard Reporting        October 2024
+
+
            "The number of packets discarded due to an invalid Segment Routing (SR) SID.";
        }
        leaf invalid-label {
@@ -1114,14 +1148,6 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
 
      grouping errors-rx {
        description
-
-
-
-Evans, et al.             Expires 23 March 2025                [Page 20]
-
-Internet-Draft       IM for Packet Discard Reporting      September 2024
-
-
          "Ingress error discard counters.";
        container l2 {
          description
@@ -1144,6 +1170,14 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
        description
          "Layer 2 transmit error discard counters.";
        container tx {
+
+
+
+Evans, et al.             Expires 21 April 2025                [Page 21]
+
+Internet-Draft       IM for Packet Discard Reporting        October 2024
+
+
          description
            "Layer 2 transmit frame error discard counters.";
          leaf frames {
@@ -1170,14 +1204,6 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
        }
      }
 
-
-
-
-Evans, et al.             Expires 23 March 2025                [Page 21]
-
-Internet-Draft       IM for Packet Discard Reporting      September 2024
-
-
      grouping errors-tx {
        description
          "Egress error discard counters.";
@@ -1200,6 +1226,14 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
        leaf frames {
          type uint32;
          description
+
+
+
+Evans, et al.             Expires 21 April 2025                [Page 22]
+
+Internet-Draft       IM for Packet Discard Reporting        October 2024
+
+
            "The number of Layer 2 frames discarded due
             to policy.";
        }
@@ -1226,18 +1260,10 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
          description
            "The number of packets discarded due to
             Layer 3 ACLs.";
-
-
-
-Evans, et al.             Expires 23 March 2025                [Page 22]
-
-Internet-Draft       IM for Packet Discard Reporting      September 2024
-
-
        }
        container policer {
          description
-           "Ingress policer violations discard counters.";
+           "The number of packets discarded due ingress policer violations.";
          uses basic-packets-bytes-32;
        }
        leaf null-route {
@@ -1256,6 +1282,14 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
          type uint32;
          description
            "The number of packets discarded due to DDoS
+
+
+
+Evans, et al.             Expires 21 April 2025                [Page 23]
+
+Internet-Draft       IM for Packet Discard Reporting        October 2024
+
+
             protection policies.";
        }
      }
@@ -1282,20 +1316,12 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
        leaf acl {
          type uint32;
          description
-
-
-
-Evans, et al.             Expires 23 March 2025                [Page 23]
-
-Internet-Draft       IM for Packet Discard Reporting      September 2024
-
-
            "The number of packets discarded due to Layer 3
             egress ACLs.";
        }
        container policer {
          description
-           "Egress policer violations discard counters.";
+           "The number of packets discarded due egress policer violations.";
          uses basic-packets-bytes-32;
        }
      }
@@ -1312,6 +1338,14 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
 
      grouping interface {
        description
+
+
+
+Evans, et al.             Expires 21 April 2025                [Page 24]
+
+Internet-Draft       IM for Packet Discard Reporting        October 2024
+
+
          "Interface-level traffic and discard counters.";
        container ingress {
          description
@@ -1338,14 +1372,6 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
              description
                "Ingress error discard counters.";
              uses errors-rx;
-
-
-
-Evans, et al.             Expires 23 March 2025                [Page 24]
-
-Internet-Draft       IM for Packet Discard Reporting      September 2024
-
-
            }
            container policy {
              description
@@ -1368,6 +1394,14 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
              "Egress traffic counters.";
            uses traffic;
          }
+
+
+
+Evans, et al.             Expires 21 April 2025                [Page 25]
+
+Internet-Draft       IM for Packet Discard Reporting        October 2024
+
+
          container discards {
            description
              "Egress packet and frame discard counters.";
@@ -1394,14 +1428,6 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
            container no-buffer {
              description
                "Egress packet discard counters due to buffer
-
-
-
-Evans, et al.             Expires 23 March 2025                [Page 25]
-
-Internet-Draft       IM for Packet Discard Reporting      September 2024
-
-
                 unavailability.";
              uses qos;
            }
@@ -1424,6 +1450,14 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
        list interface {
          key "name";
          description
+
+
+
+Evans, et al.             Expires 21 April 2025                [Page 26]
+
+Internet-Draft       IM for Packet Discard Reporting        October 2024
+
+
            "Indicates a list of interfaces for which packet discard reporting
             data is provided.";
          leaf name {
@@ -1449,15 +1483,6 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
    IANA is requested to register the following URI in the "ns"
    subregistry within the "IETF XML Registry" [RFC3688]:
 
-
-
-
-
-Evans, et al.             Expires 23 March 2025                [Page 26]
-
-Internet-Draft       IM for Packet Discard Reporting      September 2024
-
-
       URI:  urn:ietf:params:xml:ns:ietf-packet-discard-reporting
       Registrant Contact:  The IESG.
       XML:  N/A; the requested URI is an XML namespace.
@@ -1481,6 +1506,14 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
    United States of America
    Email: nchachmo@cisco.com
 
+
+
+
+Evans, et al.             Expires 21 April 2025                [Page 27]
+
+Internet-Draft       IM for Packet Discard Reporting        October 2024
+
+
 10.  Acknowledgments
 
    The content of this document has benefitted from feedback from JR
@@ -1503,16 +1536,6 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
               the Network Configuration Protocol (NETCONF)", RFC 6020,
               DOI 10.17487/RFC6020, October 2010,
               <https://www.rfc-editor.org/rfc/rfc6020>.
-
-
-
-
-
-
-Evans, et al.             Expires 23 March 2025                [Page 27]
-
-Internet-Draft       IM for Packet Discard Reporting      September 2024
-
 
    [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
@@ -1540,6 +1563,13 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
               DOI 10.17487/RFC1157, May 1990,
               <https://www.rfc-editor.org/rfc/rfc1157>.
 
+
+
+Evans, et al.             Expires 21 April 2025                [Page 28]
+
+Internet-Draft       IM for Packet Discard Reporting        October 2024
+
+
    [RFC1213]  McCloghrie, K. and M. Rose, "Management Information Base
               for Network Management of TCP/IP-based internets: MIB-II",
               STD 17, RFC 1213, DOI 10.17487/RFC1213, March 1991,
@@ -1559,16 +1589,6 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
               and A. Bierman, Ed., "Network Configuration Protocol
               (NETCONF)", RFC 6241, DOI 10.17487/RFC6241, June 2011,
               <https://www.rfc-editor.org/rfc/rfc6241>.
-
-
-
-
-
-
-Evans, et al.             Expires 23 March 2025                [Page 28]
-
-Internet-Draft       IM for Packet Discard Reporting      September 2024
-
 
    [RFC7011]  Claise, B., Ed., Trammell, B., Ed., and P. Aitken,
               "Specification of the IP Flow Information Export (IPFIX)
@@ -1595,36 +1615,22 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
               BCP 215, RFC 8340, DOI 10.17487/RFC8340, March 2018,
               <https://www.rfc-editor.org/rfc/rfc8340>.
 
+
+
+
+
+
+
+Evans, et al.             Expires 21 April 2025                [Page 29]
+
+Internet-Draft       IM for Packet Discard Reporting        October 2024
+
+
 Appendix A.  Where do packets get dropped?
 
    Figure 1 depicts an example of where and why packets may be discarded
    in a typical single-ASIC, shared-buffered type device.  Packets
    ingress on the left and egress on the right.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Evans, et al.             Expires 23 March 2025                [Page 29]
-
-Internet-Draft       IM for Packet Discard Reporting      September 2024
-
 
                                                       +----------+
                                                       |          |
@@ -1666,6 +1672,16 @@ A.1.  Discard Class Descriptions
       address, or invalid VLAN.
 
    discards/error/l3/rx/:  These are discards which occur due to errors
+
+
+
+
+
+Evans, et al.             Expires 21 April 2025                [Page 30]
+
+Internet-Draft       IM for Packet Discard Reporting        October 2024
+
+
       in the received packet, indicating an upstream problem rather than
       an issue with the device dropping the errored packets.  There are
       multiple sub-classes, including header checksum errors, MTU
@@ -1673,15 +1689,6 @@ A.1.  Discard Class Descriptions
       incorrect header length, or invalid options.
 
    discards/error/l3/rx/ttl-expired:  There can be multiple causes for
-
-
-
-
-Evans, et al.             Expires 23 March 2025                [Page 30]
-
-Internet-Draft       IM for Packet Discard Reporting      September 2024
-
-
       TTL-expired (or Hop limit exceeded) discards: i) trace-route; ii)
       TTL (Hop limit) set too low by the end-system; iii) routing loops.
 
@@ -1722,6 +1729,15 @@ Appendix B.  Implementation Experience
         combinations of classes and has proven sufficient for
         determining mitigation actions.
 
+
+
+
+
+Evans, et al.             Expires 21 April 2025                [Page 31]
+
+Internet-Draft       IM for Packet Discard Reporting        October 2024
+
+
    3.   NoBuffer discards can be realized differently with different
         memory architectures.  Whether a NoBuffer discard is attributed
         to ingress or egress can differ accordingly.  For successful
@@ -1729,14 +1745,6 @@ Appendix B.  Implementation Experience
         should be reported on egress, while discards due to device-level
         congestion (e.g. due to exceeding the device forwarding rate)
         should be reported on ingress.
-
-
-
-
-Evans, et al.             Expires 23 March 2025                [Page 31]
-
-Internet-Draft       IM for Packet Discard Reporting      September 2024
-
 
    4.   Platforms often account for the number of packets discarded
         where the TTL has expired (or Hop Limit exceeded), and the
@@ -1779,20 +1787,17 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
         Some implementations may attribute egress discards to the
         ingress protocol.
 
+
+
+Evans, et al.             Expires 21 April 2025                [Page 32]
+
+Internet-Draft       IM for Packet Discard Reporting        October 2024
+
+
    11.  While the classification tree is seven layers deep, a minimal
         implementation may only implement the top six layers.
 
 Authors' Addresses
-
-
-
-
-
-
-Evans, et al.             Expires 23 March 2025                [Page 32]
-
-Internet-Draft       IM for Packet Discard Reporting      September 2024
-
 
    John Evans
    Amazon
@@ -1840,9 +1845,4 @@ Internet-Draft       IM for Packet Discard Reporting      September 2024
 
 
 
-
-
-
-
-
-Evans, et al.             Expires 23 March 2025                [Page 33]
+Evans, et al.             Expires 21 April 2025                [Page 33]
