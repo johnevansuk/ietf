@@ -134,11 +134,19 @@ module: ietf-packet-discard-reporting
        |           +-- bytes?     uint64
        +-- control-plane
           +-- ingress
+          |  +-- traffic
+          |  |  +-- packets?   uint32
+          |  |  +-- bytes?     uint32
+          |  +-- discards
+          |     +-- packets?   uint32
+          |     +-- bytes?     uint32
+          |     +-- policy
+          |        +-- packets?   uint32
+          +-- egress
              +-- traffic
              |  +-- packets?   uint32
              |  +-- bytes?     uint32
              +-- discards
                 +-- packets?   uint32
                 +-- bytes?     uint32
-                +-- policy
-                   +-- packets?   uint32
+
