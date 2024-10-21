@@ -184,7 +184,7 @@ For additional context, Appendix A provides an example of where packets may be d
 
 Requirements {#requirements}
 ------------
-Requirements 1-10 relate to packets forwarded by the device, while requirement 11 relates to packets destined for or originating from the device:
+Requirements 1-10 relate to packets forwarded or discarded by the device, while requirement 11 relates to packets destined for or originating from the device:
 
 1. All instances of Layer 2 frame or Layer 3 packet receipt, transmission, and discards MUST be accounted for.
 2. All instances of Layer 2 frame or Layer 3 packet receipt, transmission, and discards SHOULD be attributed to the physical or logical interface of the device where they occur.  Where they cannot be attributed to the interface, they MUST be attributed to the device.
