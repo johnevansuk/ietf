@@ -55,6 +55,74 @@ module ietf-packet-discard-reporting {
   }
 
   /*
+   * Features
+   */
+
+  feature per-interface-stats {
+    description
+      "Per-interface statistics are available on this device";
+  }
+
+  feature per-device-stats {
+    description
+      "Global device statistics are available on this device";
+  }
+
+  feature control-plane-stats {
+    description
+      "Control plane statistics are available on this device";
+  }
+
+  feature flow-reporting {
+    description
+      "Flow reporting is available on this device";
+  }
+
+  /*
+   * Identities
+   */
+
+  identity direction {
+    description
+      "Defines a direction for the reported statistics";
+  }
+
+  identity ingress {
+    base direction;
+    description
+      "Reports statistics for the received from the network packets";
+  }
+
+  identity egress {
+    base direction;
+    description
+      "Reports statistics for the sent to the network packets";
+  }
+
+  identity address-family {
+    description
+      "Defines a type for the address family.";
+  }
+
+  identity ipv4 {
+    base address-family;
+    description
+      "Identity for an IPv4 address family.";
+  }
+
+  identity ipv6 {
+    base address-family;
+    description
+      "Identity for an IPv6 address family.";
+  }
+
+  identity all {
+    base address-family;
+    description
+      "Identity for all address families.";
+  }
+
+  /*
    * Groupings
    */
 
@@ -148,29 +216,6 @@ module ietf-packet-discard-reporting {
     uses basic-frames-bytes-64;
   }
 
-  identity address-family {
-    description
-      "Defines a type for the address family.";
-  }
-
-  identity ipv4 {
-    base address-family;
-    description
-      "Identity for an IPv4 address family.";
-  }
-
-  identity ipv6 {
-    base address-family;
-    description
-      "Identity for an IPv6 address family.";
-  }
-
-  identity all {
-    base address-family;
-    description
-      "Identity for all address families.";
-  }
-
   grouping ip {
     description
       "Layer 3 traffic counters per address family.";
@@ -202,13 +247,12 @@ module ietf-packet-discard-reporting {
   grouping l3-traffic {
     description
       "Layer 3 traffic counters.";
-      uses ip;
+    uses ip;
   }
 
   grouping qos {
     description
-      "Quality of Service (QoS) traffic
-       counters.";
+      "Quality of Service (QoS) traffic counters.";
     list class {
       key "id";
       min-elements 1;
@@ -243,49 +287,11 @@ module ietf-packet-discard-reporting {
     }
   }
 
-  grouping control-plane {
-    description
-      "Control plane packet counters.";
-    container ingress {
-      description
-        "Control plane ingress counters.";
-      container traffic {
-        description
-          "Control plane ingress packets received.";
-        uses basic-packets-bytes-32;
-      }
-      container discards {
-        description
-          "Control plane ingress packet discard counters.";
-        uses basic-packets-bytes-32;
-        container policy {
-          description
-            "Number of control plane packets discarded
-             due to policy.";
-          uses basic-packets-32;
-        }
-      }
-    }
-    container egress {
-      description
-        "Control plane egress counters.";
-      container traffic {
-        description
-          "Control plane packets transmitted.";
-        uses basic-packets-bytes-32;
-      }
-      container discards {
-        description
-          "Control plane egress packet discard counters.";
-        uses basic-packets-bytes-32;
-      }
-    }
-  }
-
   grouping errors-l2-rx {
     description
       "Layer 2 ingress frame error discard counters.";
     container rx {
+      when "not(../../../../direction = 'egress')";
       description
         "Layer 2 ingress frame receive error discard counters.";
       leaf frames {
@@ -301,14 +307,12 @@ module ietf-packet-discard-reporting {
       leaf invalid-mac {
         type uint32;
         description
-          "The number of frames discarded due to an invalid
-           MAC address.";
+          "The number of frames discarded due to an invalid MAC address.";
       }
       leaf invalid-vlan {
         type uint32;
         description
-          "The number of frames discarded due to an invalid
-           VLAN tag.";
+          "The number of frames discarded due to an invalid VLAN tag.";
       }
       leaf invalid-frame {
         type uint32;
@@ -322,6 +326,7 @@ module ietf-packet-discard-reporting {
     description
       "Layer 3 ingress packet error discard counters.";
     container rx {
+      when "not(../../../../direction = 'egress')";
       description
         "Layer 3 ingress packet receive error discard counters.";
       leaf packets {
@@ -332,14 +337,12 @@ module ietf-packet-discard-reporting {
       leaf checksum-error {
         type uint32;
         description
-          "The number of received packets discarded due to a checksum
-           error.";
+          "The number of received packets discarded due to a checksum error.";
       }
       leaf mtu-exceeded {
         type uint32;
         description
-          "The number of received packets discarded due to MTU
-           exceeded.";
+          "The number of received packets discarded due to MTU exceeded.";
       }
       leaf invalid-packet {
         type uint32;
@@ -350,8 +353,7 @@ module ietf-packet-discard-reporting {
     leaf ttl-expired {
       type uint32;
       description
-        "The number of received packets discarded due to expired
-         TTL.";
+        "The number of received packets discarded due to expired TTL.";
     }
     leaf no-route {
       type uint32;
@@ -385,37 +387,17 @@ module ietf-packet-discard-reporting {
     }
   }
 
-  grouping errors-rx {
-    description
-      "Ingress error discard counters.";
-    container l2 {
-      description
-        "Layer 2 received frame error discard counters.";
-      uses errors-l2-rx;
-    }
-    container l3 {
-      description
-        "Layer 3 received packet error discard counters.";
-      uses errors-l3-rx;
-    }
-    container internal {
-      description
-        "Internal error discard counters.";
-      uses errors-l3-int;
-    }
-  }
-
   grouping errors-l2-tx {
     description
       "Layer 2 transmit error discard counters.";
     container tx {
+      when "not(../../../../direction = 'ingress')";
       description
         "Layer 2 transmit frame error discard counters.";
       leaf frames {
         type uint32;
         description
-          "The number of Layer 2 frames discarded due to errors when
-           transmitting.";
+          "The number of Layer 2 frames discarded due to errors when transmitting.";
       }
     }
   }
@@ -424,65 +406,66 @@ module ietf-packet-discard-reporting {
     description
       "Layer 3 transmit error discard counters.";
     container tx {
+      when "not(../../../../direction = 'ingress')";
       description
         "Layer 3 transmit packet error discard counters.";
       leaf packets {
         type uint32;
         description
-          "The number of Layer 3 packets discarded due to errors when
-           transmitting.";
+          "The number of Layer 3 packets discarded due to errors when transmitting.";
       }
     }
   }
 
-  grouping errors-tx {
+  grouping errors {
     description
-      "Egress error discard counters.";
+      "Error discard counters.";
     container l2 {
       description
-        "Layer 2 transmit frame error discard counters.";
+        "Layer 2 frame error discard counters.";
+      uses errors-l2-rx;
       uses errors-l2-tx;
     }
     container l3 {
       description
-        "Layer 3 transmit packet error discard counters.";
+        "Layer 3 packet error discard counters.";
+      uses errors-l3-rx;
       uses errors-l3-tx;
+    }
+    container internal {
+      description
+        "Internal error discard counters.";
+      uses errors-l3-int;
     }
   }
 
-  grouping policy-l2-rx {
+  grouping policy-l2 {
     description
-      "Layer 2 policy ingress packet discard
-       counters.";
+      "Layer 2 policy frame discard counters.";
     leaf frames {
       type uint32;
       description
-        "The number of Layer 2 frames discarded due
-         to policy.";
+        "The number of Layer 2 frames discarded due to policy.";
     }
     leaf acl {
       type uint32;
       description
-        "The number of frames discarded due to
-         Layer 2 ACLs.";
+        "The number of frames discarded due to Layer 2 ACLs.";
     }
   }
 
-  grouping policy-l3-rx {
+  grouping policy-l3 {
     description
-      "Layer 3 policy ingress packet discard
-       counters.";
+      "Layer 3 policy packet discard counters.";
     leaf packets {
       type uint32;
       description
-        "The number of Layer 3 packets discarded due
-         to policy.";
+        "The number of Layer 3 packets discarded due to policy.";
     }
     leaf acl {
       type uint32;
       description
-        "The number of packets discarded due to
-         Layer 3 ACLs.";
+        "The number of packets discarded due to Layer 3 ACLs.";
     }
     container policer {
       description
@@ -492,171 +475,173 @@ module ietf-packet-discard-reporting {
     leaf null-route {
       type uint32;
       description
-        "The number of packets discarded due to matching a
-         null route.";
+        "The number of packets discarded due to matching a null route.";
     }
     leaf rpf {
       type uint32;
       description
-        "The number of packets discarded due to failing Reverse
-         Path Forwarding (RPF) check.";
+        "The number of packets discarded due to failing Reverse Path Forwarding (RPF) check.";
     }
     leaf ddos {
       type uint32;
       description
-        "The number of packets discarded due to DDoS
-         protection policies.";
+        "The number of packets discarded due to DDoS protection policies.";
     }
   }
 
-  grouping policy-rx {
+  grouping discards {
     description
-      "Policy-related ingress packet
-       discard counters.";
+      "Discard counters.";
+    container discards {
+      description
+        "Ingress discard counters.";
+      container l2 {
+        description
+          "Ingress Layer 2 frame discard counters.";
+        uses l2-traffic;
+      }
+      container l3 {
+        description
+          "Ingress Layer 3 packet discard counters.";
+        uses l3-traffic;
+      }
+      container errors {
+        description
+          "Ingress error discard counters.";
+        uses errors;
+      }
+      container policy {
+        description
+          "Ingress policy-related discard counters.";
+        uses policy;
+      }
+      container no-buffer {
+        description
+          "Ingress discard counters due to buffer
+           unavailability.";
+        uses qos;
+      }
+    }
+  }
+
+  grouping policy {
+    description
+      "Policy-related discard counters.";
     container l2 {
       description
-        "Layer 2 policy ingress packet discard counters.";
-      uses policy-l2-rx;
+        "Layer 2 policy frame discard counters.";
+      uses policy-l2;
     }
     container l3 {
       description
-        "Layer 3 policy ingress packet discard counters.";
-      uses policy-l3-rx;
+        "Layer 3 policy packet discard counters.";
+      uses policy-l3;
     }
   }
 
-  grouping policy-l3-tx {
+  grouping device {
     description
-      "Layer 3 policy egress packet discard counters.";
-    leaf acl {
-      type uint32;
+      "Device-level traffic and discard counters.";
+    container traffic {
       description
-        "The number of packets discarded due to Layer 3
-         egress ACLs.";
+        "Traffic counters.";
+      uses traffic;
     }
-    container policer {
-      description
-        "The number of packets discarded due egress policer violations.";
-      uses basic-packets-bytes-32;
-    }
-  }
-
-  grouping policy-tx {
-    description
-      "Policy egress packet discard counters.";
-    container l3 {
-      description
-        "Layer 3 policy egress packet discard counters.";
-      uses policy-l3-tx;
-    }
+    uses discards;
   }
 
   grouping interface {
     description
       "Interface-level traffic and discard counters.";
-    container ingress {
+    container traffic {
       description
-        "Ingress counters.";
-      container traffic {
-        description
-          "Ingress traffic counters.";
-        uses traffic;
-      }
-      container discards {
-        description
-          "Ingress discard counters.";
-        container l2 {
-          description
-            "Ingress Layer 2 frame discard counters.";
-          uses l2-traffic;
-        }
-        container l3 {
-          description
-            "Ingress Layer 3 packet discard counters.";
-          uses l3-traffic;
-        }
-        container errors {
-          description
-            "Ingress error discard counters.";
-          uses errors-rx;
-        }
-        container policy {
-          description
-            "Ingress policy-related discard counters.";
-          uses policy-rx;
-        }
-        container no-buffer {
-          description
-            "Ingress discard counters due to buffer
-             unavailability.";
-          uses qos;
-        }
-      }
+        "Traffic counters.";
+      uses traffic;
     }
-    container egress {
+    uses discards;
+  }
+
+  grouping control-plane {
+    description
+      "Control plane packet counters.";
+    container traffic {
       description
-        "Egress counters.";
-      container traffic {
-        description
-          "Egress traffic counters.";
-        uses traffic;
-      }
-      container discards {
-        description
-          "Egress packet and frame discard counters.";
-        container l2 {
-          description
-            "Layer 2 egress frame discard counters.";
-          uses l2-traffic;
-        }
-        container l3 {
-          description
-            "Layer 3 egress packet discard counters.";
-          uses l3-traffic;
-        }
-        container errors {
-          description
-            "Egress packet error discard counters.";
-          uses errors-tx;
-        }
-        container policy {
-          description
-            "Egress policy-related packet discard counters.";
-          uses policy-tx;
-        }
-        container no-buffer {
-          description
-            "Egress packet discard counters due to buffer
-             unavailability.";
-          uses qos;
-        }
-      }
+        "Total control plane packets.";
+      uses basic-packets-bytes-32;
     }
-    container control-plane {
+    container discards {
       description
-        "Control plane packet counters.";
-      uses control-plane;
+        "Control plane packet discard counters.";
+      uses basic-packets-bytes-32;
+      container policy {
+        description
+          "Number of control plane packets discarded due to policy.";
+        uses basic-packets-32;
+      }
     }
   }
 
   /*
    * Main structure definition
    */
-
   sx:structure packet-discard-reporting {
     description
       "Specifies the abstract structure of packet discard reporting data.";
+    container control-plane {
+      if-feature "control-plane-stats";
+      description
+        "Control plane packet counters.";
+      leaf direction {
+        type identityref {
+          base direction;
+        }
+        description
+          "Specifies a direction.";
+      }
+      uses control-plane;
+    }
     list interface {
+      if-feature "per-interface-stats";
       key "name";
       description
-        "Indicates a list of interfaces for which packet discard reporting
-         data is provided.";
+        "Indicates a list of interfaces for which packet discard reporting data is provided.";
       leaf name {
         type string;
         description
           "Indicates the name of the interface.";
       }
+      leaf direction {
+        type identityref {
+          base direction;
+        }
+        description
+          "Specifies a direction.";
+      }
       uses interface;
+    }
+    container flow {
+      if-feature "flow-reporting";
+      leaf direction {
+        type identityref {
+          base direction;
+        }
+        description
+          "Specifies a direction.";
+      }
+      description
+        "Flow packet counters.";
+      uses device;
+    }
+    container device {
+      if-feature "per-device-stats";
+      leaf direction {
+        type empty;
+        description
+          "Device-level statistics don't have direction.";
+      }
+      description
+        "Device level packet counters.";
+      uses device;
     }
   }
 }

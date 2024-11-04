@@ -223,162 +223,264 @@ appear in all capitals, as shown here.</t>
 module: ietf-packet-discard-reporting
 
   structure packet-discard-reporting:
-    +-- interface* [name]
-       +-- name             string
-       +-- ingress
-       |  +-- traffic
-       |  |  +-- l2
-       |  |  |  +-- frames?   uint64
-       |  |  |  +-- bytes?    uint64
-       |  |  +-- l3
-       |  |  |  +-- address-family-stat* [address-family]
-       |  |  |     +-- address-family    identityref
-       |  |  |     +-- packets?          uint64
-       |  |  |     +-- bytes?            uint64
-       |  |  |     +-- unicast
-       |  |  |     |  +-- packets?   uint64
-       |  |  |     |  +-- bytes?     uint64
-       |  |  |     +-- multicast
-       |  |  |        +-- packets?   uint64
-       |  |  |        +-- bytes?     uint64
-       |  |  +-- qos
-       |  |     +-- class* [id]
-       |  |        +-- id         string
+    +-- control-plane {control-plane-stats}?
+    |  +-- direction?   identityref
+    |  +-- traffic
+    |  |  +-- packets?   uint32
+    |  |  +-- bytes?     uint32
+    |  +-- discards
+    |     +-- packets?   uint32
+    |     +-- bytes?     uint32
+    |     +-- policy
+    |        +-- packets?   uint32
+    +-- interface* [name] {per-interface-stats}?
+    |  +-- name         string
+    |  +-- direction?   identityref
+    |  +-- traffic
+    |  |  +-- l2
+    |  |  |  +-- frames?   uint64
+    |  |  |  +-- bytes?    uint64
+    |  |  +-- l3
+    |  |  |  +-- address-family-stat* [address-family]
+    |  |  |     +-- address-family    identityref
+    |  |  |     +-- packets?          uint64
+    |  |  |     +-- bytes?            uint64
+    |  |  |     +-- unicast
+    |  |  |     |  +-- packets?   uint64
+    |  |  |     |  +-- bytes?     uint64
+    |  |  |     +-- multicast
+    |  |  |        +-- packets?   uint64
+    |  |  |        +-- bytes?     uint64
+    |  |  +-- qos
+    |  |     +-- class* [id]
+    |  |        +-- id         string
+    |  |        +-- packets?   uint64
+    |  |        +-- bytes?     uint64
+    |  +-- discards
+    |     +-- l2
+    |     |  +-- frames?   uint64
+    |     |  +-- bytes?    uint64
+    |     +-- l3
+    |     |  +-- address-family-stat* [address-family]
+    |     |     +-- address-family    identityref
+    |     |     +-- packets?          uint64
+    |     |     +-- bytes?            uint64
+    |     |     +-- unicast
+    |     |     |  +-- packets?   uint64
+    |     |     |  +-- bytes?     uint64
+    |     |     +-- multicast
+    |     |        +-- packets?   uint64
+    |     |        +-- bytes?     uint64
+    |     +-- errors
+    |     |  +-- l2
+    |     |  |  +-- rx
+    |     |  |  |  +-- frames?          uint32
+    |     |  |  |  +-- crc-error?       uint32
+    |     |  |  |  +-- invalid-mac?     uint32
+    |     |  |  |  +-- invalid-vlan?    uint32
+    |     |  |  |  +-- invalid-frame?   uint32
+    |     |  |  +-- tx
+    |     |  |     +-- frames?   uint32
+    |     |  +-- l3
+    |     |  |  +-- rx
+    |     |  |  |  +-- packets?          uint32
+    |     |  |  |  +-- checksum-error?   uint32
+    |     |  |  |  +-- mtu-exceeded?     uint32
+    |     |  |  |  +-- invalid-packet?   uint32
+    |     |  |  +-- ttl-expired?     uint32
+    |     |  |  +-- no-route?        uint32
+    |     |  |  +-- invalid-sid?     uint32
+    |     |  |  +-- invalid-label?   uint32
+    |     |  |  +-- tx
+    |     |  |     +-- packets?   uint32
+    |     |  +-- internal
+    |     |     +-- packets?        uint32
+    |     |     +-- parity-error?   uint32
+    |     +-- policy
+    |     |  +-- l2
+    |     |  |  +-- frames?   uint32
+    |     |  |  +-- acl?      uint32
+    |     |  +-- l3
+    |     |     +-- packets?      uint32
+    |     |     +-- acl?          uint32
+    |     |     +-- policer
+    |     |     |  +-- packets?   uint32
+    |     |     |  +-- bytes?     uint32
+    |     |     +-- null-route?   uint32
+    |     |     +-- rpf?          uint32
+    |     |     +-- ddos?         uint32
+    |     +-- no-buffer
+    |        +-- class* [id]
+    |           +-- id         string
+    |           +-- packets?   uint64
+    |           +-- bytes?     uint64
+    +-- flow {flow-reporting}?
+    |  +-- direction?   identityref
+    |  +-- traffic
+    |  |  +-- l2
+    |  |  |  +-- frames?   uint64
+    |  |  |  +-- bytes?    uint64
+    |  |  +-- l3
+    |  |  |  +-- address-family-stat* [address-family]
+    |  |  |     +-- address-family    identityref
+    |  |  |     +-- packets?          uint64
+    |  |  |     +-- bytes?            uint64
+    |  |  |     +-- unicast
+    |  |  |     |  +-- packets?   uint64
+    |  |  |     |  +-- bytes?     uint64
+    |  |  |     +-- multicast
+    |  |  |        +-- packets?   uint64
+    |  |  |        +-- bytes?     uint64
+    |  |  +-- qos
+    |  |     +-- class* [id]
+    |  |        +-- id         string
+    |  |        +-- packets?   uint64
+    |  |        +-- bytes?     uint64
+    |  +-- discards
+    |     +-- l2
+    |     |  +-- frames?   uint64
+    |     |  +-- bytes?    uint64
+    |     +-- l3
+    |     |  +-- address-family-stat* [address-family]
+    |     |     +-- address-family    identityref
+    |     |     +-- packets?          uint64
+    |     |     +-- bytes?            uint64
+    |     |     +-- unicast
+    |     |     |  +-- packets?   uint64
+    |     |     |  +-- bytes?     uint64
+    |     |     +-- multicast
+    |     |        +-- packets?   uint64
+    |     |        +-- bytes?     uint64
+    |     +-- errors
+    |     |  +-- l2
+    |     |  |  +-- rx
+    |     |  |  |  +-- frames?          uint32
+    |     |  |  |  +-- crc-error?       uint32
+    |     |  |  |  +-- invalid-mac?     uint32
+    |     |  |  |  +-- invalid-vlan?    uint32
+    |     |  |  |  +-- invalid-frame?   uint32
+    |     |  |  +-- tx
+    |     |  |     +-- frames?   uint32
+    |     |  +-- l3
+    |     |  |  +-- rx
+    |     |  |  |  +-- packets?          uint32
+    |     |  |  |  +-- checksum-error?   uint32
+    |     |  |  |  +-- mtu-exceeded?     uint32
+    |     |  |  |  +-- invalid-packet?   uint32
+    |     |  |  +-- ttl-expired?     uint32
+    |     |  |  +-- no-route?        uint32
+    |     |  |  +-- invalid-sid?     uint32
+    |     |  |  +-- invalid-label?   uint32
+    |     |  |  +-- tx
+    |     |  |     +-- packets?   uint32
+    |     |  +-- internal
+    |     |     +-- packets?        uint32
+    |     |     +-- parity-error?   uint32
+    |     +-- policy
+    |     |  +-- l2
+    |     |  |  +-- frames?   uint32
+    |     |  |  +-- acl?      uint32
+    |     |  +-- l3
+    |     |     +-- packets?      uint32
+    |     |     +-- acl?          uint32
+    |     |     +-- policer
+    |     |     |  +-- packets?   uint32
+    |     |     |  +-- bytes?     uint32
+    |     |     +-- null-route?   uint32
+    |     |     +-- rpf?          uint32
+    |     |     +-- ddos?         uint32
+    |     +-- no-buffer
+    |        +-- class* [id]
+    |           +-- id         string
+    |           +-- packets?   uint64
+    |           +-- bytes?     uint64
+    +-- device {per-device-stats}?
+       +-- direction?   empty
+       +-- traffic
+       |  +-- l2
+       |  |  +-- frames?   uint64
+       |  |  +-- bytes?    uint64
+       |  +-- l3
+       |  |  +-- address-family-stat* [address-family]
+       |  |     +-- address-family    identityref
+       |  |     +-- packets?          uint64
+       |  |     +-- bytes?            uint64
+       |  |     +-- unicast
+       |  |     |  +-- packets?   uint64
+       |  |     |  +-- bytes?     uint64
+       |  |     +-- multicast
        |  |        +-- packets?   uint64
        |  |        +-- bytes?     uint64
-       |  +-- discards
-       |     +-- l2
-       |     |  +-- frames?   uint64
-       |     |  +-- bytes?    uint64
-       |     +-- l3
-       |     |  +-- address-family-stat* [address-family]
-       |     |     +-- address-family    identityref
-       |     |     +-- packets?          uint64
-       |     |     +-- bytes?            uint64
-       |     |     +-- unicast
-       |     |     |  +-- packets?   uint64
-       |     |     |  +-- bytes?     uint64
-       |     |     +-- multicast
-       |     |        +-- packets?   uint64
-       |     |        +-- bytes?     uint64
-       |     +-- errors
-       |     |  +-- l2
-       |     |  |  +-- rx
-       |     |  |     +-- frames?          uint32
-       |     |  |     +-- crc-error?       uint32
-       |     |  |     +-- invalid-mac?     uint32
-       |     |  |     +-- invalid-vlan?    uint32
-       |     |  |     +-- invalid-frame?   uint32
-       |     |  +-- l3
-       |     |  |  +-- rx
-       |     |  |  |  +-- packets?          uint32
-       |     |  |  |  +-- checksum-error?   uint32
-       |     |  |  |  +-- mtu-exceeded?     uint32
-       |     |  |  |  +-- invalid-packet?   uint32
-       |     |  |  +-- ttl-expired?     uint32
-       |     |  |  +-- no-route?        uint32
-       |     |  |  +-- invalid-sid?     uint32
-       |     |  |  +-- invalid-label?   uint32
-       |     |  +-- internal
-       |     |     +-- packets?        uint32
-       |     |     +-- parity-error?   uint32
-       |     +-- policy
-       |     |  +-- l2
-       |     |  |  +-- frames?   uint32
-       |     |  |  +-- acl?      uint32
-       |     |  +-- l3
-       |     |     +-- packets?      uint32
-       |     |     +-- acl?          uint32
-       |     |     +-- policer
-       |     |     |  +-- packets?   uint32
-       |     |     |  +-- bytes?     uint32
-       |     |     +-- null-route?   uint32
-       |     |     +-- rpf?          uint32
-       |     |     +-- ddos?         uint32
-       |     +-- no-buffer
-       |        +-- class* [id]
-       |           +-- id         string
-       |           +-- packets?   uint64
-       |           +-- bytes?     uint64
-       +-- egress
-       |  +-- traffic
-       |  |  +-- l2
-       |  |  |  +-- frames?   uint64
-       |  |  |  +-- bytes?    uint64
-       |  |  +-- l3
-       |  |  |  +-- address-family-stat* [address-family]
-       |  |  |     +-- address-family    identityref
-       |  |  |     +-- packets?          uint64
-       |  |  |     +-- bytes?            uint64
-       |  |  |     +-- unicast
-       |  |  |     |  +-- packets?   uint64
-       |  |  |     |  +-- bytes?     uint64
-       |  |  |     +-- multicast
-       |  |  |        +-- packets?   uint64
-       |  |  |        +-- bytes?     uint64
-       |  |  +-- qos
-       |  |     +-- class* [id]
-       |  |        +-- id         string
-       |  |        +-- packets?   uint64
-       |  |        +-- bytes?     uint64
-       |  +-- discards
-       |     +-- l2
-       |     |  +-- frames?   uint64
-       |     |  +-- bytes?    uint64
-       |     +-- l3
-       |     |  +-- address-family-stat* [address-family]
-       |     |     +-- address-family    identityref
-       |     |     +-- packets?          uint64
-       |     |     +-- bytes?            uint64
-       |     |     +-- unicast
-       |     |     |  +-- packets?   uint64
-       |     |     |  +-- bytes?     uint64
-       |     |     +-- multicast
-       |     |        +-- packets?   uint64
-       |     |        +-- bytes?     uint64
-       |     +-- errors
-       |     |  +-- l2
-       |     |  |  +-- tx
-       |     |  |     +-- frames?   uint32
-       |     |  +-- l3
-       |     |     +-- tx
-       |     |        +-- packets?   uint32
-       |     +-- policy
-       |     |  +-- l3
-       |     |     +-- acl?       uint32
-       |     |     +-- policer
-       |     |        +-- packets?   uint32
-       |     |        +-- bytes?     uint32
-       |     +-- no-buffer
-       |        +-- class* [id]
-       |           +-- id         string
-       |           +-- packets?   uint64
-       |           +-- bytes?     uint64
-       +-- control-plane
-          +-- ingress
-          |  +-- traffic
-          |  |  +-- packets?   uint32
-          |  |  +-- bytes?     uint32
-          |  +-- discards
-          |     +-- packets?   uint32
-          |     +-- bytes?     uint32
-          |     +-- policy
-          |        +-- packets?   uint32
-          +-- egress
-             +-- traffic
-             |  +-- packets?   uint32
-             |  +-- bytes?     uint32
-             +-- discards
-                +-- packets?   uint32
-                +-- bytes?     uint32
-
+       |  +-- qos
+       |     +-- class* [id]
+       |        +-- id         string
+       |        +-- packets?   uint64
+       |        +-- bytes?     uint64
+       +-- discards
+          +-- l2
+          |  +-- frames?   uint64
+          |  +-- bytes?    uint64
+          +-- l3
+          |  +-- address-family-stat* [address-family]
+          |     +-- address-family    identityref
+          |     +-- packets?          uint64
+          |     +-- bytes?            uint64
+          |     +-- unicast
+          |     |  +-- packets?   uint64
+          |     |  +-- bytes?     uint64
+          |     +-- multicast
+          |        +-- packets?   uint64
+          |        +-- bytes?     uint64
+          +-- errors
+          |  +-- l2
+          |  |  +-- rx
+          |  |  |  +-- frames?          uint32
+          |  |  |  +-- crc-error?       uint32
+          |  |  |  +-- invalid-mac?     uint32
+          |  |  |  +-- invalid-vlan?    uint32
+          |  |  |  +-- invalid-frame?   uint32
+          |  |  +-- tx
+          |  |     +-- frames?   uint32
+          |  +-- l3
+          |  |  +-- rx
+          |  |  |  +-- packets?          uint32
+          |  |  |  +-- checksum-error?   uint32
+          |  |  |  +-- mtu-exceeded?     uint32
+          |  |  |  +-- invalid-packet?   uint32
+          |  |  +-- ttl-expired?     uint32
+          |  |  +-- no-route?        uint32
+          |  |  +-- invalid-sid?     uint32
+          |  |  +-- invalid-label?   uint32
+          |  |  +-- tx
+          |  |     +-- packets?   uint32
+          |  +-- internal
+          |     +-- packets?        uint32
+          |     +-- parity-error?   uint32
+          +-- policy
+          |  +-- l2
+          |  |  +-- frames?   uint32
+          |  |  +-- acl?      uint32
+          |  +-- l3
+          |     +-- packets?      uint32
+          |     +-- acl?          uint32
+          |     +-- policer
+          |     |  +-- packets?   uint32
+          |     |  +-- bytes?     uint32
+          |     +-- null-route?   uint32
+          |     +-- rpf?          uint32
+          |     +-- ddos?         uint32
+          +-- no-buffer
+             +-- class* [id]
+                +-- id         string
+                +-- packets?   uint64
+                +-- bytes?     uint64
 ]]></artwork></figure>
 
 <t>For additional context, Appendix A provides an example of where packets may be discarded in a device.</t>
 
 </section>
 <section anchor="requirements"><name>Requirements</name>
-<t>Requirements 1-10 relate to packets forwarded by the device, while requirement 11 relates to packets destined for or originating from the device:</t>
+<t>Requirements 1-10 relate to packets forwarded or discarded by the device, while requirement 11 relates to packets destined for or originating from the device:</t>
 
 <t><list style="numbers" type="1">
   <t>All instances of Layer 2 frame or Layer 3 packet receipt, transmission, and discards <bcp14>MUST</bcp14> be accounted for.</t>
@@ -569,6 +671,74 @@ module ietf-packet-discard-reporting {
   }
 
   /*
+   * Features
+   */
+
+  feature per-interface-stats {
+    description
+      "Per-interface statistics are available on this device";
+  }
+
+  feature per-device-stats {
+    description
+      "Global device statistics are available on this device";
+  }
+
+  feature control-plane-stats {
+    description
+      "Control plane statistics are available on this device";
+  }
+
+  feature flow-reporting {
+    description
+      "Flow reporting is available on this device";
+  }
+
+  /*
+   * Identities
+   */
+
+  identity direction {
+    description
+      "Defines a direction for the reported statistics";
+  }
+
+  identity ingress {
+    base direction;
+    description
+      "Reports statistics for the received from the network packets";
+  }
+
+  identity egress {
+    base direction;
+    description
+      "Reports statistics for the sent to the network packets";
+  }
+
+  identity address-family {
+    description
+      "Defines a type for the address family.";
+  }
+
+  identity ipv4 {
+    base address-family;
+    description
+      "Identity for an IPv4 address family.";
+  }
+
+  identity ipv6 {
+    base address-family;
+    description
+      "Identity for an IPv6 address family.";
+  }
+
+  identity all {
+    base address-family;
+    description
+      "Identity for all address families.";
+  }
+
+  /*
    * Groupings
    */
 
@@ -662,29 +832,6 @@ module ietf-packet-discard-reporting {
     uses basic-frames-bytes-64;
   }
 
-  identity address-family {
-    description
-      "Defines a type for the address family.";
-  }
-
-  identity ipv4 {
-    base address-family;
-    description
-      "Identity for an IPv4 address family.";
-  }
-
-  identity ipv6 {
-    base address-family;
-    description
-      "Identity for an IPv6 address family.";
-  }
-
-  identity all {
-    base address-family;
-    description
-      "Identity for all address families.";
-  }
-
   grouping ip {
     description
       "Layer 3 traffic counters per address family.";
@@ -716,13 +863,12 @@ module ietf-packet-discard-reporting {
   grouping l3-traffic {
     description
       "Layer 3 traffic counters.";
-      uses ip;
+    uses ip;
   }
 
   grouping qos {
     description
-      "Quality of Service (QoS) traffic
-       counters.";
+      "Quality of Service (QoS) traffic counters.";
     list class {
       key "id";
       min-elements 1;
@@ -757,49 +903,11 @@ module ietf-packet-discard-reporting {
     }
   }
 
-  grouping control-plane {
-    description
-      "Control plane packet counters.";
-    container ingress {
-      description
-        "Control plane ingress counters.";
-      container traffic {
-        description
-          "Control plane ingress packets received.";
-        uses basic-packets-bytes-32;
-      }
-      container discards {
-        description
-          "Control plane ingress packet discard counters.";
-        uses basic-packets-bytes-32;
-        container policy {
-          description
-            "Number of control plane packets discarded
-             due to policy.";
-          uses basic-packets-32;
-        }
-      }
-    }
-    container egress {
-      description
-        "Control plane egress counters.";
-      container traffic {
-        description
-          "Control plane packets transmitted.";
-        uses basic-packets-bytes-32;
-      }
-      container discards {
-        description
-          "Control plane egress packet discard counters.";
-        uses basic-packets-bytes-32;
-      }
-    }
-  }
-
   grouping errors-l2-rx {
     description
       "Layer 2 ingress frame error discard counters.";
     container rx {
+      when "not(../../../../direction = 'egress')";
       description
         "Layer 2 ingress frame receive error discard counters.";
       leaf frames {
@@ -815,14 +923,12 @@ module ietf-packet-discard-reporting {
       leaf invalid-mac {
         type uint32;
         description
-          "The number of frames discarded due to an invalid
-           MAC address.";
+          "The number of frames discarded due to an invalid MAC address.";
       }
       leaf invalid-vlan {
         type uint32;
         description
-          "The number of frames discarded due to an invalid
-           VLAN tag.";
+          "The number of frames discarded due to an invalid VLAN tag.";
       }
       leaf invalid-frame {
         type uint32;
@@ -836,6 +942,7 @@ module ietf-packet-discard-reporting {
     description
       "Layer 3 ingress packet error discard counters.";
     container rx {
+      when "not(../../../../direction = 'egress')";
       description
         "Layer 3 ingress packet receive error discard counters.";
       leaf packets {
@@ -846,14 +953,12 @@ module ietf-packet-discard-reporting {
       leaf checksum-error {
         type uint32;
         description
-          "The number of received packets discarded due to a checksum
-           error.";
+          "The number of received packets discarded due to a checksum error.";
       }
       leaf mtu-exceeded {
         type uint32;
         description
-          "The number of received packets discarded due to MTU
-           exceeded.";
+          "The number of received packets discarded due to MTU exceeded.";
       }
       leaf invalid-packet {
         type uint32;
@@ -864,8 +969,7 @@ module ietf-packet-discard-reporting {
     leaf ttl-expired {
       type uint32;
       description
-        "The number of received packets discarded due to expired
-         TTL.";
+        "The number of received packets discarded due to expired TTL.";
     }
     leaf no-route {
       type uint32;
@@ -899,37 +1003,17 @@ module ietf-packet-discard-reporting {
     }
   }
 
-  grouping errors-rx {
-    description
-      "Ingress error discard counters.";
-    container l2 {
-      description
-        "Layer 2 received frame error discard counters.";
-      uses errors-l2-rx;
-    }
-    container l3 {
-      description
-        "Layer 3 received packet error discard counters.";
-      uses errors-l3-rx;
-    }
-    container internal {
-      description
-        "Internal error discard counters.";
-      uses errors-l3-int;
-    }
-  }
-
   grouping errors-l2-tx {
     description
       "Layer 2 transmit error discard counters.";
     container tx {
+      when "not(../../../../direction = 'ingress')";
       description
         "Layer 2 transmit frame error discard counters.";
       leaf frames {
         type uint32;
         description
-          "The number of Layer 2 frames discarded due to errors when
-           transmitting.";
+          "The number of Layer 2 frames discarded due to errors when transmitting.";
       }
     }
   }
@@ -938,65 +1022,66 @@ module ietf-packet-discard-reporting {
     description
       "Layer 3 transmit error discard counters.";
     container tx {
+      when "not(../../../../direction = 'ingress')";
       description
         "Layer 3 transmit packet error discard counters.";
       leaf packets {
         type uint32;
         description
-          "The number of Layer 3 packets discarded due to errors when
-           transmitting.";
+          "The number of Layer 3 packets discarded due to errors when transmitting.";
       }
     }
   }
 
-  grouping errors-tx {
+  grouping errors {
     description
-      "Egress error discard counters.";
+      "Error discard counters.";
     container l2 {
       description
-        "Layer 2 transmit frame error discard counters.";
+        "Layer 2 frame error discard counters.";
+      uses errors-l2-rx;
       uses errors-l2-tx;
     }
     container l3 {
       description
-        "Layer 3 transmit packet error discard counters.";
+        "Layer 3 packet error discard counters.";
+      uses errors-l3-rx;
       uses errors-l3-tx;
+    }
+    container internal {
+      description
+        "Internal error discard counters.";
+      uses errors-l3-int;
     }
   }
 
-  grouping policy-l2-rx {
+  grouping policy-l2 {
     description
-      "Layer 2 policy ingress packet discard
-       counters.";
+      "Layer 2 policy frame discard counters.";
     leaf frames {
       type uint32;
       description
-        "The number of Layer 2 frames discarded due
-         to policy.";
+        "The number of Layer 2 frames discarded due to policy.";
     }
     leaf acl {
       type uint32;
       description
-        "The number of frames discarded due to
-         Layer 2 ACLs.";
+        "The number of frames discarded due to Layer 2 ACLs.";
     }
   }
 
-  grouping policy-l3-rx {
+  grouping policy-l3 {
     description
-      "Layer 3 policy ingress packet discard
-       counters.";
+      "Layer 3 policy packet discard counters.";
     leaf packets {
       type uint32;
       description
-        "The number of Layer 3 packets discarded due
-         to policy.";
+        "The number of Layer 3 packets discarded due to policy.";
     }
     leaf acl {
       type uint32;
       description
-        "The number of packets discarded due to
-         Layer 3 ACLs.";
+        "The number of packets discarded due to Layer 3 ACLs.";
     }
     container policer {
       description
@@ -1006,171 +1091,173 @@ module ietf-packet-discard-reporting {
     leaf null-route {
       type uint32;
       description
-        "The number of packets discarded due to matching a
-         null route.";
+        "The number of packets discarded due to matching a null route.";
     }
     leaf rpf {
       type uint32;
       description
-        "The number of packets discarded due to failing Reverse
-         Path Forwarding (RPF) check.";
+        "The number of packets discarded due to failing Reverse Path Forwarding (RPF) check.";
     }
     leaf ddos {
       type uint32;
       description
-        "The number of packets discarded due to DDoS
-         protection policies.";
+        "The number of packets discarded due to DDoS protection policies.";
     }
   }
 
-  grouping policy-rx {
+  grouping discards {
     description
-      "Policy-related ingress packet
-       discard counters.";
+      "Discard counters.";
+    container discards {
+      description
+        "Ingress discard counters.";
+      container l2 {
+        description
+          "Ingress Layer 2 frame discard counters.";
+        uses l2-traffic;
+      }
+      container l3 {
+        description
+          "Ingress Layer 3 packet discard counters.";
+        uses l3-traffic;
+      }
+      container errors {
+        description
+          "Ingress error discard counters.";
+        uses errors;
+      }
+      container policy {
+        description
+          "Ingress policy-related discard counters.";
+        uses policy;
+      }
+      container no-buffer {
+        description
+          "Ingress discard counters due to buffer
+           unavailability.";
+        uses qos;
+      }
+    }
+  }
+
+  grouping policy {
+    description
+      "Policy-related discard counters.";
     container l2 {
       description
-        "Layer 2 policy ingress packet discard counters.";
-      uses policy-l2-rx;
+        "Layer 2 policy frame discard counters.";
+      uses policy-l2;
     }
     container l3 {
       description
-        "Layer 3 policy ingress packet discard counters.";
-      uses policy-l3-rx;
+        "Layer 3 policy packet discard counters.";
+      uses policy-l3;
     }
   }
 
-  grouping policy-l3-tx {
+  grouping device {
     description
-      "Layer 3 policy egress packet discard counters.";
-    leaf acl {
-      type uint32;
+      "Device-level traffic and discard counters.";
+    container traffic {
       description
-        "The number of packets discarded due to Layer 3
-         egress ACLs.";
+        "Traffic counters.";
+      uses traffic;
     }
-    container policer {
-      description
-        "The number of packets discarded due egress policer violations.";
-      uses basic-packets-bytes-32;
-    }
-  }
-
-  grouping policy-tx {
-    description
-      "Policy egress packet discard counters.";
-    container l3 {
-      description
-        "Layer 3 policy egress packet discard counters.";
-      uses policy-l3-tx;
-    }
+    uses discards;
   }
 
   grouping interface {
     description
       "Interface-level traffic and discard counters.";
-    container ingress {
+    container traffic {
       description
-        "Ingress counters.";
-      container traffic {
-        description
-          "Ingress traffic counters.";
-        uses traffic;
-      }
-      container discards {
-        description
-          "Ingress discard counters.";
-        container l2 {
-          description
-            "Ingress Layer 2 frame discard counters.";
-          uses l2-traffic;
-        }
-        container l3 {
-          description
-            "Ingress Layer 3 packet discard counters.";
-          uses l3-traffic;
-        }
-        container errors {
-          description
-            "Ingress error discard counters.";
-          uses errors-rx;
-        }
-        container policy {
-          description
-            "Ingress policy-related discard counters.";
-          uses policy-rx;
-        }
-        container no-buffer {
-          description
-            "Ingress discard counters due to buffer
-             unavailability.";
-          uses qos;
-        }
-      }
+        "Traffic counters.";
+      uses traffic;
     }
-    container egress {
+    uses discards;
+  }
+
+  grouping control-plane {
+    description
+      "Control plane packet counters.";
+    container traffic {
       description
-        "Egress counters.";
-      container traffic {
-        description
-          "Egress traffic counters.";
-        uses traffic;
-      }
-      container discards {
-        description
-          "Egress packet and frame discard counters.";
-        container l2 {
-          description
-            "Layer 2 egress frame discard counters.";
-          uses l2-traffic;
-        }
-        container l3 {
-          description
-            "Layer 3 egress packet discard counters.";
-          uses l3-traffic;
-        }
-        container errors {
-          description
-            "Egress packet error discard counters.";
-          uses errors-tx;
-        }
-        container policy {
-          description
-            "Egress policy-related packet discard counters.";
-          uses policy-tx;
-        }
-        container no-buffer {
-          description
-            "Egress packet discard counters due to buffer
-             unavailability.";
-          uses qos;
-        }
-      }
+        "Total control plane packets.";
+      uses basic-packets-bytes-32;
     }
-    container control-plane {
+    container discards {
       description
-        "Control plane packet counters.";
-      uses control-plane;
+        "Control plane packet discard counters.";
+      uses basic-packets-bytes-32;
+      container policy {
+        description
+          "Number of control plane packets discarded due to policy.";
+        uses basic-packets-32;
+      }
     }
   }
 
   /*
    * Main structure definition
    */
-
   sx:structure packet-discard-reporting {
     description
       "Specifies the abstract structure of packet discard reporting data.";
+    container control-plane {
+      if-feature "control-plane-stats";
+      description
+        "Control plane packet counters.";
+      leaf direction {
+        type identityref {
+          base direction;
+        }
+        description
+          "Specifies a direction.";
+      }
+      uses control-plane;
+    }
     list interface {
+      if-feature "per-interface-stats";
       key "name";
       description
-        "Indicates a list of interfaces for which packet discard reporting
-         data is provided.";
+        "Indicates a list of interfaces for which packet discard reporting data is provided.";
       leaf name {
         type string;
         description
           "Indicates the name of the interface.";
       }
+      leaf direction {
+        type identityref {
+          base direction;
+        }
+        description
+          "Specifies a direction.";
+      }
       uses interface;
+    }
+    container flow {
+      if-feature "flow-reporting";
+      leaf direction {
+        type identityref {
+          base direction;
+        }
+        description
+          "Specifies a direction.";
+      }
+      description
+        "Flow packet counters.";
+      uses device;
+    }
+    container device {
+      if-feature "per-device-stats";
+      leaf direction {
+        type empty;
+        description
+          "Device-level statistics don't have direction.";
+      }
+      description
+        "Device level packet counters.";
+      uses device;
     }
   }
 }
@@ -1497,7 +1584,7 @@ Email: nchachmo@cisco.com
       <author fullname="Qin Wu" initials="Q." surname="Wu">
          <organization>Huawei</organization>
       </author>
-      <date day="11" month="October" year="2024"/>
+      <date day="21" month="October" year="2024"/>
       <abstract>
 	 <t>   This memo provides guidelines for authors and reviewers of
    specifications containing YANG modules, including IANA-maintained
@@ -1515,7 +1602,7 @@ Email: nchachmo@cisco.com
 	 </t>
       </abstract>
    </front>
-   <seriesInfo name="Internet-Draft" value="draft-ietf-netmod-rfc8407bis-18"/>
+   <seriesInfo name="Internet-Draft" value="draft-ietf-netmod-rfc8407bis-20"/>
    
 </reference>
 
@@ -1527,7 +1614,7 @@ Email: nchachmo@cisco.com
 </references>
 
 
-<?line 1133?>
+<?line 1220?>
 
 <section anchor="wheredropped"><name>Where do packets get dropped?</name>
 <t><xref target="ex-drop"/> depicts an example of where and why packets may be discarded in a typical single-ASIC, shared-buffered type device. Packets ingress on the left and egress on the right.</t>
@@ -1619,261 +1706,271 @@ Unintended                 error/rx/l2   error/l3/rx   no-buffer     error/l3/tx
   </back>
 
 <!-- ##markdown-source:
-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
+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
 AA==
 
 -->
