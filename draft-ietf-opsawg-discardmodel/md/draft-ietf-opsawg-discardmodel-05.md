@@ -273,9 +273,9 @@ The information model defined in {{module-infomodel}} specifies a YANG module us
 
 Data Model {#security-datamodel}
 ----------
-The YANG module specified in {{module-infomodel}} defines a schema for data with data nodes that contain read-only state.  It is designed to be accessed via network management protocols such as NETCONF [RFC6241] or RESTCONF [RFC8040]. The lowest NETCONF layer is the secure transport layer, and the mandatory-to-implement secure transport is Secure Shell (SSH) [RFC6242]. The lowest RESTCONF layer is HTTPS, and the mandatory-to-implement secure transport is TLS [RFC 8446].
+The YANG module specified in {{module-infomodel}} defines a schema for data with data nodes that contain read-only state.  It is designed to be accessed via network management protocols such as NETCONF {{?RFC6241}} or RESTCONF {{?RFC8040}}. The lowest NETCONF layer is the secure transport layer, and the mandatory-to-implement secure transport is Secure Shell (SSH) {{?RFC6242}}. The lowest RESTCONF layer is HTTPS, and the mandatory-to-implement secure transport is TLS {{?RFC8446}}.
 
-The Network Configuration Access Control Model (NACM) [RFC8341] provides the means to restrict access for particular NETCONF or RESTCONF users to a preconfigured subset of all available NETCONF or RESTCONF protocol operations and content.
+The Network Configuration Access Control Model (NACM) {{?RFC8341}} provides the means to restrict access for particular NETCONF or RESTCONF users to a preconfigured subset of all available NETCONF or RESTCONF protocol operations and content.
 
 The module does not expose any data nodes that are writable, or RPCs. As such, there are no additional security issues related to the YANG module that need to be considered.
 
