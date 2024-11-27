@@ -65,7 +65,6 @@ author:
 normative:
 
 informative:
-     RFC6241:
      RED93:
           title: Random Early Detection gateways for Congestion Avoidance
           author:
@@ -92,6 +91,7 @@ informative:
      RFC8040:
      RFC6242:
      RFC8446:
+     RFC8341:
      
 --- abstract
 
