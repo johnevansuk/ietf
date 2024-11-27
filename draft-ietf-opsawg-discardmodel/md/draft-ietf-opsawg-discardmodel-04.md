@@ -104,7 +104,7 @@ The primary function of a network is to transport and deliver packets according 
 
 Existing metrics for reporting packet loss, such as ifInDiscards, ifOutDiscards, ifInErrors, and ifOutErrors defined in {{?RFC1213}}, are insufficient for several reasons. First, they lack precision; for instance, ifInDiscards aggregates all discarded inbound packets without specifying the cause, making it challenging to distinguish between intended and unintended discards. Second, these definitions are ambiguous, leading to inconsistent vendor implementations. For example, in some implementations ifInErrors accounts only for errored packets that are dropped, while in others, it includes all errored packets, whether they are dropped or not. Many implementations support more discard metrics than these, however, they have been inconsistently implemented due to the lack of a standardised classification scheme and clear semantics for packet loss reporting. For example, {{?RFC7270}} provides support for reporting discards per flow in IPFIX using forwardingStatus, however, the defined drop reason codes also lack sufficient clarity to support automated root cause analysis and impact mitigation, e.g., the "For us" reason code.
 
-This document defines an information model for packet loss reporting which addresses the aforementioned issues, introducing a classification scheme to enable automated mitigation of unintended packet loss. The information model is defined using YANG {{?RFC6020}} with YANG Data Structure Extensions {{!RFC8791}}, allowing the model to remain abstract and decoupled from specific implementations in accordance with {{?RFC3444}}. This abstraction supports different data model implementations - for example, in YANG, IPFIX {{?RFC7011}}, gMNI {{gMNI}} or SNMP {{?RFC1157}} - while ensuring consistency across implementations. Using YANG for the information model enables this abstraction, leverages the community's familiarity with its syntax, and ensures lossless translation to the YANG data model, which is also defined in this document.
+This document defines an information model for packet loss reporting which addresses the aforementioned issues, introducing a classification scheme to enable automated mitigation of unintended packet loss. The information model is defined using YANG {{?RFC6020}} with Data Structure Extensions {{!RFC8791}}, allowing the model to remain abstract and decoupled from specific implementations in accordance with {{?RFC3444}}. This abstraction supports different data model implementations - for example, in YANG, IPFIX {{?RFC7011}}, gMNI {{gMNI}} or SNMP {{?RFC1157}} - while ensuring consistency across implementations. Using YANG for the information model enables this abstraction, leverages the community's familiarity with its syntax, and ensures lossless translation to the YANG data model, which is also defined in this document.
 
 The scope of this document is limited to reporting packet loss at Layer 3 and frames discarded at Layer 2, although the model could be extended in future to cover segments dropped at Layer 4. This document considers only the signals that may trigger automated mitigation actions and not how the actions are defined or executed.
 
@@ -120,15 +120,13 @@ A packet discard is any packet dropped by a device, whether intentionally or uni
 
 Intended packet loss refers to packet discards that occur due to deliberate network policies or configurations - such as Access Control Lists (ACLs) or policing mechanisms - designed to enforce security or quality of service.
 
-Unintended packet loss refers to packet discards resulting from network errors, misconfigurations, hardware failures, or other anomalies not aligned with the network operator's intended behaviour. These losses negatively impact network performance and service delivery.
-
-For example, intended packet loss occurs when packets are dropped because they match a security policy denying certain traffic types. Unintended packet loss might happen due to a faulty interface causing corrupted packets, leading to their discard.
+Unintended packet loss is the discarding of packets that the network operator otherwise intends to deliver, i.e. which indicates an error state.  There are many possible reasons for unintended packet loss, including: erroring links may corrupt packets in transit; incorrect routing tables may result in packets being dropped because they do not match a valid route; configuration errors may result in a valid packet incorrectly matching an Access Control List (ACL) and being dropped.
 
 The meanings of the symbols in the YANG tree diagrams are defined in {{?RFC8340}}.
 
 Problem Statement   {#problem}
 =================
-At the highest-level, unintended packet loss is the discarding of packets that the network operator otherwise intends to deliver, i.e. which indicates an error state.  There are many possible reasons for unintended packet loss, including: erroring links may corrupt packets in transit; incorrect routing tables may result in packets being dropped because they do not match a valid route; configuration errors may result in a valid packet incorrectly matching an Access Control List (ACL) and being dropped.  While the specific definition of unintended packet loss is network-dependent, for any network there are a small set of potential actions that can be taken to minimise customer impact by automatically mitigating unintended packet loss:
+For any network there are a small set of potential actions that can be taken to minimise customer impact by automatically mitigating unintended packet loss:
 
 1. Take a device, link, or set of devices and/or links out of service.
 2. Return a device, link, or set of devices and/or links back into service.
@@ -136,7 +134,7 @@ At the highest-level, unintended packet loss is the discarding of packets that t
 4. Roll back a recent change to a device that might have caused the problem.
 5. Escalate to a network operator as a last resort.
 
-A precise signal of impact is crucial, as taking the wrong action can be worse than taking no action. For example, taking a congested device out of service can make congestion worse by moving the traffic to other links or devices, which are already congested.
+Precise signals of impact are crucial, as taking the wrong action can be worse than taking no action. For example, taking a congested device out of service can make congestion worse by moving the traffic to other links or devices, which are already congested.
 
 To detect whether device-reported discards indicate a problem and to determine what actions should be taken to mitigate the impact and remediate the cause, depends on four primary features of the packet loss signal:
 
@@ -152,16 +150,11 @@ FEATURE-LOSS-DURATION:
 FEATURE-LOSS-LOCATION:
 : The location of the loss.
 
-FEATURE-LOSS-RATE, FEATURE-LOSS-DURATION, and FEATURE-LOSS-LOCATION are already addressed with passive monitoring statistics, for example, obtained with SNMP {{?RFC1157}} / MIB-II {{?RFC1213}} or NETCONF {{?RFC6241}}. FEATURE-LOSS-CAUSE, however, is dependent on the classification scheme used for packet loss reporting. The next section defines a new classification scheme to address this problem.
+FEATURE-LOSS-RATE, FEATURE-LOSS-DURATION, and FEATURE-LOSS-LOCATION are already implicitly addressed with passive monitoring statistics, for example, obtained with MIB-II {{?RFC1213}} or YANG {{?RFC8343}}. FEATURE-LOSS-CAUSE, however, is explicitly dependent on the classification scheme used for packet loss reporting. The next section defines a new classification scheme to address this problem.
 
 
 Information Model   {#model}
 =================
-
-Design Rationale {#rationale}
-----------------
-
-This document uses YANG {{?RFC6020}} to represent the information model for three main reasons. First, YANG, along with its data structure extensions {{!RFC8791}}, allows designers to define the model in an abstract way, decoupled from specific implementations. This abstraction ensures consistency and provides flexibility for diverse potential implementations, with the structure and groupings easily adaptable to data models such as those specific to SNMP {{?RFC1157}}, NETCONF {{?RFC6241}}, RESTCONF {{?RFC8040}}, or IPFIX {{?RFC7011}}.  Second, this approach ensures a lossless translation from the information model to a YANG data model, preserving both semantics and structure. Lastly, YANG capitalises on the community's broad familiarity with its syntax and use, facilitating easier adoption and evolution.
 
 Structure {#structure}
 ---------
