@@ -63,7 +63,7 @@ author:
     email: mohamed.boucadair@orange.com
 
 normative:
-     RFC8341
+     RFC8341:
 
 informative:
      RFC6241:
