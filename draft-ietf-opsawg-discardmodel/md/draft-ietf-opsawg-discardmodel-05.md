@@ -63,6 +63,7 @@ author:
     email: mohamed.boucadair@orange.com
 
 normative:
+     RFC8341
 
 informative:
      RFC6241:
@@ -88,6 +89,10 @@ informative:
                ins: C. Marrow
      RFC2475:
      RFC8289:
+     RFC6241:
+     RFC8040:
+     RFC6242:
+     RFC8446:
      
 --- abstract
 
