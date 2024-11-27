@@ -1,8 +1,8 @@
 ---
-title: An Information Model for Packet Discard Reporting
-abbrev: IM for Packet Discard Reporting
-docname: draft-ietf-opsawg-discardmodel-04
-date: 2024-10-18
+title: A YANG Model for Packet Discard Reporting
+abbrev: Model for Packet Discard Reporting
+docname: draft-ietf-opsawg-discardmodel-05
+date: 2024-11-25
 category: std
 
 ipr: trust200902
@@ -72,26 +72,44 @@ informative:
                ins: S. Floyd
           author:
                ins: V. Jacobson
+     gMNI:
+          title: gRPC Network Management Interface, IETF 98, March 2017, <https://datatracker.ietf.org/meeting/98/materials/slides-98-rtgwg-gnmi-intro-draft-openconfig-rtgwg-gnmi-spec-00>
+          author:
+               ins: Shakir, R.
+          author:
+               ins: Shaikh, A.
+          author:
+               ins: Borman, P.
+          author:
+               ins: Hines, M.
+          author:
+               ins: Lebsack, C.
+          author:
+               ins: C. Marrow
      RFC2475:
      RFC8289:
      
 --- abstract
 
-The primary function of a network is to transport and deliver packets according to service level objectives.  Understanding both where and why packet loss occurs within a network is essential for effective network operation.  Device-reported packet loss provides the most direct signal for network operations to identify the customer impact resulting from unintended packet loss.  This document defines an information model for packet loss reporting, which classifies these signals to enable automated network mitigation of unintended packet loss.
+This document defines an information model and corresponding data model for packet discard reporting in network elements; both are defined using YANG. The information model provides a framework for classifying packet loss, to enable automated network mitigation of unintended packet loss, which is implementation indepedent.  The data model specifies a concrete implementation of this framework.
+
+----
 
 --- middle
 
 Introduction        {#introduction}
 ============
-To effectively automate network operations, a network operator must be able to detect anomalous packet loss, determine its root cause, and then apply appropriate actions to mitigate any customer-impacting issues.  Some packet loss is normal or intended in IP/MPLS networks, however.  Therefore, precise classification of packet loss signals is crucial both to ensure that anomalous packet loss is easily detected and that the right action or sequence of actions is taken to mitigate the impact, as taking the wrong action can make problems worse.
+
+The primary function of a network is to transport and deliver packets according to service level objectives. Understanding both where and why packet loss occurs within a network is essential for effective network operation, with device-reported packet loss providing the most direct signal for identifying customer impact.  To effectively automate network operations, operators must be able to detect anomalous packet loss, determine its root cause, and apply appropriate mitigation actions. Since some packet loss is normal or intended in IP/MPLS networks, precise classification of packet loss signals is crucial both to ensure anomaly detection and appropriate mitigation, as taking the wrong action can make problems worse.
 
 Existing metrics for reporting packet loss, such as ifInDiscards, ifOutDiscards, ifInErrors, and ifOutErrors defined in {{?RFC1213}}, are insufficient for several reasons. First, they lack precision; for instance, ifInDiscards aggregates all discarded inbound packets without specifying the cause, making it challenging to distinguish between intended and unintended discards. Second, these definitions are ambiguous, leading to inconsistent vendor implementations. For example, in some implementations ifInErrors accounts only for errored packets that are dropped, while in others, it includes all errored packets, whether they are dropped or not. Many implementations support more discard metrics than these, however, they have been inconsistently implemented due to the lack of a standardised classification scheme and clear semantics for packet loss reporting. For example, {{?RFC7270}} provides support for reporting discards per flow in IPFIX using forwardingStatus, however, the defined drop reason codes also lack sufficient clarity (e.g., the "For us" reason code) to support automated root cause analysis and impact mitigation.
 
-Hence, this document defines an information model for packet loss reporting, introducing a classification scheme to facilitate automated mitigation of unintended packet loss. The model addresses the aforementioned issues while remaining protocol-agnostic and implementation-independent, in accordance with {{?RFC3444}}.
+This document defines an information model for packet loss reporting which addresses the aforementioned issues, introducing a classification scheme to enable automated mitigation of unintended packet loss. The information model is defined using YANG {{?RFC6020}} with YANG Data Structure Extensions {{!RFC8791}}, allowing the model to remain abstract and decoupled from specific implementations in accordance with {{?RFC3444}}. This abstraction supports different data model implementations - for example, in YANG, IPFIX {{?RFC7011}}, gMNI {{gMNI}} or SNMP {{?RFC1157}} - while ensuring consistency across implementations. Using YANG for the information model enables this abstraction, leverages the community's familiarity with its syntax, and ensures lossless translation to the YANG data model, which is also defined in this document.
 
-The specific implementations of this information model (i.e., protocols and associated data models) are outside the scope of this document.  The scope of this document is limited to reporting packet loss at Layer 3 and frames discarded at Layer 2, although the information model might be extended in future to cover segments dropped at Layer 4. This document considers only the signals that may trigger automated mitigation plans and not how they are defined or executed.
+The scope of this document is limited to reporting packet loss at Layer 3 and frames discarded at Layer 2, although the information model might be extended in future to cover segments dropped at Layer 4. This document considers only the signals that may trigger automated mitigation plans and not how they are defined or executed.
 
 {{problem}} describes the problem to be solved. {{model}} describes the information model and requirements with a set of examples.  {{mapping}} provides examples of discard signal-to-cause-to-auto-mitigation action mapping.  {{module}} presents the information model as an abstract data structure in YANG, in accordance with {{!RFC8791}}.  Appendix A provides an example of where packets may be discarded in a device.  Appendix B details the authors' experience from implementing this model.
+
 
 Terminology {#terminology}
 ===========
