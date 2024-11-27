@@ -91,7 +91,7 @@ informative:
      
 --- abstract
 
-This document defines an information model and corresponding data model for packet discard reporting in network elements. The information model provides a framework for classifying packet loss, to enable automated network mitigation of unintended packet loss, which is implementation indepedent.  The data model specifies a implementation of this framework in YANG.
+This document defines an information model and corresponding data model for packet discard reporting. The information model provides an implementation indepedent framework for classifying packet loss, to enable automated network mitigation of unintended packet loss.  The data model specifies a implementation of this framework in YANG for network elements.
 
 ----
 
