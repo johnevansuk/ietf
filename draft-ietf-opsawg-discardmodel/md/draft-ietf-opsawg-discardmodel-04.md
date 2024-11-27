@@ -156,7 +156,7 @@ FEATURE-LOSS-RATE, FEATURE-LOSS-DURATION, and FEATURE-LOSS-LOCATION are already 
 Information Model   {#infomodel}
 =================
 
-Structure {#structure}
+Structure {#infomodel-structure}
 ---------
 The classification scheme is structured as a hierarchical tree that follows the structure: component/direction/type/layer/sub-type/sub-sub-type/.../metric.  The elements of the tree are defined as follows:
 
@@ -190,17 +190,18 @@ Each sub-type may contain further specific reasons for discards, providing more 
 {::include ../yang/draft-ietf-opsawg-discardmodel-04.yang.tree.txt}
 ~~~~~~~~~~
 
-The corresponding YANG module is provided in Appendix A.
+The corresponding YANG module is defined in {{module-infomodel}}.
 
 For additional context, {{wheredropped}} provides an example of where packets may be discarded in a device.
 
 
 Data Model   {#datamodel}
 ==========
-This data model implements the preceding information model for the interface and device components.  This is classed as a Network Element model as defined in {{?RFC1157}}.
+This data model implements the preceding information model for the interface and device components.  This is classed as a Network Element model as defined by {{?RFC1157}}.
 
-Structure {#structure}
+Structure {#datamodel-structure}
 ---------
+The data model structure is represented by the following YANG tree diagram.
 
 ~~~~~~~~~~
 {::include ../yang/draft-ietf-opsawg-discardmodel-04.yang.tree.txt}
@@ -312,6 +313,18 @@ The content of this document has benefitted from feedback from JR Rivers, Ronan 
 
 --- back
 
+YANG Module - Information Model {#module-infomodel}
+===============================
+
+The "ietf-packet-discard-reporting" uses the "sx" structure defined in {{!RFC8791}}.
+
+
+~~~~~~~~~~
+<CODE BEGINS> file "ietf-packet-discard-reporting@2024-06-04.yang"
+{::include ../yang/draft-ietf-opsawg-discardmodel-04.yang.txt}
+<CODE ENDS>
+~~~~~~~~~~
+
 
 Where do packets get dropped? {#wheredropped}
 =============================
@@ -371,18 +384,6 @@ discards/error/local/:
 discards/no-buffer/:  
 : Discards occur due to no available buffer to enqueue the packet. These can be tail-drop discards or due to an active queue management algorithm, such as RED {{RED93}} or CODEL {{RFC8289}}.
 
-
-YANG Module - Information Model {#module-infomodel}
-===============================
-
-The "ietf-packet-discard-reporting" uses the "sx" structure defined in {{!RFC8791}}.
-
-
-~~~~~~~~~~
-<CODE BEGINS> file "ietf-packet-discard-reporting@2024-06-04.yang"
-{::include ../yang/draft-ietf-opsawg-discardmodel-04.yang.txt}
-<CODE ENDS>
-~~~~~~~~~~
 
 Example Signal-Cause-Mitigation Mapping {#mapping}
 =======================================
