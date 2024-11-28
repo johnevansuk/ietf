@@ -97,8 +97,6 @@ informative:
 
 This document defines an information model and corresponding data model for packet discard reporting. The information model provides an implementation indepedent framework for classifying packet loss, to enable automated network mitigation of unintended packet loss.  The data model specifies a implementation of this framework in YANG for network elements.
 
-----
-
 --- middle
 
 Introduction        {#introduction}
@@ -272,7 +270,7 @@ The information model defined in {{module-infomodel}} specifies a YANG module us
 
 Data Model {#security-datamodel}
 ----------
-The YANG module specified in {{module-infomodel}} defines a schema for data with data nodes that contain read-only state.  It is designed to be accessed via network management protocols such as NETCONF {{?RFC6241}} or RESTCONF {{?RFC8040}}. The lowest NETCONF layer is the secure transport layer, and the mandatory-to-implement secure transport is Secure Shell (SSH) {{?RFC6242}}. The lowest RESTCONF layer is HTTPS, and the mandatory-to-implement secure transport is TLS {{?RFC8446}}.
+The YANG module specified in {{module-datamodel}} defines a schema for data with data nodes that contain read-only state.  It is designed to be accessed via network management protocols such as NETCONF {{?RFC6241}} or RESTCONF {{?RFC8040}}. The lowest NETCONF layer is the secure transport layer, and the mandatory-to-implement secure transport is Secure Shell (SSH) {{?RFC6242}}. The lowest RESTCONF layer is HTTPS, and the mandatory-to-implement secure transport is TLS {{?RFC8446}}.
 
 The Network Configuration Access Control Model (NACM) {{?RFC8341}} provides the means to restrict access for particular NETCONF or RESTCONF users to a preconfigured subset of all available NETCONF or RESTCONF protocol operations and content.
 
