@@ -180,14 +180,7 @@ The information model defines a hierarchical classification scheme for packet di
   - l2: Layer 2 traffic and discards, i.e. frame and byte counts.
   - l3: Layer 3 traffic and discards, i.e. packet and byte counts.
 
-- Sub-Type:
-  - For discards:
-    - errors: discards due to errors in processing packets or frames, e.g., checksum errors.
-    - policy: discards due to policy enforcement, e.g., ACL drops.
-    - no-buffer: discards due to lack of buffer space, e.g., congestion-related drops.
-
 The hierarchical structure allows for future extension while maintaining backward compatibility. New discard types can be added as new branches without affecting existing implementations.
-
 
 ~~~~~~~~~~
 {::include ../yang/draft-ietf-opsawg-discardmodel-04.yang.tree.txt}
@@ -197,11 +190,14 @@ The corresponding YANG module is defined in {{module-infomodel}}.
 
 For additional context, {{wheredropped}} provides an example of where packets may be discarded in a device.
 
-Discard Class Definitions
--------------------------
+Sub-type Definitions
+--------------------
 
 discards/policy/:  
 : These are intended discards, meaning packets dropped by a device due to a configured policy. There are multiple sub-classes.
+
+discards/policy/:
+: These are unintneded discards due to errors in processing packets or frames.  There are multiple sub-classes.
 
 discards/error/l2/rx/:  
 : Frames discarded due to errors in the received Layer 2 frame. There are multiple sub-classes, such as those resulting from failing CRC, invalid header, invalid MAC address, or invalid VLAN.
@@ -219,7 +215,7 @@ discards/error/local/:
 : A device may discard packets within its switching pipeline due to internal errors, such as parity errors. Any errored discards not explicitly assigned to the above classes are also accounted for here.
 
 discards/no-buffer/:  
-: Discards occur due to no available buffer to enqueue the packet. These can be tail-drop discards or due to an active queue management algorithm, such as RED {{RED93}} or CODEL {{RFC8289}}.
+: Discards occur due to no available buffer to enqueue the packet, i.e. congestion related discards. These can be tail-drop discards or due to an active queue management algorithm, such as RED {{RED93}} or CODEL {{RFC8289}}.
 
 An example of possible signal-to-mitigation action mapping is provided in {{mapping}}.
 
@@ -277,6 +273,13 @@ An IPv4 packet discarded on egress due to no buffers would increment:
 - interface/egress/discards/no-buffer/class_0/packets  
 - interface/egress/discards/no-buffer/class_0/bytes
 
+A multicast IPv6 packet dropped due to RPF check failure would increment:
+
+- interface/ingress/discards/l3/v6/multicast/packets
+- interface/ingress/discards/l3/v6/multicast/bytes  
+- interface/ingress/discards/policy/l3/rpf/packets
+
+
 YANG Module - Data Model {#module-datamodel}
 ========================
 
@@ -295,7 +298,6 @@ This section discusses security considerations for both the information model an
 Information Model {#security-infomodel}
 -----------------
 The information model defined in {{module-infomodel}} specifies a YANG module using {{!RFC8791}} data extensions.  It defines a set of identities, types, and groupings. These nodes are intended to be reused by other YANG modules. The module by itself does not expose any data nodes that are writable, data nodes that contain read-only state, or RPCs. As such, there are no additional security issues related to the YANG module that need to be considered.
-
 
 Data Model {#security-datamodel}
 ----------
@@ -361,7 +363,7 @@ The "ietf-packet-discard-reporting" uses the "sx" structure defined in {{!RFC879
 
 Where do packets get dropped? {#wheredropped}
 =============================
-Understanding where in a network device packets can be discarded is essential for interpreting discard signals and determining appropriate mitigation actions.  This appendix provides an example device architecture and maps common discard locations to the classification schema defined in this document.
+Understanding where packets are discarded in a network device packets is essential for interpreting discard signals and determining appropriate mitigation actions.  This appendix provides an example device architecture and maps common discard locations to the classification schema defined in this document.
 
 {{ex-drop}} depicts an example of where and why packets may be discarded in a typical single-ASIC, shared-buffered type device. While actual device architectures vary, this example illustrates common processing stages where packets may be dropped.
 
@@ -421,7 +423,6 @@ The effectiveness of automated mitigation depends on correctly mapping discard s
 {: #ex-table title="Example Signal-Cause-Mitigation Mapping"}
 
 The 'Baseline' in the 'Discard Rate' column is both discard class and network dependent.
-
 
 Implementation Experience {#experience}
 =========================
