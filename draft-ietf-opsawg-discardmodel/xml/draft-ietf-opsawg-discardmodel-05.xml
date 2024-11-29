@@ -88,7 +88,7 @@
 
 <?line 96?>
 
-<t>This document defines an information model and corresponding data model for packet discard reporting. The information model provides an implementation indepedent framework for classifying packet loss, to enable automated network mitigation of unintended packet loss.  The data model specifies a implementation of this framework in YANG for network elements.</t>
+<t>This document defines an information model and corresponding data model for packet discard reporting. The information model provides an implementation-independent framework for classifying packet loss to enable automated network mitigation of unintended packet loss.  The data model specifies a YANG implementation of this framework for network elements.</t>
 
 
 
@@ -105,15 +105,15 @@
 
 <section anchor="introduction"><name>Introduction</name>
 
-<t>The primary function of a network is to transport and deliver packets according to service level objectives. Understanding both where and why packet loss occurs within a network is essential for effective network operation, with device-reported packet loss providing the most direct signal for identifying customer impact.  To effectively automate network operations, operators must be able to detect anomalous packet loss, determine its root cause, and apply appropriate mitigation actions. Some packet loss is normal or intended in IP/MPLS networks, however.  Therefore, precise classification of packet loss signals is crucial both to ensure that anomalous packet loss is easily detected and that the right action or sequence of actions is taken to mitigate the impact, as taking the wrong action can make problems worse. For example, taking a congested device out of service can make congestion worse by moving the traffic to other links or devices, which are already congested.</t>
+<t>The primary function of a network is to transport and deliver packets according to service level objectives. Understanding both where and why packet loss occurs within a network is essential for effective network operation, with device-reported packet loss providing the most direct signal for identifying customer impact.  To effectively automate network operations, operators must be able to detect anomalous packet loss, determine its root cause, and apply appropriate mitigation actions. While certain types of packet loss, such as policy-based discards, are intentional, precise classification of packet loss is crucial both to ensure that anomalous packet loss is easily detected and that the right action or sequence of actions is taken to mitigate the impact, as taking the wrong action can make problems worse.  For example, taking a congested device out of service can make congestion worse by moving the traffic to other links or devices, which are already congested.</t>
 
-<t>Existing metrics for reporting packet loss, such as ifInDiscards, ifOutDiscards, ifInErrors, and ifOutErrors defined in <xref target="RFC1213"/>, are insufficient for several reasons. First, they lack precision; for instance, ifInDiscards aggregates all discarded inbound packets without specifying the cause, making it challenging to distinguish between intended and unintended discards. Second, these definitions are ambiguous, leading to inconsistent vendor implementations. For example, in some implementations ifInErrors accounts only for errored packets that are dropped, while in others, it includes all errored packets, whether they are dropped or not. Many implementations support more discard metrics than these, however, they have been inconsistently implemented due to the lack of a standardised classification scheme and clear semantics for packet loss reporting. For example, <xref target="RFC7270"/> provides support for reporting discards per flow in IPFIX using forwardingStatus, however, the defined drop reason codes also lack sufficient clarity to support automated root cause analysis and impact mitigation, e.g., the "For us" reason code.</t>
+<t>Existing metrics for reporting packet loss, such as ifInDiscards, ifOutDiscards, ifInErrors, and ifOutErrors defined in MIB-II <xref target="RFC1213"/> and the YANG Data Model for Interface Management <xref target="RFC8343"/>, are insufficient for several reasons. First, they lack precision; for instance, ifInDiscards aggregates all discarded inbound packets without specifying the cause, making it challenging to distinguish between intended and unintended discards. Second, these definitions are ambiguous, leading to inconsistent vendor implementations. For example, in some implementations ifInErrors accounts only for errored packets that are dropped, while in others, it includes all errored packets, whether they are dropped or not. Many implementations support more discard metrics than these, however, they have been inconsistently implemented due to the lack of a standardised classification scheme and clear semantics for packet loss reporting. For example, <xref target="RFC7270"/> provides support for reporting discards per flow in IPFIX using forwardingStatus, however, the defined drop reason codes also lack sufficient clarity to facilitate automated root cause analysis and impact mitigation, e.g., the "For us" reason code.</t>
 
-<t>This document defines an information model for packet loss reporting which addresses these issues, introducing a classification scheme to enable automated mitigation of unintended packet loss. The information model is defined using YANG <xref target="RFC6020"/> using Data Structure Extensions <xref target="RFC8791"/>, allowing the model to remain abstract and decoupled from specific implementations in accordance with <xref target="RFC3444"/>. This abstraction supports different data model implementations - for example, in YANG, IPFIX <xref target="RFC7011"/>, gMNI <xref target="gMNI"/> or SNMP <xref target="RFC1157"/> - while ensuring consistency across implementations. Using YANG for the information model enables this abstraction, leverages the community's familiarity with its syntax, and ensures lossless translation to the corresponding YANG data model for network elements, which is also defined in this document.</t>
+<t>This document defines an information model for packet loss reporting which addresses these issues, providing precise classification of packet loss to enable accurate automated mitigation, and supporting different data model implementations while maintaining consistency through clear semantics.</t>
 
-<t>The scope of this document is limited to reporting packet loss at Layer 3 and frames discarded at Layer 2, although the model could be extended in future to cover segments dropped at Layer 4. This document considers only the signals that may trigger automated mitigation actions and not how the actions are defined or executed.</t>
+<t>The scope of this document is limited to reporting packet loss at Layer 3 and frames discarded at Layer 2. This document considers only the signals that may trigger automated mitigation actions and not how the actions are defined or executed.</t>
 
-<t><xref target="problem"/> describes the problem to be solved. <xref target="infomodel"/> describes the information model. <xref target="datamodel"/> describes the corresponding network element data model and implementation requirements together with a set of examples.  <xref target="module-datamodel"/> defines the corresponding YANG module.  <xref target="module-infomodel"/> defines the information model as an abstract data structure in YANG, in accordance with <xref target="RFC8791"/>.  <xref target="wheredropped"/> provides an example of where packets may be discarded in a device. <xref target="mapping"/> provides examples of discard signal-to-cause-to-auto-mitigation action mapping. <xref target="experience"/> details the authors' experience from implementing this model.</t>
+<t><xref target="problem"/> describes the problem space and requirements. <xref target="infomodel"/> defines the information model and classification scheme. <xref target="datamodel"/> specifies the corresponding data model and implementation requirements together with a set of usage examples. <xref target="module-infomodel"/> provides the complete YANG module definition for the data model. The appendices provide additional context and implementation guidance.</t>
 
 </section>
 <section anchor="terminology"><name>Terminology</name>
@@ -126,57 +126,60 @@ appear in all capitals, as shown here.</t>
 
 <?line -18?>
 
-<t>A packet discard is any packet dropped by a device, whether intentionally or unintentionally.</t>
+<t>A packet discard accounts for any instance where a packet is dropped by a device, regardless of whether the discard was intentional or unintentional.</t>
 
-<t>Intended packet loss refers to packet discards that occur due to deliberate network policies or configurations designed to enforce security or quality of service. For example, packets dropped because they match an Access Control List (ACL) denying certain traffic types.</t>
+<t>Intended discards are packets dropped due to deliberate network policies or configurations designed to enforce security or quality of service. For example, packets dropped because they match an Access Control List (ACL) denying certain traffic types.</t>
 
-<t>Unintended packet loss is the discarding of packets that the network operator otherwise intends to deliver, i.e. which indicates an error state.  There are many possible reasons for unintended packet loss, including: erroring links may corrupt packets in transit; incorrect routing tables may result in packets being dropped because they do not match a valid route; configuration errors may result in a valid packet incorrectly matching an Access Control List (ACL) and being dropped.</t>
+<t>Unintended discards are packets that were dropped, which the network operator otherwise intended to deliver, i.e. which indicates an error state.  There are many possible reasons for unintended packet loss, including: erroring links may corrupt packets in transit; incorrect routing tables may result in packets being dropped because they do not match a valid route; configuration errors may result in a valid packet incorrectly matching an ACL and being dropped.</t>
 
 <t>Tree diagrams used in this document follow the notation defined in <xref target="RFC8340"/>.</t>
 
+<t>Symbol "|" is used to denote "or".</t>
+
 </section>
 <section anchor="problem"><name>Problem Statement</name>
-<t>For any network there are a small set of potential actions that can be taken to minimise customer impact by automatically mitigating unintended packet loss:</t>
+<t>The fundamental problem for network operators is how to automatically detect when unintended packet loss is occurring and determine the appropriate action to mitigate it. For any network there are a small set of potential actions that can be taken to mitigate customer impact when unintended packet loss is detected:</t>
 
 <t><list style="numbers" type="1">
-  <t>Take a device, link, or set of devices and/or links out of service.</t>
+  <t>Take a problematic device, link, or set of devices and/or links out of service.</t>
   <t>Return a device, link, or set of devices and/or links back into service.</t>
-  <t>Move traffic to other links or devices.</t>
+  <t>Move traffic to other links or devices to alleviate congestion or avoid problematic paths.</t>
   <t>Roll back a recent change to a device that might have caused the problem.</t>
-  <t>Escalate to a network operator as a last resort.</t>
+  <t>Escalate to a network operator as a last resort when automated mitigation is not possible.</t>
 </list></t>
 
-<t>To be able to detect whether device-reported discards indicate a problem and to determine what actions should be taken to mitigate the impact and remediate the cause, depends on four primary features of the packet loss signal:</t>
+<t>The ability to select the appropriate mitigation action depends on four key features of packet loss:</t>
 
 <dl>
   <dt>FEATURE-DISCARD-LOCATION:</dt>
   <dd>
-    <t>The location of the discards.</t>
+    <t>Determines which devices, interfaces and/or flows are impacted.</t>
   </dd>
   <dt>FEATURE-DISCARD-RATE:</dt>
   <dd>
-    <t>The rate and/or magnitude of the discards.</t>
+    <t>The rate and/or magnitude of the discards, indicating the severity and urgency of the problem.</t>
   </dd>
   <dt>FEATURE-DISCARD-DURATION:</dt>
   <dd>
-    <t>The duration of the discards.</t>
+    <t>The duration of the discards which helps to distinguish transient from persistent issues.</t>
   </dd>
   <dt>FEATURE-DISCARD-CLASS:</dt>
   <dd>
-    <t>The type or class of discards.</t>
+    <t>The type or class of discards, which is crucial for selecting the appropriate of mitigation - for example: error discards may require taking faulty components out of service; no-buffer discards may require traffic redistribution; policy discards typically require no automated action</t>
   </dd>
 </dl>
 
-<t>FEATURE-LOSS-LOCATION, FEATURE-LOSS-RATE, and FEATURE-LOSS-DURATION, are implicitly provided by existing passive monitoring statistics, for example, defined by MIB-II <xref target="RFC1213"/> or YANG <xref target="RFC8343"/>. FEATURE-LOSS-CLASS, is dependent on the classification scheme used for discard reporting.  The discard classification defined in <xref target="RFC1213"/> or <xref target="RFC8343"/> is insufficient to determine the correct action to mitigate the impact of unintended discards.  The following information model defines a packet discard classification scheme which addresses this problem.</t>
+<t>While FEATURE-LOSS-LOCATION, FEATURE-LOSS-RATE, and FEATURE-LOSS-DURATION are implicitly supported by MIB-II <xref target="RFC1213"/> and the YANG Data Model for Interface Management <xref target="RFC8343"/>, FEATURE-LOSS-CLASS requires a more detailed classification scheme than they define. The following information model defines such a classification scheme to enable automated mapping from loss signals to appropriate mitigation actions.</t>
 
 </section>
 <section anchor="infomodel"><name>Information Model</name>
+<t>The information model is defined using YANG <xref target="RFC6020"/> with Data Structure Extensions <xref target="RFC8791"/>, allowing the model to remain abstract and decoupled from specific implementations in accordance with <xref target="RFC3444"/>. This abstraction supports different data model implementations - for example, in YANG, IPFIX <xref target="RFC7011"/>, gMNI <xref target="gMNI"/> or SNMP <xref target="RFC1157"/> - while ensuring consistency across implementations. Using YANG for the information model enables this abstraction, leverages the community's familiarity with its syntax, and ensures lossless translation to the corresponding YANG data model, which is also defined in <xref target="datamodel"/>.</t>
 
 <section anchor="infomodel-structure"><name>Structure</name>
-<t>The classification schema is a hierarchical tree that follows the structure: component/direction/type/layer/sub-type/sub-sub-type/.../metric.  The elements of the tree are defined as follows:</t>
+<t>The information model defines a hierarchical classification scheme for packet discards, which captures where in a device the discards are accounted (component), in which direction they were flowing (direction), whether they were successfully processed or discarded (type), what protocol layer they belong to (layer), and the specific reason for any discards (sub-types).  This organisation enables both high-level monitoring of total discards and more detailed triage to map to mitigation actions.  The elements of the tree are defined as follows:</t>
 
 <t><list style="symbols">
-  <t>Component: Specifies where in the device the discards are accounted. It can be:
+  <t>Component:
   <list style="symbols">
       <t>interface: discards of traffic to or from a specific network interface.</t>
       <t>device: discards of traffic transiting the device.</t>
@@ -198,18 +201,11 @@ appear in all capitals, as shown here.</t>
       <t>l2: Layer 2 traffic and discards, i.e. frame and byte counts.</t>
       <t>l3: Layer 3 traffic and discards, i.e. packet and byte counts.</t>
     </list></t>
-  <t>Sub-Type:
-  <list style="symbols">
-      <t>For discards:
-      <list style="symbols">
-          <t>errors: discards due to errors in processing packets or frames, e.g., checksum errors.</t>
-          <t>policy: discards due to policy enforcement, e.g., ACL drops.</t>
-          <t>no-buffer: discards due to lack of buffer space, e.g., congestion-related drops.</t>
-        </list></t>
-    </list></t>
 </list></t>
 
-<t>Each sub-type may contain further specific reasons for discards, providing more detailed insight into the cause of packet loss.</t>
+<t>The hierarchical structure allows for future extension while maintaining backward compatibility. New discard types can be added as new branches without affecting existing implementations.</t>
+
+<t>The following YANG tree diagram shows the complete structure:</t>
 
 <figure><artwork><![CDATA[
 module: ietf-packet-discard-reporting
@@ -472,15 +468,53 @@ module: ietf-packet-discard-reporting
 
 <t>For additional context, <xref target="wheredropped"/> provides an example of where packets may be discarded in a device.</t>
 
-<t>An example of possible signal-to-mitigation action mapping is provided in {#mapping}.</t>
+</section>
+<section anchor="sub-type-definitions"><name>Sub-type Definitions</name>
+
+<dl>
+  <dt>discards/policy/:</dt>
+  <dd>
+    <t>These are intended discards, meaning packets dropped by a device due to a configured policy. There are multiple sub-classes.</t>
+  </dd>
+  <dt>discards/error/:</dt>
+  <dd>
+    <t>These are unintended discards due to errors in processing packets or frames.  There are multiple sub-classes.</t>
+  </dd>
+  <dt>discards/error/l2/rx/:</dt>
+  <dd>
+    <t>Frames discarded due to errors in the received Layer 2 frame. There are multiple sub-classes, such as those resulting from failing CRC, invalid header, invalid MAC address, or invalid VLAN.</t>
+  </dd>
+  <dt>discards/error/l3/rx/:</dt>
+  <dd>
+    <t>These are discards which occur due to errors in the received packet, indicating an upstream problem rather than an issue with the device dropping the errored packets. There are multiple sub-classes, including header checksum errors, MTU exceeded, and invalid packet, i.e. due to incorrect version, incorrect header length, or invalid options.</t>
+  </dd>
+  <dt>discards/error/l3/rx/ttl-expired:</dt>
+  <dd>
+    <t>There can be multiple causes for TTL-expired (or Hop limit exceeded) discards: i) trace-route; ii) TTL (Hop limit) set too low by the end-system; iii) routing loops.</t>
+  </dd>
+  <dt>discards/error/l3/no-route/:</dt>
+  <dd>
+    <t>Discards which occur due to a packet not matching any route.</t>
+  </dd>
+  <dt>discards/error/local/:</dt>
+  <dd>
+    <t>A device may discard packets within its switching pipeline due to internal errors, such as parity errors. Any errored discards not explicitly assigned to the above classes are also accounted for here.</t>
+  </dd>
+  <dt>discards/no-buffer/:</dt>
+  <dd>
+    <t>Discards occur due to no available buffer to enqueue the packet, i.e. congestion related discards. These can be tail-drop discards or due to an active queue management algorithm, such as RED <xref target="RED93"/> or CODEL <xref target="RFC8289"/>.</t>
+  </dd>
+</dl>
+
+<t>An example of possible signal-to-mitigation action mapping is provided in <xref target="mapping"/>.</t>
 
 </section>
 </section>
 <section anchor="datamodel"><name>Data Model</name>
-<t>This data model implements the preceding information model for the interface and device components.  This is classed as a Network Element model as defined by <xref target="RFC1157"/>.</t>
+<t>This data model implements the information model defined in <xref target="infomodel"/> for the interface and device components.  This is classed as a Network Element model as defined by <xref target="RFC1157"/>.</t>
 
 <section anchor="datamodel-structure"><name>Structure</name>
-<t>The data model structure is represented by the following YANG tree diagram.</t>
+<t>Their is a direct mapping between the information model components and their data model implementations, with each component in the hierarchy represented by corresponding YANG containers and leaves.  The following YANG tree diagram shows the complete structure:</t>
 
 <figure><artwork><![CDATA[
 module: ietf-packet-discard-reporting
@@ -741,24 +775,25 @@ module: ietf-packet-discard-reporting
 
 </section>
 <section anchor="requirements"><name>Implementation Requirements</name>
-<t>The following requirements apply to the implementation of the data model.  Requirements 1-10 relate to packets forwarded or discarded by the device, while requirement 11 relates to packets destined for or originating from the device:</t>
+<t>The following requirements apply to the implementation of the data model and are intended ensure consistent implementation across different vendors and platforms while allowing for platform-specific optimisations where needed.  Requirements 1-10 relate to packets forwarded or discarded by the device, while requirement 11 relates to packets destined for or originating from the device:</t>
 
 <t><list style="numbers" type="1">
   <t>All instances of Layer 2 frame or Layer 3 packet receipt, transmission, and discards <bcp14>MUST</bcp14> be accounted for.</t>
   <t>All instances of Layer 2 frame or Layer 3 packet receipt, transmission, and discards <bcp14>SHOULD</bcp14> be attributed to the physical or logical interface of the device where they occur.  Where they cannot be attributed to the interface, they <bcp14>MUST</bcp14> be attributed to the device.</t>
-  <t>An individual frame <bcp14>MUST</bcp14> only be accounted for by either the Layer 2 traffic class or the Layer 2 discard classes within a single direction or context, i.e., ingress or egress or device.</t>
-  <t>An individual packet <bcp14>MUST</bcp14> only be accounted for by either the Layer 3 traffic class or the Layer 3 discard classes within a single direction or context, i.e., ingress or egress or device.</t>
-  <t>A frame accounted for at Layer 2 <bcp14>SHOULD NOT</bcp14> be accounted for at Layer 3 and vice versa.  An implementation <bcp14>MUST</bcp14> indicate which layers traffic and discards are counted against.</t>
+  <t>An individual frame <bcp14>MUST</bcp14> only be accounted for by either the Layer 2 traffic class or the Layer 2 discard classes within a single direction or context, i.e., ingress or egress or device.  This is to avoid double counting.</t>
+  <t>An individual packet <bcp14>MUST</bcp14> only be accounted for by either the Layer 3 traffic class or the Layer 3 discard classes within a single direction or context, i.e., ingress or egress or device.  This is to avoid double counting.</t>
+  <t>A frame accounted for at Layer 2 <bcp14>SHOULD NOT</bcp14> be accounted for at Layer 3 and vice versa.  An implementation <bcp14>MUST</bcp14> indicate which layers traffic and discards are counted against.  This is to avoid double counting.</t>
   <t>The aggregate Layer 2 and Layer 3 traffic and discard classes <bcp14>SHOULD</bcp14> account for all underlying frames or packets received, transmitted, and discarded across all other classes.</t>
   <t>The aggregate Quality of Service (QoS) traffic and no buffer discard classes <bcp14>MUST</bcp14> account for all underlying packets received, transmitted, and discarded across all other classes.</t>
   <t>In addition to the Layer 2 and Layer 3 aggregate classes, an individual discarded packet <bcp14>MUST</bcp14> only account against a single error, policy, or no-buffer discard subclass.</t>
   <t>When there are multiple reasons for discarding a packet, the ordering of discard class reporting <bcp14>MUST</bcp14> be defined.</t>
-  <t>If Diffserv <xref target="RFC2475"/> is not used, no-buffer discards <bcp14>SHOULD</bcp14> be reported as class0.</t>
+  <t>If Diffserv <xref target="RFC2475"/> is not used, no-buffer discards <bcp14>SHOULD</bcp14> be reported as class0, which represents the default class.</t>
   <t>Traffic to the device control plane has its own class, however, traffic from the device control plane <bcp14>SHOULD</bcp14> be accounted for in the same way as other egress traffic.</t>
+  <t>While the model defines a comprehensive set of counters and statistics, implementations <bcp14>MAY</bcp14> support a subset of the defined features based on device capabilities and operational requirements. However, implementations <bcp14>MUST</bcp14> clearly document which features are supported and how they map to the model.</t>
 </list></t>
 
 </section>
-<section anchor="examples"><name>Examples</name>
+<section anchor="examples"><name>Usage Examples</name>
 
 <t>If all of the requirements are met, a "good" unicast IPv4 packet received would increment:</t>
 
@@ -784,6 +819,14 @@ module: ietf-packet-discard-reporting
   <t>interface/egress/discards/l3/v4/unicast/bytes</t>
   <t>interface/egress/discards/no-buffer/class_0/packets</t>
   <t>interface/egress/discards/no-buffer/class_0/bytes</t>
+</list></t>
+
+<t>A multicast IPv6 packet dropped due to RPF check failure would increment:</t>
+
+<t><list style="symbols">
+  <t>interface/ingress/discards/l3/v6/multicast/packets</t>
+  <t>interface/ingress/discards/l3/v6/multicast/bytes</t>
+  <t>interface/ingress/discards/policy/l3/rpf/packets</t>
 </list></t>
 
 </section>
@@ -1446,6 +1489,7 @@ module ietf-packet-discard-reporting {
 
 </section>
 <section anchor="security"><name>Security Considerations</name>
+<t>This section discusses security considerations for both the information model and its implementation as a data model.</t>
 
 <section anchor="security-infomodel"><name>Information Model</name>
 <t>The information model defined in <xref target="module-infomodel"/> specifies a YANG module using <xref target="RFC8791"/> data extensions.  It defines a set of identities, types, and groupings. These nodes are intended to be reused by other YANG modules. The module by itself does not expose any data nodes that are writable, data nodes that contain read-only state, or RPCs. As such, there are no additional security issues related to the YANG module that need to be considered.</t>
@@ -1512,34 +1556,6 @@ Email: nchachmo@cisco.com
 
 
 
-<reference anchor="RFC6020">
-  <front>
-    <title>YANG - A Data Modeling Language for the Network Configuration Protocol (NETCONF)</title>
-    <author fullname="M. Bjorklund" initials="M." role="editor" surname="Bjorklund"/>
-    <date month="October" year="2010"/>
-    <abstract>
-      <t>YANG is a data modeling language used to model configuration and state data manipulated by the Network Configuration Protocol (NETCONF), NETCONF remote procedure calls, and NETCONF notifications. [STANDARDS-TRACK]</t>
-    </abstract>
-  </front>
-  <seriesInfo name="RFC" value="6020"/>
-  <seriesInfo name="DOI" value="10.17487/RFC6020"/>
-</reference>
-
-<reference anchor="RFC8791">
-  <front>
-    <title>YANG Data Structure Extensions</title>
-    <author fullname="A. Bierman" initials="A." surname="Bierman"/>
-    <author fullname="M. Björklund" initials="M." surname="Björklund"/>
-    <author fullname="K. Watsen" initials="K." surname="Watsen"/>
-    <date month="June" year="2020"/>
-    <abstract>
-      <t>This document describes YANG mechanisms for defining abstract data structures with YANG.</t>
-    </abstract>
-  </front>
-  <seriesInfo name="RFC" value="8791"/>
-  <seriesInfo name="DOI" value="10.17487/RFC8791"/>
-</reference>
-
 <reference anchor="RFC2119">
   <front>
     <title>Key words for use in RFCs to Indicate Requirement Levels</title>
@@ -1566,6 +1582,34 @@ Email: nchachmo@cisco.com
   <seriesInfo name="BCP" value="14"/>
   <seriesInfo name="RFC" value="8174"/>
   <seriesInfo name="DOI" value="10.17487/RFC8174"/>
+</reference>
+
+<reference anchor="RFC6020">
+  <front>
+    <title>YANG - A Data Modeling Language for the Network Configuration Protocol (NETCONF)</title>
+    <author fullname="M. Bjorklund" initials="M." role="editor" surname="Bjorklund"/>
+    <date month="October" year="2010"/>
+    <abstract>
+      <t>YANG is a data modeling language used to model configuration and state data manipulated by the Network Configuration Protocol (NETCONF), NETCONF remote procedure calls, and NETCONF notifications. [STANDARDS-TRACK]</t>
+    </abstract>
+  </front>
+  <seriesInfo name="RFC" value="6020"/>
+  <seriesInfo name="DOI" value="10.17487/RFC6020"/>
+</reference>
+
+<reference anchor="RFC8791">
+  <front>
+    <title>YANG Data Structure Extensions</title>
+    <author fullname="A. Bierman" initials="A." surname="Bierman"/>
+    <author fullname="M. Björklund" initials="M." surname="Björklund"/>
+    <author fullname="K. Watsen" initials="K." surname="Watsen"/>
+    <date month="June" year="2020"/>
+    <abstract>
+      <t>This document describes YANG mechanisms for defining abstract data structures with YANG.</t>
+    </abstract>
+  </front>
+  <seriesInfo name="RFC" value="8791"/>
+  <seriesInfo name="DOI" value="10.17487/RFC8791"/>
 </reference>
 
 <reference anchor="RFC3688">
@@ -1732,6 +1776,21 @@ Email: nchachmo@cisco.com
   <seriesInfo name="DOI" value="10.17487/RFC1213"/>
 </reference>
 
+<reference anchor="RFC8343">
+  <front>
+    <title>A YANG Data Model for Interface Management</title>
+    <author fullname="M. Bjorklund" initials="M." surname="Bjorklund"/>
+    <date month="March" year="2018"/>
+    <abstract>
+      <t>This document defines a YANG data model for the management of network interfaces. It is expected that interface-type-specific data models augment the generic interfaces data model defined in this document. The data model includes definitions for configuration and system state (status information and counters for the collection of statistics).</t>
+      <t>The YANG data model in this document conforms to the Network Management Datastore Architecture (NMDA) defined in RFC 8342.</t>
+      <t>This document obsoletes RFC 7223.</t>
+    </abstract>
+  </front>
+  <seriesInfo name="RFC" value="8343"/>
+  <seriesInfo name="DOI" value="10.17487/RFC8343"/>
+</reference>
+
 <reference anchor="RFC7270">
   <front>
     <title>Cisco-Specific Information Elements Reused in IP Flow Information Export (IPFIX)</title>
@@ -1745,6 +1804,21 @@ Email: nchachmo@cisco.com
   </front>
   <seriesInfo name="RFC" value="7270"/>
   <seriesInfo name="DOI" value="10.17487/RFC7270"/>
+</reference>
+
+<reference anchor="RFC8340">
+  <front>
+    <title>YANG Tree Diagrams</title>
+    <author fullname="M. Bjorklund" initials="M." surname="Bjorklund"/>
+    <author fullname="L. Berger" initials="L." role="editor" surname="Berger"/>
+    <date month="March" year="2018"/>
+    <abstract>
+      <t>This document captures the current syntax used in YANG module tree diagrams. The purpose of this document is to provide a single location for this definition. This syntax may be updated from time to time based on the evolution of the YANG language.</t>
+    </abstract>
+  </front>
+  <seriesInfo name="BCP" value="215"/>
+  <seriesInfo name="RFC" value="8340"/>
+  <seriesInfo name="DOI" value="10.17487/RFC8340"/>
 </reference>
 
 <reference anchor="RFC3444">
@@ -1793,36 +1867,6 @@ Email: nchachmo@cisco.com
   <seriesInfo name="DOI" value="10.17487/RFC1157"/>
 </reference>
 
-<reference anchor="RFC8340">
-  <front>
-    <title>YANG Tree Diagrams</title>
-    <author fullname="M. Bjorklund" initials="M." surname="Bjorklund"/>
-    <author fullname="L. Berger" initials="L." role="editor" surname="Berger"/>
-    <date month="March" year="2018"/>
-    <abstract>
-      <t>This document captures the current syntax used in YANG module tree diagrams. The purpose of this document is to provide a single location for this definition. This syntax may be updated from time to time based on the evolution of the YANG language.</t>
-    </abstract>
-  </front>
-  <seriesInfo name="BCP" value="215"/>
-  <seriesInfo name="RFC" value="8340"/>
-  <seriesInfo name="DOI" value="10.17487/RFC8340"/>
-</reference>
-
-<reference anchor="RFC8343">
-  <front>
-    <title>A YANG Data Model for Interface Management</title>
-    <author fullname="M. Bjorklund" initials="M." surname="Bjorklund"/>
-    <date month="March" year="2018"/>
-    <abstract>
-      <t>This document defines a YANG data model for the management of network interfaces. It is expected that interface-type-specific data models augment the generic interfaces data model defined in this document. The data model includes definitions for configuration and system state (status information and counters for the collection of statistics).</t>
-      <t>The YANG data model in this document conforms to the Network Management Datastore Architecture (NMDA) defined in RFC 8342.</t>
-      <t>This document obsoletes RFC 7223.</t>
-    </abstract>
-  </front>
-  <seriesInfo name="RFC" value="8343"/>
-  <seriesInfo name="DOI" value="10.17487/RFC8343"/>
-</reference>
-
 
 
 
@@ -1831,7 +1875,7 @@ Email: nchachmo@cisco.com
 </references>
 
 
-<?line 1488?>
+<?line 1519?>
 
 <section anchor="module-infomodel"><name>YANG Module - Information Model</name>
 
@@ -2491,9 +2535,11 @@ module ietf-packet-discard-reporting {
 
 </section>
 <section anchor="wheredropped"><name>Where do packets get dropped?</name>
-<t><xref target="ex-drop"/> depicts an example of where and why packets may be discarded in a typical single-ASIC, shared-buffered type device. Packets ingress on the left and egress on the right.</t>
+<t>Understanding where packets are discarded in a network device is essential for interpreting discard signals and determining appropriate mitigation actions.  <xref target="ex-drop"/> depicts an example of where and why packets may be discarded in a typical single-ASIC, shared-buffered type device. While actual device architectures vary, this example illustrates common processing stages where packets may be dropped.</t>
 
 <figure title="Example of where packets get dropped" anchor="ex-drop"><artwork><![CDATA[
+Packets ingress on the left and egress on the right:
+
                                                       +----------+
                                                       |          |
                                                       |  CPU     |
@@ -2522,43 +2568,12 @@ Unintended                 error/rx/l2   error/l3/rx   no-buffer     error/l3/tx
 
 ]]></artwork></figure>
 
-<section anchor="discard-class-descriptions"><name>Discard Class Descriptions</name>
+<t>See Appendix C for examples of how these discard signals map to root causes and mitigation actions.</t>
 
-<dl>
-  <dt>discards/policy/:</dt>
-  <dd>
-    <t>These are intended discards, meaning packets dropped by a device due to a configured policy. There are multiple sub-classes.</t>
-  </dd>
-  <dt>discards/error/l2/rx/:</dt>
-  <dd>
-    <t>Frames discarded due to errors in the received Layer 2 frame. There are multiple sub-classes, such as those resulting from failing CRC, invalid header, invalid MAC address, or invalid VLAN.</t>
-  </dd>
-  <dt>discards/error/l3/rx/:</dt>
-  <dd>
-    <t>These are discards which occur due to errors in the received packet, indicating an upstream problem rather than an issue with the device dropping the errored packets. There are multiple sub-classes, including header checksum errors, MTU exceeded, and invalid packet, i.e. due to incorrect version, incorrect header length, or invalid options.</t>
-  </dd>
-  <dt>discards/error/l3/rx/ttl-expired:</dt>
-  <dd>
-    <t>There can be multiple causes for TTL-expired (or Hop limit exceeded) discards: i) trace-route; ii) TTL (Hop limit) set too low by the end-system; iii) routing loops.</t>
-  </dd>
-  <dt>discards/error/l3/no-route/:</dt>
-  <dd>
-    <t>Discards occur due to a packet not matching any route.</t>
-  </dd>
-  <dt>discards/error/local/:</dt>
-  <dd>
-    <t>A device may discard packets within its switching pipeline due to internal errors, such as parity errors. Any errored discards not explicitly assigned to the above classes are also accounted for here.</t>
-  </dd>
-  <dt>discards/no-buffer/:</dt>
-  <dd>
-    <t>Discards occur due to no available buffer to enqueue the packet. These can be tail-drop discards or due to an active queue management algorithm, such as RED <xref target="RED93"/> or CODEL <xref target="RFC8289"/>.</t>
-  </dd>
-</dl>
-
-</section>
 </section>
 <section anchor="mapping"><name>Example signal-to-mitigation action mapping</name>
-<t><xref target="ex-table"/> gives an example discard signal-to-mitigation action mapping.  Mappings for a specific network will be dependent on the definition of unintended packet loss for that network.</t>
+
+<t>The effectiveness of automated mitigation depends on correctly mapping discard signals to root causes and appropriate actions.  <xref target="ex-table"/> gives example discard signal-to-mitigation action mappings.</t>
 
 <texttable title="Example Signal-Cause-Mitigation Mapping" anchor="ex-table">
       <ttcol align='left'>Discard class</ttcol>
@@ -2639,16 +2654,16 @@ Unintended                 error/rx/l2   error/l3/rx   no-buffer     error/l3/tx
 
 </section>
 <section anchor="experience"><name>Implementation Experience</name>
-<t>This appendix captures the authors' experience gained from implementing and applying this information model across multiple vendors' platforms, as guidance for future implementers.</t>
+<t>This appendix captures practical insights gained from implementing this information model across multiple vendors' platforms, as guidance for future implementers.</t>
 
 <t><list style="numbers" type="1">
-  <t>The number and granularity of discard classes defined in the information model represent a compromise.  It aims to offer sufficient detail to enable appropriate automated actions while avoiding excessive detail, which may hinder quick problem identification.  Additionally, it helps to limit the quantity of data produced per interface, constraining the data volume and device CPU impacts.  While further granularity is possible, the defined schema has generally proven to be sufficient for the task of mitigating unintended packet loss.</t>
+  <t>The number and granularity of discard classes defined in the information model represent a compromise.  It aims to provide sufficient detail to enable appropriate automated actions while avoiding excessive detail, which may hinder quick problem identification.  Additionally, it helps to limit the quantity of data produced per interface, constraining the data volume and device CPU impacts.  While further granularity is possible, the defined schema has generally proven to be sufficient for the task of mitigating unintended packet loss.</t>
   <t>There are many possible ways to define the discard classification tree.  For example, we could have used a multi-rooted tree, rooted in each protocol.  Instead, we opted to define a tree where protocol discards and causal discard classes are accounted for orthogonally.  This decision reduces the number of combinations of classes and has proven sufficient for determining mitigation actions.</t>
   <t>NoBuffer discards can be realized differently with different memory architectures. Whether a NoBuffer discard is attributed to ingress or egress can differ accordingly.  For successful auto-mitigation, discards due to egress interface congestion should be reported on egress, while discards due to device-level congestion (e.g. due to exceeding the device forwarding rate) should be reported on ingress.</t>
   <t>Platforms often account for the number of packets discarded where the TTL has expired (or Hop Limit exceeded), and the device CPU has returned an ICMP Time Exceeded message.  There is typically a policer applied to limit the number of packets sent to the device CPU, however, which implicitly limits the rate of TTL discards that are processed.  One method to account for all packet discards due to TTL expired, even those that are dropped by a policer when being forwarded to the CPU, is to use accounting of all ingress packets received with TTL=1 as a proxy measure.</t>
   <t>Where no route discards are implemented with a default null route, separate discard accounting is required for any explicit null routes configured, in order to differentiate between interface/ingress/discards/policy/null-route/packets and interface/ingress/discards/errors/no-route/packets.</t>
   <t>It is useful to account separately for transit packets discarded by ACLs or policers, and packets discarded by ACLs or policers which limit the number of packets to the device control plane.</t>
-  <t>It is not possible to identify a configuration error - e.g., when intended discards are unintended - with device packet loss metrics alone.  For example, additional context is needed to determine if ACL discards are intended or due to a misconfigured ACL, i.e., with configuration validation before deployment or by detecting a significant change in ACL discards after a configuration change compared to before.</t>
+  <t>It is not possible to identify a configuration error - e.g., when intended discards are unintended - with device discard metrics alone.  For example, additional context is needed to determine if ACL discards are intended or due to a misconfigured ACL, i.e., with configuration validation before deployment or by detecting a significant change in ACL discards after a configuration change compared to before.</t>
   <t>Where traffic byte counters need to be 64-bit, packet and discard counters that increase at a lower rate may be encoded in 32-bit.</t>
   <t>Aggregate counters need to be able to deal with the possibility of discontinuities in the underlying counters.</t>
   <t>In cases where the reporting device is the source or destination of a tunnel, the ingress protocol for a packet may differ from the egress protocol; if IPv4 is tunnelled over IPv6 for example.  Some implementations may attribute egress discards to the ingress protocol.</t>
@@ -2661,294 +2676,310 @@ Unintended                 error/rx/l2   error/l3/rx   no-buffer     error/l3/tx
   </back>
 
 <!-- ##markdown-source:
-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
+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
+v0GpJ3Ai5EHgEPb/AeIy1fm/MAEA
 
 -->
 
