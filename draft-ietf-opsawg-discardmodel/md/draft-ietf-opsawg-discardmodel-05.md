@@ -159,9 +159,9 @@ The information model is defined using YANG {{?RFC6020}} with Data Structure Ext
 
 Structure {#infomodel-structure}
 ---------
-The information model defines a hierarchical classification scheme for packet discards, which captures where in a device the discards are accounted (component), in which direction they were flowing (direction), whether they were successfully processed or discarded (type), what protocol layer they belong to (layer), and the specific reason for any discards (sub-types). A complete classification path follows the pattern: component/direction/type/layer/sub-type/sub-sub-type/.../metric. Appendix B illustrates where these discards typically occur in a network device.
+The information model defines a hierarchical classification scheme for packet discards, which captures where in a device the discards are accounted (component), in which direction they were flowing (direction), whether they were successfully processed or discarded (type), what protocol layer they belong to (layer), and the specific reason for any discards (sub-types). This organisation enables both high-level monitoring of total discards and more detailed triage to map to mitigation actions.
 
-This organisation enables both high-level monitoring of total discards and more detailed triage to map to mitigation actions.  The elements of the tree are defined as follows:
+A complete classification path follows the pattern: component/direction/type/layer/sub-type/sub-sub-type/.../metric. Appendix B illustrates where these discards typically occur in a network device.  The elements of the tree are defined as follows:
 
 - Component:
   - interface: discards of traffic to or from a specific network interface.
@@ -197,28 +197,28 @@ Sub-type Definitions
 --------------------
 
 discards/policy/:  
-: These are intended discards, meaning packets dropped by a device due to a configured policy. There are multiple sub-classes.
+: These are intended discards, meaning packets dropped by a device due to a configured policy, including: ACLs, traffic policers, Reverse Path Forwarding (RPF) checks, DDoS protection rules and explicit null routes
 
 discards/error/:
 : These are unintended discards due to errors in processing packets or frames.  There are multiple sub-classes.
 
 discards/error/l2/rx/:  
-: Frames discarded due to errors in the received Layer 2 frame. There are multiple sub-classes, such as those resulting from failing CRC, invalid header, invalid MAC address, or invalid VLAN.
+: These are frames discarded due to errors in the received Layer 2 frame, including: CRC errors, invalid MAC addresses, invalid VLAN tags, frame size violations and other malformed frame conditions
 
 discards/error/l3/rx/:  
-: These are discards which occur due to errors in the received packet, indicating an upstream problem rather than an issue with the device dropping the errored packets. There are multiple sub-classes, including header checksum errors, MTU exceeded, and invalid packet, i.e. due to incorrect version, incorrect header length, or invalid options.
+: These are discards which occur due to errors in the received packet, indicating an upstream problem rather than an issue with the device dropping the errored packets, including: header checksum errors,  MTU exceeded, invalid packet errors, i.e. incorrect version, incorrect header length, invalid options and other malformed packet conditions
 
 discards/error/l3/rx/ttl-expired:  
-: There can be multiple causes for TTL-expired (or Hop limit exceeded) discards: i) trace-route; ii) TTL (Hop limit) set too low by the end-system; iii) routing loops. 
+: These are discards due to TTL (or Hop limit) expiry, which can occur for the following reasons: normal trace-route operations, end-system TTL/Hop limit set too low, routing loops in the network.
 
 discards/error/l3/no-route/:  
-: Discards which occur due to a packet not matching any route.
+: These are discards which occur due to a packet not matching any route in the routing table, e.g. which may be due to routing configuration errors or may be transient discards during convergence.
 
 discards/error/local/:  
-: A device may discard packets within its switching pipeline due to internal errors, such as parity errors. Any errored discards not explicitly assigned to the above classes are also accounted for here.
+: These are discards due to internal device issues, including: parity errors in device memory or other internal hardware errors.  Any errored discards not explicitly assigned to other classes are also accounted for here.
 
 discards/no-buffer/:  
-: Discards occur due to no available buffer to enqueue the packet, i.e. congestion related discards. These can be tail-drop discards or due to an active queue management algorithm, such as RED {{RED93}} or CODEL {{RFC8289}}.
+:  These are discards due to buffer exhaustion, i.e. congestion related discards. These can be tail-drop discards or due to an active queue management algorithm, such as RED {{RED93}} or CODEL {{RFC8289}}.
 
 An example of possible signal-to-mitigation action mapping is provided in {{mapping}}.
 
@@ -442,4 +442,3 @@ This appendix captures practical insights gained from implementing this informat
 9. Aggregate counters need to be able to deal with the possibility of discontinuities in the underlying counters.
 10. In cases where the reporting device is the source or destination of a tunnel, the ingress protocol for a packet may differ from the egress protocol; if IPv4 is tunnelled over IPv6 for example.  Some implementations may attribute egress discards to the ingress protocol.
 11. While the classification tree is seven layers deep, a minimal implementation may only implement the top six layers.
-
