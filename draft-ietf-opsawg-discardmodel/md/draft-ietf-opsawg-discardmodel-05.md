@@ -95,7 +95,7 @@ informative:
      
 --- abstract
 
-This document defines an information model and corresponding data model for packet discard reporting. The information model provides an implementation independent framework for classifying packet loss, to enable automated network mitigation of unintended packet loss.  The data model specifies an implementation of this framework in YANG.
+This document defines an information model and corresponding data model for packet discard reporting. The information model provides an implementation-independent framework for classifying packet loss to enable automated network mitigation of unintended packet loss.  The data model specifies a YANG implementation of this framework for network elements.
 
 --- middle
 
@@ -104,7 +104,7 @@ Introduction        {#introduction}
 
 The primary function of a network is to transport and deliver packets according to service level objectives. Understanding both where and why packet loss occurs within a network is essential for effective network operation, with device-reported packet loss providing the most direct signal for identifying customer impact.  To effectively automate network operations, operators must be able to detect anomalous packet loss, determine its root cause, and apply appropriate mitigation actions. While certain types of packet loss, such as policy-based discards, are intentional, precise classification of packet loss is crucial both to ensure that anomalous packet loss is easily detected and that the right action or sequence of actions is taken to mitigate the impact, as taking the wrong action can make problems worse.  For example, taking a congested device out of service can make congestion worse by moving the traffic to other links or devices, which are already congested. 
 
-Existing metrics for reporting packet loss, such as ifInDiscards, ifOutDiscards, ifInErrors, and ifOutErrors defined in {{?RFC1213}} and {{?RFC8343}}, are insufficient for several reasons. First, they lack precision; for instance, ifInDiscards aggregates all discarded inbound packets without specifying the cause, making it challenging to distinguish between intended and unintended discards. Second, these definitions are ambiguous, leading to inconsistent vendor implementations. For example, in some implementations ifInErrors accounts only for errored packets that are dropped, while in others, it includes all errored packets, whether they are dropped or not. Many implementations support more discard metrics than these, however, they have been inconsistently implemented due to the lack of a standardised classification scheme and clear semantics for packet loss reporting. For example, {{?RFC7270}} provides support for reporting discards per flow in IPFIX using forwardingStatus, however, the defined drop reason codes also lack sufficient clarity to facilitate automated root cause analysis and impact mitigation, e.g., the "For us" reason code.
+Existing metrics for reporting packet loss, such as ifInDiscards, ifOutDiscards, ifInErrors, and ifOutErrors defined in MIB-II {{?RFC1213}} and the YANG Data Model for Interface Management {{?RFC8343}}, are insufficient for several reasons. First, they lack precision; for instance, ifInDiscards aggregates all discarded inbound packets without specifying the cause, making it challenging to distinguish between intended and unintended discards. Second, these definitions are ambiguous, leading to inconsistent vendor implementations. For example, in some implementations ifInErrors accounts only for errored packets that are dropped, while in others, it includes all errored packets, whether they are dropped or not. Many implementations support more discard metrics than these, however, they have been inconsistently implemented due to the lack of a standardised classification scheme and clear semantics for packet loss reporting. For example, {{?RFC7270}} provides support for reporting discards per flow in IPFIX using forwardingStatus, however, the defined drop reason codes also lack sufficient clarity to facilitate automated root cause analysis and impact mitigation, e.g., the "For us" reason code.
 
 This document defines an information model for packet loss reporting which addresses these issues, providing precise classification of packet loss causes to enable accurate automated mitigation and supporting different data model implementations while maintaining consistency through clear semantics.
 
@@ -129,11 +129,11 @@ Problem Statement   {#problem}
 =================
 The fundamental problem for network operators is how to automatically detect when unintended packet loss is occurring and determine the appropriate action to mitigate it. For any network there are a small set of potential actions that can be taken to minimise customer impact when unintended packet loss is detected:
 
-1. Take a device, link, or set of devices and/or links out of service.
+1. Take a problematic device, link, or set of devices and/or links out of service.
 2. Return a device, link, or set of devices and/or links back into service.
-3. Move traffic to other links or devices.
+3. Move traffic to other links or devices to alleviate congestion or avoid problematic paths.
 4. Roll back a recent change to a device that might have caused the problem.
-5. Escalate to a network operator as a last resort.
+5. Escalate to a network operator as a last resort when automated mitigation is not possible.
 
 The ability to select the appropriate mitigation action depends on four key features of packet loss:
 
@@ -141,13 +141,13 @@ FEATURE-DISCARD-LOCATION:
 : Determines which devices, interfaces and/or flows are impacted.
 
 FEATURE-DISCARD-RATE:
-: The rate and/or magnitude of the discards which helps determine the scale of the impact and urgency of the required action.
+: The rate and/or magnitude of the discards, indicating the severity and urgency of the problem.
 
 FEATURE-DISCARD-DURATION:
-: The duration of the discards which helps distinguish temporary from persistent issues.
+: The duration of the discards which helps to distinguish transient from persistent issues.
 
 FEATURE-DISCARD-CLASS:
-: The type or class of discards, which is crucial for selecting the correct type of mitigation - for example:
+: The type or class of discards, which is crucial for selecting the appropriate of mitigation - for example:
   * Error discards may require taking faulty components out of service
   * No-buffer discards may require traffic redistribution
   * Policy discards typically require no automated action
@@ -160,17 +160,9 @@ The information model is defined using YANG {{?RFC6020}} using Data Structure Ex
 
 Structure {#infomodel-structure}
 ---------
-The information model defines a hierarchical classification scheme for packet discards, which captures where in a device packets are discarded (component), in which direction they were flowing (direction), whether they were successfully processed or discarded (type), what protocol 
-layer they belong to (layer), and the specific reason for any discards (sub-types). This organization enables both high-level monitoring of total discards and detailed analysis of specific discard reasons.
+The information model defines a hierarchical classification scheme for packet discards, which captures where in a device the discards are accounted (component), in which direction they were flowing (direction), whether they were successfully processed or discarded (type), what protocol layer they belong to (layer), and the specific reason for any discards (sub-types).  This organization enables both high-level monitoring of total discards and detailed analysis of specific discard reasons.  The elements of the tree are defined as follows:
 
-
-
-The hierarchical structure allows for future extension while maintaining backward compatibility. New discard types can be added as new branches without affecting existing implementations.
-
-
-The elements of the tree are defined as follows:
-
-- Component: Specifies where in the device the discards are accounted. It can be:
+- Component:
   - interface: discards of traffic to or from a specific network interface.
   - device: discards of traffic transiting the device.
   - control-plane: discards of traffic to or from the device's control plane.
@@ -194,7 +186,8 @@ The elements of the tree are defined as follows:
     - policy: discards due to policy enforcement, e.g., ACL drops.
     - no-buffer: discards due to lack of buffer space, e.g., congestion-related drops.
 
-Each sub-type may contain further specific reasons for discards, providing more detailed insight into the cause of packet loss.
+The hierarchical structure allows for future extension while maintaining backward compatibility. New discard types can be added as new branches without affecting existing implementations.
+
 
 ~~~~~~~~~~
 {::include ../yang/draft-ietf-opsawg-discardmodel-04.yang.tree.txt}
@@ -228,15 +221,15 @@ discards/error/local/:
 discards/no-buffer/:  
 : Discards occur due to no available buffer to enqueue the packet. These can be tail-drop discards or due to an active queue management algorithm, such as RED {{RED93}} or CODEL {{RFC8289}}.
 
-An example of possible signal-to-mitigation action mapping is provided in {#mapping}.
+An example of possible signal-to-mitigation action mapping is provided in {{mapping}}.
 
 Data Model   {#datamodel}
 ==========
-This data model implements information model described in {{infomodel}} for the interface and device components.  This is classed as a Network Element model as defined by {{?RFC1157}}.
+This data model implements information model defined in {{infomodel}} for the interface and device components.  This is classed as a Network Element model as defined by {{?RFC1157}}.
 
 Structure {#datamodel-structure}
 ---------
-Each component follows the hierarchical structure of direction/type/layer/sub-type defined in the information model. The following YANG tree diagram shows the complete structure:
+The mapping between the information model components and their data model implementations is direct, with each component in the hierarchy represented by corresponding YANG containers and leaves.  The following YANG tree diagram shows the complete structure:
 
 ~~~~~~~~~~
 {::include ../yang/draft-ietf-opsawg-discardmodel-04.yang.tree.txt}
@@ -245,13 +238,13 @@ Each component follows the hierarchical structure of direction/type/layer/sub-ty
 
 Implementation Requirements {#requirements}
 ---------------------------
-The following requirements apply to the implementation of the data model.  These requirements ensure consistent implementation across different vendors and platforms while allowing for platform-specific optimizations where needed.  Requirements 1-10 relate to packets forwarded or discarded by the device, while requirement 11 relates to packets destined for or originating from the device:
+The following requirements apply to the implementation of the data model and are intended ensure consistent implementation across different vendors and platforms while allowing for platform-specific optimisations where needed.  Requirements 1-10 relate to packets forwarded or discarded by the device, while requirement 11 relates to packets destined for or originating from the device:
 
 1. All instances of Layer 2 frame or Layer 3 packet receipt, transmission, and discards MUST be accounted for.
 2. All instances of Layer 2 frame or Layer 3 packet receipt, transmission, and discards SHOULD be attributed to the physical or logical interface of the device where they occur.  Where they cannot be attributed to the interface, they MUST be attributed to the device.
 3. An individual frame MUST only be accounted for by either the Layer 2 traffic class or the Layer 2 discard classes within a single direction or context, i.e., ingress or egress or device.  This is to avoid double counting.
-4. An individual packet MUST only be accounted for by either the Layer 3 traffic class or the Layer 3 discard classes within a single direction or context, i.e., ingress or egress or device.
-5. A frame accounted for at Layer 2 SHOULD NOT be accounted for at Layer 3 and vice versa.  An implementation MUST indicate which layers traffic and discards are counted against.
+4. An individual packet MUST only be accounted for by either the Layer 3 traffic class or the Layer 3 discard classes within a single direction or context, i.e., ingress or egress or device.  This is to avoid double counting.
+5. A frame accounted for at Layer 2 SHOULD NOT be accounted for at Layer 3 and vice versa.  An implementation MUST indicate which layers traffic and discards are counted against.  This is to avoid double counting.
 6.  The aggregate Layer 2 and Layer 3 traffic and discard classes SHOULD account for all underlying frames or packets received, transmitted, and discarded across all other classes.
 7. The aggregate Quality of Service (QoS) traffic and no buffer discard classes MUST account for all underlying packets received, transmitted, and discarded across all other classes.
 8. In addition to the Layer 2 and Layer 3 aggregate classes, an individual discarded packet MUST only account against a single error, policy, or no-buffer discard subclass.
@@ -261,8 +254,8 @@ The following requirements apply to the implementation of the data model.  These
 12. While the model defines a comprehensive set of counters and statistics, implementations MAY support a subset of the defined features based on hardware capabilities and operational requirements. However, implementations MUST clearly document which features are supported and how they map to the model.
 
 
-Examples {#examples}
---------
+Usage Examples {#examples}
+--------------
 
 If all of the requirements are met, a "good" unicast IPv4 packet received would increment:
 
@@ -373,6 +366,8 @@ Understanding where in a network device packets can be discarded is essential fo
 {{ex-drop}} depicts an example of where and why packets may be discarded in a typical single-ASIC, shared-buffered type device. While actual device architectures vary, this example illustrates common processing stages where packets may be dropped.
 
 ~~~~~~~~~~
+
+Packets ingress on the left and egress on the right:
                                                       +----------+
                                                       |          |
                                                       |  CPU     |
@@ -401,8 +396,6 @@ Unintended                 error/rx/l2   error/l3/rx   no-buffer     error/l3/tx
 
 ~~~~~~~~~~
 {: #ex-drop title="Example of where packets get dropped"}
-
-Packets ingress on the left and egress on the right.
 
 See Appendix C for examples of how these discard signals map to root causes and mitigation actions.
 
