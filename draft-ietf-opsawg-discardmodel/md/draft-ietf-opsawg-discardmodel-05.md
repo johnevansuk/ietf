@@ -125,6 +125,8 @@ Unintended discards are packets that were dropped, which the network operator ot
 
 Tree diagrams used in this document follow the notation defined in {{?RFC8340}}.
 
+Symbol "&#124;" is used to denote "or".
+
 Problem Statement   {#problem}
 =================
 The fundamental problem for network operators is how to automatically detect when unintended packet loss is occurring and determine the appropriate action to mitigate it. For any network there are a small set of potential actions that can be taken to minimise customer impact when unintended packet loss is detected:
