@@ -125,29 +125,28 @@ Internet-Draft   IM and DM for Packet Discard Reporting    November 2024
    Existing metrics for reporting packet loss, such as ifInDiscards,
    ifOutDiscards, ifInErrors, and ifOutErrors defined in MIB-II
    [RFC1213] and the YANG Data Model for Interface Management [RFC8343],
-   are insufficient for several reasons.  First, they lack precision;
-   for instance, ifInDiscards aggregates all discarded inbound packets
-   without specifying the cause, making it challenging to distinguish
-   between intended and unintended discards.  Second, these definitions
-   are ambiguous, leading to inconsistent vendor implementations.  For
-   example, in some implementations ifInErrors accounts only for errored
-   packets that are dropped, while in others, it includes all errored
-   packets, whether they are dropped or not.  Many implementations
-   support more discard metrics than these, however, they have been
-   inconsistently implemented due to the lack of a standardised
-   classification scheme and clear semantics for packet loss reporting.
-   For example, [RFC7270] provides support for reporting discards per
-   flow in IPFIX using forwardingStatus, however, the defined drop
-   reason codes also lack sufficient clarity to facilitate automated
-   root cause analysis and impact mitigation, e.g., the "For us" reason
-   code.
+   are insufficient for automating network operations.  First, they lack
+   precision; for instance, ifInDiscards aggregates all discarded
+   inbound packets without specifying the cause, making it challenging
+   to distinguish between intended and unintended discards.  Second,
+   these definitions are ambiguous, leading to inconsistent vendor
+   implementations.  For example, in some implementations ifInErrors
+   accounts only for errored packets that are dropped, while in others,
+   it includes all errored packets, whether they are dropped or not.
+   Many implementations support more discard metrics than these,
+   however, they have been inconsistently implemented due to the lack of
+   a standardised classification scheme and clear semantics for packet
+   loss reporting.  For example, [RFC7270] provides support for
+   reporting discards per flow in IPFIX using forwardingStatus, however,
+   the defined drop reason codes also lack sufficient clarity to
+   facilitate automated root cause analysis and impact mitigation, e.g.,
+   the "For us" reason code.
 
-   To address these limitations, this document defines an information
-   model for packet loss reporting which addresses these issues,
-   providing precise classification of packet loss to enable accurate
-   automated mitigation, and supporting different data model
-   implementations while maintaining consistency through clear
-   semantics.
+   This document defines an information model for packet loss reporting
+   which addresses these issues.  The model provides precise
+   classification of packet loss to enable accurate automated
+   mitigation.  It supports different data model implementations while
+   maintaining consistency through clear semantics.
 
    The scope of this document is limited to reporting packet loss at
    Layer 3 and frames discarded at Layer 2.  This document considers
@@ -160,6 +159,7 @@ Internet-Draft   IM and DM for Packet Discard Reporting    November 2024
    requirements together with a set of usage examples.  Appendix A
    provides the complete YANG module definition for the data model.  The
    appendices provide additional context and implementation guidance.
+
 
 
 
