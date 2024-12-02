@@ -100,12 +100,12 @@ Table of Contents
    The primary function of a network is to transport and deliver packets
    according to service level objectives.  For network operators,
    understanding both where and why packet loss occurs within a network
-   is essential for effective operation.  To effectively automate
-   network operations, operators must be able to detect anomalous packet
-   loss, determine its root cause, and apply appropriate mitigation
-   actions.  While certain types of packet loss, such as policy-based
-   discards, are intentional and part of normal network operation,
-   unintended packet loss can impact customer services.  Device-reported
+   is essential for effective operation.  Device-reported packet loss
+   provides the most direct signal for identifying service impact.
+   While certain types of packet loss, such as policy-based discards,
+   are intentional and part of normal network operation, unintended
+   packet loss can impact customer services.  To automate network
+   operations, operators must be able to detect customer-impacting
 
 
 
@@ -114,14 +114,13 @@ Evans, et al.              Expires 29 May 2025                  [Page 2]
 Internet-Draft   IM and DM for Packet Discard Reporting    November 2024
 
 
-   packet loss provides the most direct signal for identifying customer
-   impact.  Precise classification of packet loss is crucial both to
-   ensure that anomalous packet loss is easily detected and that the
-   right action or sequence of actions is taken to mitigate the impact,
-   as taking the wrong action can make problems worse.  For example,
-   taking a congested device out of service can make congestion worse by
-   moving the traffic to other links or devices, which are already
-   congested.
+   packet loss, determine its root cause, and apply appropriate
+   mitigation actions.  Precise classification of packet loss is crucial
+   to ensure that anomalous packet loss is easily detected and that the
+   right action is taken to mitigate the impact.  Taking the wrong
+   action can make problems worse; for example, removing a congested
+   device from service can exacerbate congestion by redirecting traffic
+   to other already congested links or devices.
 
    Existing metrics for reporting packet loss, such as ifInDiscards,
    ifOutDiscards, ifInErrors, and ifOutErrors defined in MIB-II
@@ -161,6 +160,7 @@ Internet-Draft   IM and DM for Packet Discard Reporting    November 2024
    requirements together with a set of usage examples.  Appendix A
    provides the complete YANG module definition for the data model.  The
    appendices provide additional context and implementation guidance.
+
 
 
 
