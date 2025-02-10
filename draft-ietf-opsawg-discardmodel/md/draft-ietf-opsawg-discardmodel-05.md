@@ -125,8 +125,6 @@ Unintended discards are packets that were dropped, which the network operator ot
 
 Tree diagrams used in this document follow the notation defined in {{?RFC8340}}.
 
-Symbol "&#124;" is used to denote "or".
-
 Problem Statement   {#problem}
 =================
 The fundamental problem for network operators is how to automatically detect when unintended packet loss is occurring and determine the appropriate action to mitigate it. For any network there are a small set of potential actions that can be taken to mitigate customer impact when unintended packet loss is detected:
@@ -155,7 +153,7 @@ While FEATURE-DISCARD-LOCATION, FEATURE-DISCARD-RATE, and FEATURE-DISCARD-DURATI
 
 Information Model   {#infomodel}
 =================
-The information model is defined using YANG {{?RFC6020}} with Data Structure Extensions {{!RFC8791}}, allowing the model to remain abstract and decoupled from specific implementations in accordance with {{?RFC3444}}. This abstraction supports different data model implementations - for example, in YANG, IPFIX {{?RFC7011}}, gMNI {{gMNI}} or SNMP {{?RFC1157}} - while ensuring consistency across implementations. Using YANG for the information model enables this abstraction, leverages the community's familiarity with its syntax, and ensures lossless translation to the corresponding YANG data model, which is also defined in {{datamodel}}.
+The information model is defined using YANG {{?RFC6020}} with Data Structure Extensions {{!RFC8791}}, allowing the model to remain abstract and decoupled from specific implementations in accordance with {{?RFC3444}}. This abstraction supports different data model implementations - for example, in YANG, IPFIX {{?RFC7011}}, gMNI {{gMNI}} or SNMP {{?RFC1157}} - while ensuring consistency across implementations. Using YANG for the information model enables this abstraction, leverages the community's familiarity with its syntax, and ensures lossless translation to the corresponding YANG data model, which is defined in {{datamodel}}.
 
 Structure {#infomodel-structure}
 ---------
@@ -228,7 +226,7 @@ This data model implements the information model defined in {{infomodel}} for th
 
 Structure {#datamodel-structure}
 ---------
-Their is a direct mapping between the information model components and their data model implementations, with each component in the hierarchy represented by corresponding YANG containers and leaves.  The following YANG tree diagram shows the complete structure:
+There is a direct mapping between the information model components and their data model implementations, with each component in the hierarchy represented by corresponding YANG containers and leaves.  The following YANG tree diagram shows the complete structure:
 
 ~~~~~~~~~~
 {::include ../yang/draft-ietf-opsawg-discardmodel-04.yang.tree.txt}
@@ -237,7 +235,7 @@ Their is a direct mapping between the information model components and their dat
 
 Implementation Requirements {#requirements}
 ---------------------------
-The following requirements apply to the implementation of the data model and are intended ensure consistent implementation across different vendors and platforms while allowing for platform-specific optimisations where needed.  While the model defines a comprehensive set of counters and statistics, implementations MAY support a subset of the defined features based on device capabilities and operational requirements. However, implementations MUST clearly document which features are supported and how they map to the model.
+The following requirements apply to the implementation of the data model and are intended to ensure consistent implementation across different vendors and platforms while allowing for platform-specific optimisations where needed.  While the model defines a comprehensive set of counters and statistics, implementations MAY support a subset of the defined features based on device capabilities and operational requirements. However, implementations MUST clearly document which features are supported and how they map to the model.
 
 Requirements 1-10 relate to packets forwarded or discarded by the device, while requirement 11 relates to packets destined for or originating from the device:
 
