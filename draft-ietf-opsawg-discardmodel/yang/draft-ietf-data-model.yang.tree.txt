@@ -1,0 +1,162 @@
+module: ietf-packet-discard-reporting
+  +--rw interface* [name] {per-interface-stats}?
+  |  +--rw name        string
+  |  +--rw traffic* [direction]
+  |  |  +--rw direction    identityref
+  |  |  +--rw l2
+  |  |  |  +--rw frames?   uint64
+  |  |  |  +--rw bytes?    uint64
+  |  |  +--rw l3
+  |  |  |  +--rw address-family-stat* [address-family]
+  |  |  |     +--rw address-family    identityref
+  |  |  |     +--rw packets?          uint64
+  |  |  |     +--rw bytes?            uint64
+  |  |  |     +--rw unicast
+  |  |  |     |  +--rw packets?   uint64
+  |  |  |     |  +--rw bytes?     uint64
+  |  |  |     +--rw multicast
+  |  |  |        +--rw packets?   uint64
+  |  |  |        +--rw bytes?     uint64
+  |  |  +--rw qos!
+  |  |     +--rw class* [id]
+  |  |        +--rw id         string
+  |  |        +--rw packets?   uint64
+  |  |        +--rw bytes?     uint64
+  |  +--rw discards* [direction]
+  |     +--rw direction    identityref
+  |     +--rw l2
+  |     |  +--rw frames?   uint64
+  |     |  +--rw bytes?    uint64
+  |     +--rw l3
+  |     |  +--rw address-family-stat* [address-family]
+  |     |     +--rw address-family    identityref
+  |     |     +--rw packets?          uint64
+  |     |     +--rw bytes?            uint64
+  |     |     +--rw unicast
+  |     |     |  +--rw packets?   uint64
+  |     |     |  +--rw bytes?     uint64
+  |     |     +--rw multicast
+  |     |        +--rw packets?   uint64
+  |     |        +--rw bytes?     uint64
+  |     +--rw errors
+  |     |  +--rw l2
+  |     |  |  +--rw rx!
+  |     |  |  |  +--rw frames?          uint32
+  |     |  |  |  +--rw crc-error?       uint32
+  |     |  |  |  +--rw invalid-mac?     uint32
+  |     |  |  |  +--rw invalid-vlan?    uint32
+  |     |  |  |  +--rw invalid-frame?   uint32
+  |     |  |  +--rw tx!
+  |     |  |     +--rw frames?   uint32
+  |     |  +--rw l3
+  |     |  |  +--rw rx!
+  |     |  |  |  +--rw packets?          uint32
+  |     |  |  |  +--rw checksum-error?   uint32
+  |     |  |  |  +--rw mtu-exceeded?     uint32
+  |     |  |  |  +--rw invalid-packet?   uint32
+  |     |  |  +--rw ttl-expired?     uint32
+  |     |  |  +--rw no-route?        uint32
+  |     |  |  +--rw invalid-sid?     uint32
+  |     |  |  +--rw invalid-label?   uint32
+  |     |  |  +--rw tx!
+  |     |  |     +--rw packets?   uint32
+  |     |  +--rw internal
+  |     |     +--rw packets?        uint32
+  |     |     +--rw parity-error?   uint32
+  |     +--rw policy
+  |     |  +--rw l2
+  |     |  |  +--rw frames?   uint32
+  |     |  |  +--rw acl?      uint32
+  |     |  +--rw l3
+  |     |     +--rw packets?      uint32
+  |     |     +--rw acl?          uint32
+  |     |     +--rw policer
+  |     |     |  +--rw packets?   uint32
+  |     |     |  +--rw bytes?     uint32
+  |     |     +--rw null-route?   uint32
+  |     |     +--rw rpf?          uint32
+  |     |     +--rw ddos?         uint32
+  |     +--rw no-buffer
+  |        +--rw class* [id]
+  |           +--rw id         string
+  |           +--rw packets?   uint64
+  |           +--rw bytes?     uint64
+  +--rw device! {per-device-stats}?
+     +--rw traffic
+     |  +--rw l2
+     |  |  +--rw frames?   uint64
+     |  |  +--rw bytes?    uint64
+     |  +--rw l3
+     |  |  +--rw address-family-stat* [address-family]
+     |  |     +--rw address-family    identityref
+     |  |     +--rw packets?          uint64
+     |  |     +--rw bytes?            uint64
+     |  |     +--rw unicast
+     |  |     |  +--rw packets?   uint64
+     |  |     |  +--rw bytes?     uint64
+     |  |     +--rw multicast
+     |  |        +--rw packets?   uint64
+     |  |        +--rw bytes?     uint64
+     |  +--rw qos!
+     |     +--rw class* [id]
+     |        +--rw id         string
+     |        +--rw packets?   uint64
+     |        +--rw bytes?     uint64
+     +--rw discards
+        +--rw l2
+        |  +--rw frames?   uint64
+        |  +--rw bytes?    uint64
+        +--rw l3
+        |  +--rw address-family-stat* [address-family]
+        |     +--rw address-family    identityref
+        |     +--rw packets?          uint64
+        |     +--rw bytes?            uint64
+        |     +--rw unicast
+        |     |  +--rw packets?   uint64
+        |     |  +--rw bytes?     uint64
+        |     +--rw multicast
+        |        +--rw packets?   uint64
+        |        +--rw bytes?     uint64
+        +--rw errors
+        |  +--rw l2
+        |  |  +--rw rx!
+        |  |  |  +--rw frames?          uint32
+        |  |  |  +--rw crc-error?       uint32
+        |  |  |  +--rw invalid-mac?     uint32
+        |  |  |  +--rw invalid-vlan?    uint32
+        |  |  |  +--rw invalid-frame?   uint32
+        |  |  +--rw tx!
+        |  |     +--rw frames?   uint32
+        |  +--rw l3
+        |  |  +--rw rx!
+        |  |  |  +--rw packets?          uint32
+        |  |  |  +--rw checksum-error?   uint32
+        |  |  |  +--rw mtu-exceeded?     uint32
+        |  |  |  +--rw invalid-packet?   uint32
+        |  |  +--rw ttl-expired?     uint32
+        |  |  +--rw no-route?        uint32
+        |  |  +--rw invalid-sid?     uint32
+        |  |  +--rw invalid-label?   uint32
+        |  |  +--rw tx!
+        |  |     +--rw packets?   uint32
+        |  +--rw internal
+        |     +--rw packets?        uint32
+        |     +--rw parity-error?   uint32
+        +--rw policy
+        |  +--rw l2
+        |  |  +--rw frames?   uint32
+        |  |  +--rw acl?      uint32
+        |  +--rw l3
+        |     +--rw packets?      uint32
+        |     +--rw acl?          uint32
+        |     +--rw policer
+        |     |  +--rw packets?   uint32
+        |     |  +--rw bytes?     uint32
+        |     +--rw null-route?   uint32
+        |     +--rw rpf?          uint32
+        |     +--rw ddos?         uint32
+        +--rw no-buffer
+           +--rw class* [id]
+              +--rw id         string
+              +--rw packets?   uint64
+              +--rw bytes?     uint64
