@@ -4,12 +4,6 @@ module ietf-packet-discard-reporting {
     "urn:ietf:params:xml:ns:yang:ietf-packet-discard-reporting";
   prefix plr;
 
-  import ietf-yang-structure-ext {
-    prefix sx;
-    reference
-      "RFC 8791: YANG Data Structure Extensions";
-  }
-
   organization
     "IETF OPSAWG (Operations and Management Area Working Group)";
   contact
@@ -66,16 +60,6 @@ module ietf-packet-discard-reporting {
   feature per-device-stats {
     description
       "Global device statistics are available on this device";
-  }
-
-  feature control-plane-stats {
-    description
-      "Control plane statistics are available on this device";
-  }
-
-  feature flow-reporting {
-    description
-      "Flow reporting is available on this device";
   }
 
   /*
@@ -281,6 +265,7 @@ module ietf-packet-discard-reporting {
       uses l3-traffic;
     }
     container qos {
+      presence "Qos reporting is enabled";
       description
         "QoS traffic counters.";
       uses qos;
@@ -291,6 +276,7 @@ module ietf-packet-discard-reporting {
     description
       "Layer 2 ingress frame error discard counters.";
     container rx {
+      presence "rx";
       description
         "Layer 2 ingress frame receive error discard counters.";
       leaf frames {
@@ -325,6 +311,7 @@ module ietf-packet-discard-reporting {
     description
       "Layer 3 ingress packet error discard counters.";
     container rx {
+      presence "rx";
       description
         "Layer 3 ingress packet receive error discard counters.";
       leaf packets {
@@ -389,6 +376,7 @@ module ietf-packet-discard-reporting {
     description
       "Layer 2 transmit error discard counters.";
     container tx {
+      presence "tx";
       description
         "Layer 2 transmit frame error discard counters.";
       leaf frames {
@@ -403,6 +391,7 @@ module ietf-packet-discard-reporting {
     description
       "Layer 3 transmit error discard counters.";
     container tx {
+      presence "tx";
       description
         "Layer 3 transmit packet error discard counters.";
       leaf packets {
@@ -540,8 +529,7 @@ module ietf-packet-discard-reporting {
       uses traffic;
     }
     container discards {
-      description
-        "Discard counters.";
+      description "Discard counters.";
       uses discards;
     }
   }
@@ -577,85 +565,26 @@ module ietf-packet-discard-reporting {
     }
   }
 
-  grouping control-plane {
-    description
-      "Control plane packet counters.";
-    list traffic {
-      key "direction";
-      description
-        "Total control plane packets.";
-      leaf direction {
-        type identityref {
-          base direction;
-        }
-        description
-          "Specifies a direction.";
-      }
-      uses basic-packets-bytes-32;
-    }
-    list discards {
-      key "direction";
-      description
-        "Control plane packet discard counters.";
-      leaf direction {
-        type identityref {
-          base direction;
-        }
-        description
-          "Specifies a direction.";
-      }
-      uses basic-packets-bytes-32;
-      container policy {
-        description
-          "Number of control plane packets discarded due to policy.";
-        uses basic-packets-32;
-      }
-    }
-  }
-
   /*
    * Main structure definition
    */
-  sx:structure packet-discard-reporting {
+  list interface {
+    if-feature "per-interface-stats";
+    key "name";
     description
-      "Specifies the abstract structure of packet discard reporting data.";
-    container control-plane {
-      if-feature "control-plane-stats";
+      "Indicates a list of interfaces for which packet discard reporting data is provided.";
+    leaf name {
+      type string;
       description
-        "Control plane packet counters.";
-      uses control-plane;
+        "Indicates the name of the interface.";
     }
-    list interface {
-      if-feature "per-interface-stats";
-      key "name";
-      description
-        "Indicates a list of interfaces for which packet discard reporting data is provided.";
-      leaf name {
-        type string;
-        description
-          "Indicates the name of the interface.";
-      }
-      uses interface;
-    }
-    list flow {
-      if-feature "flow-reporting";
-      key "direction";
-      leaf direction {
-        type identityref {
-          base direction;
-        }
-        description
-          "Specifies a direction.";
-      }
-      description
-        "Flow packet counters.";
-      uses device;
-    }
-    container device {
-      if-feature "per-device-stats";
-      description
-        "Device level packet counters.";
-      uses device;
-    }
+    uses interface;
+  }
+  container device {
+    if-feature "per-device-stats";
+    presence "Device-level statistics are available.";
+    description
+      "Device level packet counters.";
+    uses device;
   }
 }

@@ -2,19 +2,20 @@ module: ietf-packet-discard-reporting
 
   structure packet-discard-reporting:
     +-- control-plane {control-plane-stats}?
-    |  +-- direction?   identityref
-    |  +-- traffic
-    |  |  +-- packets?   uint32
-    |  |  +-- bytes?     uint32
-    |  +-- discards
-    |     +-- packets?   uint32
-    |     +-- bytes?     uint32
+    |  +-- traffic* [direction]
+    |  |  +-- direction    identityref
+    |  |  +-- packets?     uint32
+    |  |  +-- bytes?       uint32
+    |  +-- discards* [direction]
+    |     +-- direction    identityref
+    |     +-- packets?     uint32
+    |     +-- bytes?       uint32
     |     +-- policy
     |        +-- packets?   uint32
     +-- interface* [name] {per-interface-stats}?
-    |  +-- name         string
-    |  +-- direction?   identityref
-    |  +-- traffic
+    |  +-- name        string
+    |  +-- traffic* [direction]
+    |  |  +-- direction    identityref
     |  |  +-- l2
     |  |  |  +-- frames?   uint64
     |  |  |  +-- bytes?    uint64
@@ -34,7 +35,8 @@ module: ietf-packet-discard-reporting
     |  |        +-- id         string
     |  |        +-- packets?   uint64
     |  |        +-- bytes?     uint64
-    |  +-- discards
+    |  +-- discards* [direction]
+    |     +-- direction    identityref
     |     +-- l2
     |     |  +-- frames?   uint64
     |     |  +-- bytes?    uint64
@@ -92,8 +94,8 @@ module: ietf-packet-discard-reporting
     |           +-- id         string
     |           +-- packets?   uint64
     |           +-- bytes?     uint64
-    +-- flow {flow-reporting}?
-    |  +-- direction?   identityref
+    +-- flow* [direction] {flow-reporting}?
+    |  +-- direction    identityref
     |  +-- traffic
     |  |  +-- l2
     |  |  |  +-- frames?   uint64
@@ -173,7 +175,6 @@ module: ietf-packet-discard-reporting
     |           +-- packets?   uint64
     |           +-- bytes?     uint64
     +-- device {per-device-stats}?
-       +-- direction?   empty
        +-- traffic
        |  +-- l2
        |  |  +-- frames?   uint64
