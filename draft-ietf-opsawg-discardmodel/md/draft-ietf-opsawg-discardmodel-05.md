@@ -2,7 +2,7 @@
 title: Information and Data Models for Packet Discard Reporting
 abbrev: IM and DM for Packet Discard Reporting
 docname: draft-ietf-opsawg-discardmodel-05
-date: 2024-11-25
+date: 2025-02-27
 category: std
 
 ipr: trust200902
@@ -106,11 +106,11 @@ The primary function of a network is to transport and deliver packets according 
 
 Existing metrics for reporting packet loss, such as ifInDiscards, ifOutDiscards, ifInErrors, and ifOutErrors defined in MIB-II {{?RFC1213}} and the YANG Data Model for Interface Management {{?RFC8343}}, are insufficient for automating network operations.  First, they lack precision; for instance, ifInDiscards aggregates all discarded inbound packets without specifying the cause, making it challenging to distinguish between intended and unintended discards. Second, these definitions are ambiguous, leading to inconsistent vendor implementations. For example, in some implementations ifInErrors accounts only for errored packets that are dropped, while in others, it includes all errored packets, whether they are dropped or not. Many implementations support more discard metrics than these, however, they have been inconsistently implemented due to the lack of a standardised classification scheme and clear semantics for packet loss reporting. For example, {{?RFC7270}} provides support for reporting discards per flow in IPFIX using forwardingStatus, however, the defined drop reason codes also lack sufficient clarity to facilitate automated root cause analysis and impact mitigation, e.g., the "For us" reason code.
 
-This document defines an information model for packet loss reporting which addresses these issues. The model provides precise classification of packet loss to enable accurate automated mitigation. It supports different data model implementations while maintaining consistency through clear semantics.
+This document defines an information model and corresponding data model for packet loss reporting which address these issues.  The information model provides precise classification of packet loss to enable accurate automated mitigation.  The data model specifies a YANG implementation of this framework for network elements, while maintaining consistency through clear semantics.
 
 The scope of this document is limited to reporting packet loss at Layer 3 and frames discarded at Layer 2. This document considers only the signals that may trigger automated mitigation actions and not how the actions are defined or executed.
 
-{{problem}} describes the problem space and requirements. {{infomodel}} defines the information model and classification scheme. {{datamodel}} specifies the corresponding data model and implementation requirements together with a set of usage examples. {{module-infomodel}} provides the complete YANG module definition for the data model. The appendices provide additional context and implementation guidance.
+{{problem}} describes the problem space and requirements. {{infomodel}} defines the information model and classification scheme. {{datamodel}} specifies the corresponding data model and implementation requirements together with a set of usage examples. {{datamodel-module}} provides the complete YANG module definition for the data model. The appendices provide the  YANG module definition for the information model, together with additional context and implementation guidance.
 
 Terminology {#terminology}
 ===========
@@ -187,7 +187,8 @@ The following YANG tree diagram shows the complete structure:
 {::include ../yang/draft-ietf-opsawg-discardmodel-04.yang.tree.txt}
 ~~~~~~~~~~
 
-The corresponding YANG module is defined in {{module-infomodel}}.
+
+The corresponding YANG module is defined in {{infomodel-module}}.
 
 For additional context, {{wheredropped}} provides an example of where packets may be discarded in a device.
 
@@ -229,7 +230,7 @@ Structure {#datamodel-structure}
 There is a direct mapping between the information model components and their data model implementations, with each component in the hierarchy represented by corresponding YANG containers and leaves.  The following YANG tree diagram shows the complete structure:
 
 ~~~~~~~~~~
-{::include ../yang/draft-ietf-opsawg-discardmodel-04.yang.tree.txt}
+{::include ../yang/draft-ietf-data-model.yang.tree.txt}
 ~~~~~~~~~~
 
 
@@ -244,7 +245,7 @@ Requirements 1-10 relate to packets forwarded or discarded by the device, while 
 3. An individual frame MUST only be accounted for by either the Layer 2 traffic class or the Layer 2 discard classes within a single direction or context, i.e., ingress or egress or device.  This is to avoid double counting.
 4. An individual packet MUST only be accounted for by either the Layer 3 traffic class or the Layer 3 discard classes within a single direction or context, i.e., ingress or egress or device.  This is to avoid double counting.
 5. A frame accounted for at Layer 2 SHOULD NOT be accounted for at Layer 3 and vice versa.  An implementation MUST indicate which layers traffic and discards are counted against.  This is to avoid double counting.
-6.  The aggregate Layer 2 and Layer 3 traffic and discard classes SHOULD account for all underlying frames or packets received, transmitted, and discarded across all other classes.
+6. The aggregate Layer 2 and Layer 3 traffic and discard classes SHOULD account for all underlying frames or packets received, transmitted, and discarded across all other classes.
 7. The aggregate Quality of Service (QoS) traffic and no buffer discard classes MUST account for all underlying packets received, transmitted, and discarded across all other classes.
 8. In addition to the Layer 2 and Layer 3 aggregate classes, an individual discarded packet MUST only account against a single error, policy, or no-buffer discard subclass.
 9. When there are multiple reasons for discarding a packet, the ordering of discard class reporting MUST be defined.
@@ -281,16 +282,17 @@ A multicast IPv6 packet dropped due to RPF check failure would increment:
 - interface/ingress/discards/policy/l3/rpf/packets
 
 
-YANG Module - Data Model {#module-datamodel}
+Data model - YANG Module {#datamodel-module}
 ========================
 
-The "ietf-packet-discard-reporting" uses the "sx" structure defined in {{!RFC8791}}.
+The "ietf-packet-discard-reporting" yang module uses the "sx" structure defined in {{!RFC8791}}.
 
 ~~~~~~~~~~
-<CODE BEGINS> file "ietf-packet-discard-reporting@2024-06-04.yang"
-{::include ../yang/draft-ietf-opsawg-discardmodel-04.yang.txt}
+<CODE BEGINS> 
+{::include ../yang/draft-ietf-data-model.yang.txt}
 <CODE ENDS>
 ~~~~~~~~~~
+
 
 Security Considerations {#security}
 =======================
@@ -298,11 +300,11 @@ This section discusses security considerations for both the information model an
 
 Information Model {#security-infomodel}
 -----------------
-The information model defined in {{module-infomodel}} specifies a YANG module using {{!RFC8791}} data extensions.  It defines a set of identities, types, and groupings. These nodes are intended to be reused by other YANG modules. The module by itself does not expose any data nodes that are writable, data nodes that contain read-only state, or RPCs. As such, there are no additional security issues related to the YANG module that need to be considered.
+The information model defined in {{infomodel-module}} specifies a YANG module using {{!RFC8791}} data extensions.  It defines a set of identities, types, and groupings. These nodes are intended to be reused by other YANG modules. The module by itself does not expose any data nodes that are writable, data nodes that contain read-only state, or RPCs. As such, there are no additional security issues related to the YANG module that need to be considered.
 
 Data Model {#security-datamodel}
 ----------
-The YANG module specified in {{module-datamodel}} defines a schema for data with data nodes that contain read-only state.  It is designed to be accessed via network management protocols such as NETCONF {{?RFC6241}} or RESTCONF {{?RFC8040}}. The lowest NETCONF layer is the secure transport layer, and the mandatory-to-implement secure transport is Secure Shell (SSH) {{?RFC6242}}. The lowest RESTCONF layer is HTTPS, and the mandatory-to-implement secure transport is TLS {{?RFC8446}}.
+The YANG module specified in {{datamodel-module}} defines a schema for data with data nodes that contain read-only state.  It is designed to be accessed via network management protocols such as NETCONF {{?RFC6241}} or RESTCONF {{?RFC8040}}. The lowest NETCONF layer is the secure transport layer, and the mandatory-to-implement secure transport is Secure Shell (SSH) {{?RFC6242}}. The lowest RESTCONF layer is HTTPS, and the mandatory-to-implement secure transport is TLS {{?RFC8446}}.
 
 The Network Configuration Access Control Model (NACM) {{?RFC8341}} provides the means to restrict access for particular NETCONF or RESTCONF users to a preconfigured subset of all available NETCONF or RESTCONF protocol operations and content.
 
@@ -312,8 +314,7 @@ The module does not expose any data nodes that are writable, or RPCs. As such, t
 IANA Considerations {#iana}
 ===================
 
-   IANA is requested to register the following URI in the "ns" subregistry within
-   the "IETF XML Registry" {{!RFC3688}}:
+IANA is requested to register the following URI in the "ns" subregistry within the "IETF XML Registry" {{!RFC3688}}:
 
 ~~~~
    URI:  urn:ietf:params:xml:ns:ietf-packet-discard-reporting
@@ -349,14 +350,13 @@ The content of this document has benefitted from feedback from JR Rivers, Ronan 
 
 --- back
 
-YANG Module - Information Model {#module-infomodel}
+Information Model - YANG Module {#infomodel-module}
 ===============================
 
-The "ietf-packet-discard-reporting" uses the "sx" structure defined in {{!RFC8791}}.
-
+The "ietf-packet-discard-reporting" yang module uses the "sx" structure defined in {{!RFC8791}}.
 
 ~~~~~~~~~~
-<CODE BEGINS> file "ietf-packet-discard-reporting@2024-06-04.yang"
+<CODE BEGINS> 
 {::include ../yang/draft-ietf-opsawg-discardmodel-04.yang.txt}
 <CODE ENDS>
 ~~~~~~~~~~
@@ -409,7 +409,7 @@ The effectiveness of automated mitigation depends on correctly mapping discard s
 
 
 | DISCARD-CLASS | Discard cause | DISCARD-RATE | DISCARD-DURATION | Unintended? | Possible actions |
-|:--------------|:--------------|:------------:|:----------------:|:-----------:|:-----------------|
+|:--------------|:--------------|:-------------|:----------------:|:-----------:|:-----------------|
 | ingress/discards/errors/l2/rx | Upstream device or link error | >Baseline| O(1min) | Y | Take upstream link or device out-of-service |
 | ingress/discards/errors/l3/rx/ttl-expired | Tracert | <=Baseline | | N | no action |
 | ingress/discards/errors/l3/rx/ttl-expired | Convergence | >Baseline | O(1s) | Y | No action |
